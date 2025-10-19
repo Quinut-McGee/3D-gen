@@ -66,6 +66,13 @@ async def _complete_one_task(
 
     results = await _generate(generate_url, pull.task.prompt) or b""
 
+    # Quality check: Skip submission if result is too small (likely failed generation)
+    if results and len(results) < 1000:  # Less than 1KB is likely corrupt/failed
+        bt.logging.warning(f"Generation too small ({len(results)} bytes), skipping submission to avoid penalty")
+        results = b""
+    elif results:
+        bt.logging.debug(f"Generation passed size check: {len(results)} bytes")
+
     async with bt.dendrite(wallet=wallet) as dendrite:
         submit = await _submit_results(wallet, dendrite, metagraph, validator_uid, pull.task, results)
         if submit.feedback is None:

@@ -99,7 +99,11 @@ class MVDream(nn.Module):
     camera: [B, 4, 4]
     """
 
-    def train_step(self, pred_rgb, camera, step_ratio=None, guidance_scale=100, as_latent=False):
+    def train_step(self, pred_rgb, camera, step_ratio=None, guidance_scale=None, as_latent=False):
+        # Use provided guidance_scale or default to 100
+        if guidance_scale is None:
+            guidance_scale = 100
+
         batch_size = pred_rgb.shape[0]
         real_batch_size = batch_size // 4
         pred_rgb = pred_rgb.to(self.dtype)

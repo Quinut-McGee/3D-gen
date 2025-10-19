@@ -201,7 +201,7 @@ class GaussianProcessor:
                 )
 
                 # rgb loss
-                image = image.pemute(0, 3, 1, 2)
+                image = image.permute(0, 3, 1, 2)
 
                 loss = loss + 10000 * (step_ratio if self._opt.warmup_rgb_loss else 1) * F.mse_loss(
                     image, self._input_img_torch
@@ -309,16 +309,20 @@ class GaussianProcessor:
 
                 # guidance loss
                 if self._enable_sd:
+                    # Get guidance_scale from config if available, otherwise use default
+                    guidance_scale = getattr(self._opt, 'guidance_scale', None)
                     if self._opt.mvdream or self._opt.imagedream:
                         loss = loss + self._opt.lambda_sd * self._guidance_sd.train_step(
                             images,
                             poses,
                             step_ratio=step_ratio if self._opt.anneal_timestep else None,
+                            guidance_scale=guidance_scale,
                         )
                     else:
                         loss = loss + self._opt.lambda_sd * self._guidance_sd.train_step(
                             images,
                             step_ratio=step_ratio if self._opt.anneal_timestep else None,
+                            guidance_scale=guidance_scale,
                         )
 
                 if self._enable_zero123:

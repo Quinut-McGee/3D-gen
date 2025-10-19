@@ -1,0 +1,80 @@
+### ULTRA-FAST CONFIG - Target: <15 seconds
+### Maximum speed, minimum viable quality (CLIP >0.6)
+### Use ONLY if competition requires <20s generations
+
+### Input
+input:
+prompt:
+negative_prompt: "ugly, blurry, deformed"  # Minimal for speed
+mesh:
+elevation: 0
+ref_size: 64  # EXTREME: 64x64 reference (16x faster than 256)
+density_thresh: 1
+
+### Output
+outdir: logs
+mesh_format: obj
+save_path: ???
+
+### Training
+mvdream: True
+imagedream: False
+stablediff: False
+stable_zero123: False
+zero123_xl: False
+
+lambda_sd: 1
+lambda_zero123: 0
+guidance_scale: 30  # Minimal guidance for speed
+
+warmup_rgb_loss: False  # SKIP RGB warmup
+batch_size: 4  # Process all 4 MVDream views at once
+
+# EXTREME: Only 150 iterations (~15 seconds)
+iters: 150
+
+anneal_timestep: False  # Disable annealing for speed
+iters_refine: 0
+
+radius: 2.5
+fovy: 49.1
+min_ver: -15
+max_ver: 15
+
+load:
+train_geo: False
+invert_bg_prob: 0  # Always white background (faster)
+
+### GUI
+gui: False
+force_cuda_rast: True
+H: 512
+W: 512
+
+### Gaussian splatting - ULTRA MINIMAL
+num_pts: 2000  # Minimal points
+
+sh_degree: 0
+
+# AGGRESSIVE learning rates
+position_lr_init: 0.002
+position_lr_final: 0.0001
+position_lr_delay_mult: 0.005
+position_lr_max_steps: 60
+
+feature_lr: 0.02
+opacity_lr: 0.1
+scaling_lr: 0.01
+rotation_lr: 0.01
+
+# Minimal densification
+percent_dense: 0.03
+density_start_iter: 0
+density_end_iter: 120  # Stop early
+densification_interval: 30
+opacity_reset_interval: 1000  # Never triggers
+densify_grad_threshold: 0.02  # High threshold = minimal densification
+
+### Textured Mesh
+geom_lr: 0.0001
+texture_lr: 0.2

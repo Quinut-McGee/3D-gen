@@ -34,18 +34,34 @@ class ValidatorSelector:
             return self._owner_uid
 
         start_uid = self._next_uid
+        checked_validators = 0
         while True:
+            is_serving = metagraph.axons[self._next_uid].is_serving
+            stake = metagraph.S[self._next_uid]
+            cooldown = self._cooldowns.get(self._next_uid, 0)
+
             if (
-                metagraph.axons[self._next_uid].is_serving
-                and metagraph.S[self._next_uid] >= self._min_stake
-                and self._cooldowns.get(self._next_uid, 0) < current_time
+                is_serving
+                and stake >= self._min_stake
+                and cooldown < current_time
             ):
-                bt.logging.debug(f"Querying task from [{self._next_uid}]. Stake: {metagraph.S[self._next_uid]}")
+                bt.logging.debug(f"Querying task from [{self._next_uid}]. Stake: {stake}")
                 return self._next_uid
 
+            # Log why validator was skipped (only log first full cycle)
+            if checked_validators < metagraph.n:
+                if not is_serving:
+                    bt.logging.debug(f"Validator [{self._next_uid}] not serving")
+                elif stake < self._min_stake:
+                    bt.logging.debug(f"Validator [{self._next_uid}] stake {stake} < min {self._min_stake}")
+                elif cooldown >= current_time:
+                    bt.logging.debug(f"Validator [{self._next_uid}] on cooldown until {cooldown}")
+
             self._next_uid = 0 if self._next_uid + 1 == metagraph.n else self._next_uid + 1
+            checked_validators += 1
+
             if start_uid == self._next_uid:
-                bt.logging.info("No available validators to pull the task.")
+                bt.logging.info(f"No available validators to pull the task. Checked {checked_validators} validators. Min stake required: {self._min_stake}")
                 return None
 
     def set_cooldown(self, validator_uid: int, cooldown_until: int) -> None:

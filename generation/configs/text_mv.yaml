@@ -1,9 +1,9 @@
 ### Input
 # input rgba image path (default to None, can be load in GUI too)
-input: 
+input:
 # input text prompt (default to None, can be input in GUI too)
 prompt:
-negative_prompt: "ugly, bad anatomy, blurry, pixelated obscure, unnatural colors, poor lighting, dull, and unclear, cropped, lowres, low quality, artifacts, duplicate, morbid, mutilated, poorly drawn face, deformed, dehydrated, bad proportions"
+negative_prompt: "ugly, bad anatomy, blurry, pixelated, obscure, unnatural colors, poor lighting, dull, unclear, cropped, lowres, low quality, artifacts, duplicate, morbid, mutilated, poorly drawn face, deformed, dehydrated, bad proportions, flat, 2d render, low poly, missing details, bad topology, stretched textures, bad geometry, malformed"
 # input mesh for stage 2 (auto-search from stage 1 output path if None)
 mesh:
 # estimated elevation angle for input image 
@@ -32,12 +32,14 @@ zero123_xl: False
 # guidance loss weights (0 to disable)
 lambda_sd: 1
 lambda_zero123: 0
+# guidance scale for diffusion model (higher = better prompt adherence)
+guidance_scale: 120
 # warmup rgb supervision for image-to-3d
 warmup_rgb_loss: True
 # training batch size per iter
 batch_size: 1
-# training iterations for stage 1
-iters: 1000
+# training iterations for stage 1 (increased for better quality)
+iters: 1500
 # whether to linearly anneal timestep
 anneal_timestep: True
 # training iterations for stage 2
@@ -65,19 +67,19 @@ H: 800
 W: 800
 
 ### Gaussian splatting
-num_pts: 5000
+num_pts: 8000  # Increased from 5000 for better geometry detail
 sh_degree: 0
 position_lr_init: 0.001
 position_lr_final: 0.00002
 position_lr_delay_mult: 0.02
-position_lr_max_steps: 300
+position_lr_max_steps: 450  # Increased to match new iters count
 feature_lr: 0.01
 opacity_lr: 0.05
 scaling_lr: 0.005
 rotation_lr: 0.005
 percent_dense: 0.015 # 0.01
 density_start_iter: 0
-density_end_iter: 3000
+density_end_iter: 1200  # Fixed: was 3000 but iters was only 1000, now 80% of 1500
 densification_interval: 50
 opacity_reset_interval: 700
 densify_grad_threshold: 0.01

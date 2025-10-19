@@ -132,11 +132,15 @@ class StableDiffusion(nn.Module):
         self,
         pred_rgb,
         step_ratio=None,
-        guidance_scale=100,
+        guidance_scale=None,
         as_latent=False,
         vers=None,
         hors=None,
     ):
+        # Use provided guidance_scale or default to 100
+        if guidance_scale is None:
+            guidance_scale = 100
+
         batch_size = pred_rgb.shape[0]
         pred_rgb = pred_rgb.to(self.dtype)
 

@@ -144,7 +144,11 @@ class ImageDream(nn.Module):
     camera: [B, 4, 4]
     """
 
-    def train_step(self, pred_rgb, camera, step_ratio=None, guidance_scale=5, as_latent=False):
+    def train_step(self, pred_rgb, camera, step_ratio=None, guidance_scale=None, as_latent=False):
+        # Use provided guidance_scale or default to 5 for ImageDream
+        if guidance_scale is None:
+            guidance_scale = 5
+
         batch_size = pred_rgb.shape[0]
         real_batch_size = batch_size // 4
         pred_rgb = pred_rgb.to(self.dtype)

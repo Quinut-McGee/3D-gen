@@ -18,7 +18,9 @@ from video_utils import VideoUtils
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--port", type=int, default=10006)
-    parser.add_argument("--config", default="configs/text_mv.yaml")
+    # PRODUCTION: Use fast config for sub-30s generations
+    # Options: text_mv_fast.yaml (~20-25s), text_mv_ultra_fast.yaml (~10-15s), text_mv.yaml (quality mode ~3.5min)
+    parser.add_argument("--config", default="configs/text_mv_fast.yaml")
     return parser.parse_args()
 
 

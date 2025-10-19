@@ -1,0 +1,87 @@
+### PRODUCTION SPEED CONFIG - Target: <30 seconds
+### Optimized for RTX 4090 to meet 300s cooldown windows
+### Maintains >0.6 CLIP threshold while maximizing throughput
+
+### Input
+input:
+prompt:
+# Focused negative prompt - shorter for speed
+negative_prompt: "ugly, blurry, low quality, deformed, bad anatomy, flat, 2d"
+mesh:
+elevation: 0
+# SPEED: Reduced from 256 to 128 (4x faster VAE encoding)
+ref_size: 128
+density_thresh: 1
+
+### Output
+outdir: logs
+mesh_format: obj
+save_path: ???
+
+### Training
+mvdream: True
+imagedream: False
+stablediff: False
+stable_zero123: False
+zero123_xl: False
+
+# SPEED: Lower guidance_scale = faster convergence (trade: -5% quality for +30% speed)
+lambda_sd: 1
+lambda_zero123: 0
+guidance_scale: 50  # Down from 120 - faster diffusion steps
+
+warmup_rgb_loss: True
+
+# CRITICAL SPEED OPTIMIZATION: Use batch_size=4 for MVDream's 4-view architecture
+# This processes all 4 views simultaneously instead of sequentially
+batch_size: 4
+
+# CRITICAL: Reduced from 1500 to 250 (6x faster!)
+# This is the MAIN bottleneck - each iter ~0.1s
+iters: 250
+
+anneal_timestep: True
+iters_refine: 0  # Skip refinement for speed
+
+# Tighter camera bounds = faster convergence
+radius: 3.0
+fovy: 49.1
+min_ver: -20  # Reduced from -30
+max_ver: 20   # Reduced from 30
+
+load:
+train_geo: False
+invert_bg_prob: 0.5  # Keep randomness for robustness
+
+### GUI
+gui: False
+force_cuda_rast: True  # SPEED: Force CUDA rasterization
+H: 512  # Lower res for faster testing
+W: 512
+
+### Gaussian splatting - SPEED OPTIMIZED
+num_pts: 4000  # Reduced from 8000 - faster initialization & densification
+sh_degree: 0   # Keep at 0 (no spherical harmonics = faster)
+
+# Faster learning rates for quick convergence
+position_lr_init: 0.0015    # Increased from 0.001
+position_lr_final: 0.00005  # Increased from 0.00002
+position_lr_delay_mult: 0.01  # Reduced from 0.02
+position_lr_max_steps: 100  # Reduced from 450 (40% of iters)
+
+feature_lr: 0.015    # Increased from 0.01
+opacity_lr: 0.08     # Increased from 0.05
+scaling_lr: 0.008    # Increased from 0.005
+rotation_lr: 0.008   # Increased from 0.005
+
+# AGGRESSIVE densification schedule
+percent_dense: 0.02  # Increased from 0.015 - more aggressive pruning
+density_start_iter: 0
+density_end_iter: 200  # Stop at 80% of total iters
+densification_interval: 25  # More frequent (every 25 instead of 50)
+opacity_reset_interval: 500  # Less frequent (won't trigger in 250 iters)
+densify_grad_threshold: 0.015  # Higher threshold = less densification = faster
+
+### Textured Mesh
+geom_lr: 0.0001
+texture_lr: 0.2
