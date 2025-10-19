@@ -19,3 +19,13 @@ gradio==4.19.2
 open-clip-torch==2.24.0
 plyfile==1.0.3
 loguru==0.7.2
+
+# FastAPI for generation service
+fastapi==0.115.6
+uvicorn==0.34.0
+
+# CLIP validator (for competitive mining)
+git+https://github.com/openai/CLIP.git
+
+# Additional PIL support
+Pillow==10.1.0

@@ -7,3 +7,12 @@ aioquic==1.2.0
 glicko2==2.1.0
 openai==1.97.1
 blake3==1.0.5
+
+# Async HTTP for competitive miner task manager
+aiohttp==3.11.11
+
+# Logging for competitive miner
+loguru==0.7.2
+
+# Image processing for validators
+Pillow==10.1.0
