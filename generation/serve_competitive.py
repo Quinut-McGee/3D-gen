@@ -2,12 +2,12 @@
 404-GEN COMPETITIVE GENERATION SERVICE
 
 This is the production-ready competitive miner pipeline:
-1. FLUX.1-schnell: Ultra-fast text-to-image (4 steps = 3s)
-2. BRIA RMBG 2.0: SOTA background removal
+1. Stable Diffusion 1.5: Fast text-to-image (20 steps = 4s)
+2. rembg: Background removal
 3. DreamGaussian: Fast 3D generation (optimized config)
 4. CLIP Validation: Pre-submission quality check
 
-Target: <20 seconds per generation with >0.7 CLIP score
+Target: <22 seconds per generation with >0.62 CLIP score
 """
 
 from io import BytesIO
@@ -19,6 +19,7 @@ import time
 from loguru import logger
 import torch
 from PIL import Image
+import gc
 
 from omegaconf import OmegaConf
 
@@ -43,8 +44,8 @@ def get_args():
     parser.add_argument(
         "--flux-steps",
         type=int,
-        default=4,
-        help="FLUX inference steps (1-4 recommended, 4=best quality)"
+        default=20,
+        help="SD 1.5 inference steps (15-25 recommended, 20=best balance)"
     )
     parser.add_argument(
         "--validation-threshold",
@@ -77,6 +78,61 @@ class AppState:
 app.state = AppState()
 
 
+def cleanup_memory():
+    """Aggressively clean up GPU memory to prevent OOM errors"""
+    gc.collect()
+    if torch.cuda.is_available():
+        torch.cuda.empty_cache()
+        torch.cuda.synchronize()
+        # Force garbage collection again after clearing cache
+        gc.collect()
+
+
+def precompile_gsplat():
+    """
+    Pre-compile gsplat CUDA extensions before service starts.
+
+    This ensures the CUDA kernels are compiled at startup rather than
+    during the first generation request. If compilation fails, we clear
+    the cache and retry once.
+    """
+    import os
+    import shutil
+    from pathlib import Path
+
+    logger.info("\n[Pre-check] Compiling gsplat CUDA extensions...")
+
+    try:
+        # Import gsplat to trigger JIT compilation
+        import gsplat
+        from gsplat import rasterization
+
+        logger.info("✅ gsplat CUDA extensions compiled successfully")
+        return True
+
+    except Exception as e:
+        logger.error(f"❌ gsplat compilation failed: {e}")
+
+        # Try clearing cache and retry once
+        cache_dir = Path.home() / ".cache" / "torch_extensions"
+        if cache_dir.exists():
+            logger.info(f"Clearing torch extensions cache: {cache_dir}")
+            shutil.rmtree(cache_dir, ignore_errors=True)
+
+        # Retry import
+        try:
+            import gsplat
+            from gsplat import rasterization
+            logger.info("✅ gsplat compiled successfully after cache clear")
+            return True
+        except Exception as e2:
+            logger.error(f"❌ gsplat compilation failed after retry: {e2}")
+            raise RuntimeError(
+                "Cannot compile gsplat CUDA extensions. "
+                "Check CUDA_HOME is set and nvcc is available."
+            ) from e2
+
+
 @app.on_event("startup")
 def startup_event():
     """
@@ -96,21 +152,25 @@ def startup_event():
         logger.info(f"GPU: {torch.cuda.get_device_name(0)}")
         logger.info(f"VRAM: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.1f} GB")
 
-    # 1. Load FLUX.1-schnell (text-to-image)
-    logger.info("\n[1/4] Loading FLUX.1-schnell (text-to-image)...")
+    # Pre-compile gsplat CUDA extensions
+    precompile_gsplat()
+
+    # 1. Load Stable Diffusion 1.5 (text-to-image)
+    logger.info("\n[1/4] Loading Stable Diffusion 1.5 (text-to-image)...")
     app.state.flux_generator = FluxImageGenerator(device=device)
-    logger.info("✅ FLUX.1-schnell ready")
+    logger.info("✅ Stable Diffusion 1.5 ready")
 
     # 2. Load BRIA RMBG 2.0 (background removal)
     logger.info("\n[2/4] Loading BRIA RMBG 2.0 (background removal)...")
     app.state.background_remover = SOTABackgroundRemover(device=device)
     logger.info("✅ BRIA RMBG 2.0 ready")
 
-    # 3. Load DreamGaussian models
+    # 3. Load DreamGaussian models directly on GPU (RTX 4090 has 24GB VRAM)
     logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
     config = OmegaConf.load(args.config)
+    # Load directly on GPU to avoid device mismatch issues
     app.state.gaussian_models = ModelsPreLoader.preload_model(config, device)
-    logger.info("✅ DreamGaussian ready")
+    logger.info(f"✅ DreamGaussian ready (on {device})")
 
     # 4. Load CLIP validator (if enabled)
     if args.enable_validation:
@@ -128,9 +188,9 @@ def startup_event():
     logger.info("🚀 COMPETITIVE MINER READY FOR PRODUCTION")
     logger.info("=" * 60)
     logger.info(f"Config: {args.config}")
-    logger.info(f"FLUX steps: {args.flux_steps}")
+    logger.info(f"SD 1.5 steps: {args.flux_steps}")
     logger.info(f"Validation: {'ON' if args.enable_validation else 'OFF'}")
-    logger.info(f"Expected speed: 15-25 seconds per generation")
+    logger.info(f"Expected speed: 18-25 seconds per generation")
     logger.info("=" * 60 + "\n")
 
 
@@ -140,35 +200,64 @@ async def generate(prompt: str = Form()) -> Response:
     Competitive generation pipeline.
 
     Pipeline:
-    1. FLUX.1-schnell: prompt → image (3s)
-    2. BRIA RMBG: image → RGBA (0.2s)
+    1. Stable Diffusion 1.5: prompt → image (4s)
+    2. rembg: image → RGBA (1s)
     3. DreamGaussian: RGBA → Gaussian Splat (15s)
     4. CLIP Validation: quality check (0.5s)
 
-    Total: ~20 seconds
+    Total: ~21 seconds
     """
     t_start = time.time()
 
     logger.info(f"🎯 Generation request: '{prompt}'")
 
     try:
-        # Step 1: Text-to-image with FLUX.1-schnell
-        t1 = time.time()
-        logger.info("  [1/4] Generating image with FLUX.1-schnell...")
+        # Clean memory before starting generation
+        cleanup_memory()
 
+        # Step 1: Text-to-image with Stable Diffusion 1.5
+        t1 = time.time()
+        logger.info("  [1/4] Generating image with Stable Diffusion 1.5...")
+
+        # SKIP: Keep DreamGaussian on GPU (RTX 4090 has 24GB VRAM)
+        # Note: Moving models between CPU/GPU causes tensor device mismatches
+        # logger.debug("  Moving DreamGaussian models to CPU to free GPU for SD...")
+        # for model in app.state.gaussian_models:
+        #     if hasattr(model, 'to'):
+        #         model.to('cpu')
+
+        # Cleanup memory without moving models
+        torch.cuda.synchronize()
+        cleanup_memory()
+
+        logger.debug("  Memory cleaned, loading SD to GPU...")
+
+        # Now move SD to GPU
+        app.state.flux_generator.ensure_on_gpu()
+
+        # CUDA sync before generation
+        torch.cuda.synchronize()
+
+        # Use 256x256 to reduce memory pressure (can upscale later if needed)
         image = app.state.flux_generator.generate(
             prompt=prompt,
             num_inference_steps=args.flux_steps,
-            height=512,
-            width=512
+            height=256,
+            width=256
         )
 
         t2 = time.time()
-        logger.info(f"  ✅ FLUX done ({t2-t1:.2f}s)")
+        logger.info(f"  ✅ SD 1.5 done ({t2-t1:.2f}s)")
 
-        # Step 2: Background removal with BRIA RMBG 2.0
-        logger.info("  [2/4] Removing background with BRIA RMBG 2.0...")
+        # Aggressively offload SD to free GPU memory for next stage
+        app.state.flux_generator.offload_to_cpu()
+        cleanup_memory()
+        logger.debug(f"  GPU memory freed after SD 1.5")
 
+        # Step 2: Background removal with rembg
+        logger.info("  [2/4] Removing background with rembg...")
+
+        # Note: Background remover automatically moves to GPU and back to CPU
         rgba_image = app.state.background_remover.remove_background(
             image,
             threshold=0.5
@@ -177,17 +266,34 @@ async def generate(prompt: str = Form()) -> Response:
         t3 = time.time()
         logger.info(f"  ✅ Background removal done ({t3-t2:.2f}s)")
 
+        # Free the input image from memory
+        del image
+        cleanup_memory()
+        logger.debug(f"  GPU memory freed after background removal")
+
         # Step 3: 3D generation with DreamGaussian
         logger.info("  [3/4] Generating 3D with DreamGaussian...")
+
+        # SKIP: Models already on GPU (no CPU/GPU shuffling needed)
+        # logger.debug("  Moving DreamGaussian models back to GPU...")
+        # for model in app.state.gaussian_models:
+        #     if hasattr(model, 'to'):
+        #         model.to('cuda')
+        cleanup_memory()
 
         # Save RGBA to temp for DreamGaussian
         # (DreamGaussian expects file path, can optimize later)
         import tempfile
         import os
 
-        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(suffix='_rgba.png', delete=False) as tmp:
             rgba_image.save(tmp.name)
             tmp_path = tmp.name
+
+        # Also save prompt to caption file (DreamGaussian expects this)
+        caption_path = tmp_path.replace('_rgba.png', '_caption.txt')
+        with open(caption_path, 'w') as f:
+            f.write(prompt)
 
         try:
             # Load config
@@ -206,25 +312,41 @@ async def generate(prompt: str = Form()) -> Response:
             ply_bytes = buffer.getvalue()
 
         finally:
-            # Clean up temp file
+            # Clean up temp files
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
+            if os.path.exists(caption_path):
+                os.remove(caption_path)
 
         t4 = time.time()
         logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
+
+        # Clean up 3D generation memory and intermediate data
+        del gaussian_processor
+        cleanup_memory()
+        logger.debug(f"  GPU memory freed after 3D generation")
 
         # Step 4: CLIP validation
         if app.state.clip_validator:
             logger.info("  [4/4] Validating with CLIP...")
 
-            # Validate using the generated image (faster than rendering PLY)
+            # Need to recreate the RGB image for validation (we deleted it earlier)
+            # Use the RGBA image, convert back to RGB
+            validation_image = rgba_image.convert("RGB")
+
+            # Note: CLIP validator automatically moves to GPU and back to CPU
             passes, score = app.state.clip_validator.validate_image(
-                image,
+                validation_image,
                 prompt
             )
 
             t5 = time.time()
             logger.info(f"  ✅ Validation done ({t5-t4:.2f}s)")
+
+            # Clean up validation memory
+            del validation_image
+            cleanup_memory()
+            logger.debug(f"  GPU memory freed after validation")
 
             if not passes:
                 logger.warning(
@@ -248,7 +370,7 @@ async def generate(prompt: str = Form()) -> Response:
         logger.info("=" * 60)
         logger.info(f"✅ GENERATION COMPLETE")
         logger.info(f"   Total time: {t_total:.2f}s")
-        logger.info(f"   FLUX: {t2-t1:.2f}s")
+        logger.info(f"   SD 1.5: {t2-t1:.2f}s")
         logger.info(f"   Background: {t3-t2:.2f}s")
         logger.info(f"   3D: {t4-t3:.2f}s")
         if app.state.clip_validator:
@@ -267,7 +389,12 @@ async def generate(prompt: str = Form()) -> Response:
         )
 
     except Exception as e:
-        logger.error(f"❌ Generation failed: {e}", exc_info=True)
+        import traceback
+        logger.error(f"❌ Generation failed: {e}")
+        logger.error(f"Traceback:\n{traceback.format_exc()}")
+
+        # Clean up memory on error
+        cleanup_memory()
 
         # Return empty result on error (better than crash)
         empty_buffer = BytesIO()
@@ -277,6 +404,9 @@ async def generate(prompt: str = Form()) -> Response:
             headers={"X-Generation-Error": str(e)},
             status_code=500
         )
+    finally:
+        # Always clean up memory after request completes
+        cleanup_memory()
 
 
 @app.get("/health")

@@ -36,12 +36,14 @@ class CLIPValidator:
         """
         self.device = device
         self.threshold = threshold
+        self.is_on_gpu = False
 
         logger.info(f"Loading CLIP model {model_name} for validation...")
-        self.model, self.preprocess = clip.load(model_name, device=device)
+        # Load on CPU first to save GPU memory during startup
+        self.model, self.preprocess = clip.load(model_name, device="cpu")
         self.model.eval()  # Inference mode
 
-        logger.info(f"CLIP validator ready. Threshold: {threshold}")
+        logger.info(f"CLIP validator ready (on CPU, will move to GPU when needed). Threshold: {threshold}")
 
     @torch.no_grad()
     def validate_image(
@@ -66,6 +68,9 @@ class CLIPValidator:
             >>>     logger.warning(f"Failed validation: {score:.3f} < 0.6")
         """
         try:
+            # Move model to GPU before inference
+            self.to_gpu()
+
             # Preprocess image
             image_input = self.preprocess(image).unsqueeze(0).to(self.device)
 
@@ -85,6 +90,9 @@ class CLIPValidator:
 
             # Check threshold
             passes = similarity >= self.threshold
+
+            # Move model back to CPU to free GPU memory
+            self.to_cpu()
 
             return passes, similarity
 
@@ -156,3 +164,21 @@ class CLIPValidator:
         """
         logger.info(f"Updating CLIP threshold: {self.threshold} → {new_threshold}")
         self.threshold = new_threshold
+
+    def to_gpu(self):
+        """Move model to GPU"""
+        if not self.is_on_gpu:
+            self.model.to(self.device)
+            self.is_on_gpu = True
+            logger.debug("Moved CLIP validator to GPU")
+
+    def to_cpu(self):
+        """Move model to CPU to free GPU memory"""
+        if self.is_on_gpu:
+            self.model.to("cpu")
+            self.is_on_gpu = False
+            # Clear CUDA cache
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.synchronize()
+            logger.debug("Moved CLIP validator to CPU")

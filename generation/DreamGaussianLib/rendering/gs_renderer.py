@@ -2,7 +2,7 @@ from pathlib import Path
 
 import torch
 from gsplat.rendering import rasterization
-from gsplat.strategy import DefaultStrategy
+# from gsplat.strategy import DefaultStrategy  # Not actually used, commented out
 from PIL import Image
 
 
@@ -14,8 +14,8 @@ class GaussianRenderer:
         torch.set_default_device(self._device)
         self._bg_color = torch.tensor([1, 1, 1], dtype=torch.float32, device=self._device)
         self._scene_scale = scene_scale
-        self.strategy = DefaultStrategy()
-        self.strategy_state = self.strategy.initialize_state()
+        # self.strategy = DefaultStrategy()  # Not used anywhere, commented out
+        # self.strategy_state = self.strategy.initialize_state()  # Not used anywhere, commented out
         self.splats_params = torch.nn.ParameterDict({})
 
     def render(

@@ -40,18 +40,20 @@ class SOTABackgroundRemover:
             model_name: HuggingFace model ID
         """
         self.device = device
+        self.is_on_gpu = False
 
         logger.info(f"Loading {model_name} background remover...")
 
         try:
+            # Load model on CPU first to save GPU memory
             self.model = AutoModelForImageSegmentation.from_pretrained(
                 model_name,
                 trust_remote_code=True
-            ).to(device)
+            )
 
             self.model.eval()
 
-            logger.info("✅ BRIA RMBG 2.0 ready")
+            logger.info("✅ BRIA RMBG 2.0 ready (on CPU, will move to GPU when needed)")
 
         except Exception as e:
             logger.error(f"Failed to load BRIA RMBG 2.0: {e}")
@@ -86,6 +88,9 @@ class SOTABackgroundRemover:
             return self._fallback_remove_background(image)
 
         try:
+            # Move model to GPU before inference
+            self.to_gpu()
+
             # Preprocess
             input_images = self._preprocess(image).to(self.device)
 
@@ -102,6 +107,9 @@ class SOTABackgroundRemover:
             rgba.putalpha(Image.fromarray(mask))
 
             logger.debug(f"Background removed (threshold={threshold})")
+
+            # Move model back to CPU to free GPU memory
+            self.to_cpu()
 
             return rgba
 
@@ -142,16 +150,30 @@ class SOTABackgroundRemover:
         This is the old method - not as good but better than nothing.
         """
         try:
-            import rembg
+            from rembg import remove
+            from io import BytesIO
 
             logger.warning("Using rembg fallback (not recommended for competition)")
 
-            # rembg expects and returns PIL Image
-            input_bytes = image.tobytes()
-            output = rembg.remove(input_bytes)
+            # rembg expects PIL Image
+            output = remove(image)
 
-            return Image.open(output)
+            # Ensure output is RGBA
+            if output.mode != 'RGBA':
+                rgba = image.convert("RGB")
+                alpha = Image.new('L', image.size, 255)
+                rgba.putalpha(alpha)
+                return rgba
 
+            return output
+
+        except ImportError:
+            logger.warning("rembg not installed, using simple background (full alpha)")
+            # Return original with full alpha
+            rgba = image.convert("RGB")
+            alpha = Image.new('L', image.size, 255)
+            rgba.putalpha(alpha)
+            return rgba
         except Exception as e:
             logger.error(f"Fallback removal also failed: {e}")
             # Last resort: return original with full alpha
@@ -211,7 +233,26 @@ class SOTABackgroundRemover:
         if self.model:
             self.device = device
             self.model.to(device)
+            self.is_on_gpu = (device == "cuda")
             logger.info(f"Moved background remover to {device}")
+
+    def to_gpu(self):
+        """Move model to GPU"""
+        if self.model and not self.is_on_gpu:
+            self.model.to(self.device)
+            self.is_on_gpu = True
+            logger.debug("Moved background remover to GPU")
+
+    def to_cpu(self):
+        """Move model to CPU to free GPU memory"""
+        if self.model and self.is_on_gpu:
+            self.model.to("cpu")
+            self.is_on_gpu = False
+            # Clear CUDA cache
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.synchronize()
+            logger.debug("Moved background remover to CPU")
 
 
 # Performance notes:

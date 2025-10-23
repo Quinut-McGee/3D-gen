@@ -304,68 +304,90 @@ class GaussianProcessor:
                         image_i = image_i.permute(0, 3, 1, 2)
                         images.append(image_i)
 
-                images = torch.cat(images, dim=0)
-                poses = torch.stack(poses, dim=0).to(self._device)
+            # After collecting all batch views, convert lists to tensors
+            images = torch.cat(images, dim=0)
+            poses = torch.stack(poses, dim=0).to(self._device)
 
-                # guidance loss
-                if self._enable_sd:
-                    # Get guidance_scale from config if available, otherwise use default
-                    guidance_scale = getattr(self._opt, 'guidance_scale', None)
-                    if self._opt.mvdream or self._opt.imagedream:
-                        loss = loss + self._opt.lambda_sd * self._guidance_sd.train_step(
-                            images,
-                            poses,
-                            step_ratio=step_ratio if self._opt.anneal_timestep else None,
-                            guidance_scale=guidance_scale,
-                        )
-                    else:
-                        loss = loss + self._opt.lambda_sd * self._guidance_sd.train_step(
-                            images,
-                            step_ratio=step_ratio if self._opt.anneal_timestep else None,
-                            guidance_scale=guidance_scale,
-                        )
-
-                if self._enable_zero123:
-                    loss = loss + self._opt.lambda_zero123 * self._guidance_zero123.train_step(
+            # guidance loss
+            if self._enable_sd:
+                # Get guidance_scale from config if available, otherwise use default
+                guidance_scale = getattr(self._opt, 'guidance_scale', None)
+                if self._opt.mvdream or self._opt.imagedream:
+                    loss = loss + self._opt.lambda_sd * self._guidance_sd.train_step(
                         images,
-                        vers,
-                        hors,
-                        radii,
+                        poses,
                         step_ratio=step_ratio if self._opt.anneal_timestep else None,
-                        default_elevation=self._opt.elevation,
+                        guidance_scale=guidance_scale,
+                    )
+                else:
+                    loss = loss + self._opt.lambda_sd * self._guidance_sd.train_step(
+                        images,
+                        step_ratio=step_ratio if self._opt.anneal_timestep else None,
+                        guidance_scale=guidance_scale,
                     )
 
-                # optimize step
-                loss.backward()
-                self._optimizer.step()
-                self._optimizer.zero_grad()
+            if self._enable_zero123:
+                loss = loss + self._opt.lambda_zero123 * self._guidance_zero123.train_step(
+                    images,
+                    vers,
+                    hors,
+                    radii,
+                    step_ratio=step_ratio if self._opt.anneal_timestep else None,
+                    default_elevation=self._opt.elevation,
+                )
 
-                # densify and prune
-                if ((self._step >= self._opt.density_start_iter)
-                        and (self._step <= self._opt.density_end_iter)):
+            # optimize step
+            loss.backward()
+            self._optimizer.step()
+            self._optimizer.zero_grad()
 
-                    viewspace_point_tensor, visibility_filter, radii = (
-                        meta["means2d"],
-                        meta["radii"] > 0,
-                        meta["radii"],
+            # densify and prune
+            if ((self._step >= self._opt.density_start_iter)
+                    and (self._step <= self._opt.density_end_iter)):
+
+                # Fix: Use different variable name to avoid conflict with radii list above
+                viewspace_point_tensor, visibility_filter, meta_radii = (
+                    meta["means2d"],
+                    meta["radii"] > 0,
+                    meta["radii"],
+                )
+
+                # Fix: Handle multi-dimensional visibility_filter and radii
+                # meta_radii can be (batch, num_points) or (batch, num_points, 2) for x,y coordinates
+                logger.debug(f"visibility_filter shape: {visibility_filter.shape}, meta_radii shape: {meta_radii.shape}, max_radii2D shape: {self._model.max_radii2D.shape}")
+
+                # Extract first view's data for both visibility and radii
+                if visibility_filter.dim() == 3:
+                    # Shape: (batch, num_points, 2) -> take (0, :, 0) for first batch, x-coordinate
+                    visibility_filter_1d = visibility_filter[0, :, 0]
+                    meta_radii_1d = meta_radii[0, :, 0]
+                elif visibility_filter.dim() == 2:
+                    # Shape: (batch, num_points) -> take first batch
+                    visibility_filter_1d = visibility_filter[0]
+                    meta_radii_1d = meta_radii[0]
+                else:
+                    # Already 1D
+                    visibility_filter_1d = visibility_filter
+                    meta_radii_1d = meta_radii
+
+                logger.debug(f"After fix - visibility_filter_1d: {visibility_filter_1d.shape}, meta_radii_1d: {meta_radii_1d.shape}")
+
+                self._model.max_radii2D[visibility_filter_1d] = torch.max(
+                    self._model.max_radii2D[visibility_filter_1d],
+                    meta_radii_1d[visibility_filter_1d],
+                )
+                self._model.add_densification_stats(viewspace_point_tensor, visibility_filter_1d)
+
+                if self._step % self._opt.densification_interval == 0:
+                    self._model.densify_and_prune(
+                        self._opt.densify_grad_threshold,
+                        min_opacity=0.01,
+                        extent=4,
+                        max_screen_size=1,
                     )
 
-                    self._model.max_radii2D[visibility_filter.squeeze(0)] = torch.max(
-                        self._model.max_radii2D[visibility_filter.squeeze(0)],
-                        radii[visibility_filter],
-                    )
-                    self._model.add_densification_stats(viewspace_point_tensor, visibility_filter.squeeze(0))
-
-                    if self._step % self._opt.densification_interval == 0:
-                        self._model.densify_and_prune(
-                            self._opt.densify_grad_threshold,
-                            min_opacity=0.01,
-                            extent=4,
-                            max_screen_size=1,
-                        )
-
-                    if self._step % self._opt.opacity_reset_interval == 0:
-                        self._model.reset_opacity()
+                if self._step % self._opt.opacity_reset_interval == 0:
+                    self._model.reset_opacity()
 
         ender.record()
         torch.cuda.synchronize()

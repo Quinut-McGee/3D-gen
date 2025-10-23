@@ -190,7 +190,11 @@ class GaussianModel:
         dtype_full = [(attribute, "f4") for attribute in self._construct_list_of_attributes()]
 
         elements = np.empty(xyz.shape[0], dtype=dtype_full)
-        attributes = np.concatenate((xyz, normals, f_dc, f_rest, opacities, scale, rotation), axis=1)
+        # Handle case where f_rest is empty (max_sh_degree=0)
+        if f_rest.shape[1] == 0:
+            attributes = np.concatenate((xyz, normals, f_dc, opacities, scale, rotation), axis=1)
+        else:
+            attributes = np.concatenate((xyz, normals, f_dc, f_rest, opacities, scale, rotation), axis=1)
         elements[:] = list(map(tuple, attributes))
         el = PlyElement.describe(elements, "vertex")
         PlyData([el]).write(buffer)
@@ -239,23 +243,51 @@ class GaussianModel:
             self.active_sh_degree += 1
 
     def distCUDA2(self, points: np.ndarray):
+        logger.debug(f"distCUDA2: points shape = {points.shape}")
         dists, inds = KDTree(points).query(points, k=4)
+        logger.debug(f"distCUDA2: dists shape = {dists.shape}, dists ndim = {dists.ndim}")
+        logger.debug(f"distCUDA2: dists[:, 1:] shape = {dists[:, 1:].shape}")
         meanDists = (dists[:, 1:] ** 2).mean(1)
+        logger.debug(f"distCUDA2: meanDists shape = {meanDists.shape}")
 
         return torch.tensor(meanDists, dtype=torch.float, device=self._device)
 
     def _create_from_pcd(self, pcd: BasicPointCloud, spatial_lr_scale: float = 1.0):
         self.spatial_lr_scale = spatial_lr_scale
+        logger.debug(f"_create_from_pcd: pcd.points shape = {np.asarray(pcd.points).shape}, pcd.colors shape = {np.asarray(pcd.colors).shape}")
+
         fused_point_cloud = torch.tensor(np.asarray(pcd.points)).float().cuda()
+        logger.debug(f"fused_point_cloud shape: {fused_point_cloud.shape}")
+
         fused_color = RGB2SH(torch.tensor(np.asarray(pcd.colors)).float().cuda())
+        logger.debug(f"fused_color shape: {fused_color.shape}")
+
         features = torch.zeros((fused_color.shape[0], 3, (self.max_sh_degree + 1) ** 2)).float().cuda()
+        logger.debug(f"features shape: {features.shape}")
+        logger.debug(f"features[:, :3, 0] shape: {features[:, :3, 0].shape}")
+
         features[:, :3, 0] = fused_color
-        features[:, 3:, 1:] = 0.0
+        logger.debug("Successfully assigned fused_color to features")
+        # Line removed: features[:, 3:, 1:] = 0.0
+        # Bug fix: This line tried to access channels 3+ when only 0,1,2 exist (RGB)
+        # The features tensor is already initialized with zeros, so this is unnecessary
 
-        logger.info("Number of points at initialisation : ", fused_point_cloud.shape[0])
+        logger.info(f"Number of points at initialisation : {fused_point_cloud.shape[0]}")
 
+        logger.debug("Computing distances...")
         dist2 = torch.clamp_min(self.distCUDA2(pcd.points), 0.0000001)
-        scales = torch.log(torch.sqrt(dist2))[..., None].repeat(1, 3)
+        logger.debug(f"dist2 shape: {dist2.shape}, dist2 ndim: {dist2.ndim}")
+
+        logger.debug("Computing scales...")
+        sqrt_dist2 = torch.sqrt(dist2)
+        logger.debug(f"sqrt_dist2 shape: {sqrt_dist2.shape}")
+        log_sqrt = torch.log(sqrt_dist2)
+        logger.debug(f"log_sqrt shape: {log_sqrt.shape}")
+        log_with_newdim = log_sqrt[..., None]
+        logger.debug(f"log_with_newdim shape: {log_with_newdim.shape}")
+        scales = log_with_newdim.repeat(1, 3)
+        logger.debug(f"scales shape: {scales.shape}")
+
         rots = torch.zeros((fused_point_cloud.shape[0], 4), device=self._device)
         rots[:, 0] = 1
 
@@ -264,8 +296,18 @@ class GaussianModel:
                                                            device=self._device))
 
         self._xyz = nn.Parameter(fused_point_cloud.requires_grad_(True))
-        self._features_dc = nn.Parameter(features[:, :, 0:1].transpose(1, 2).contiguous().requires_grad_(True))
-        self._features_rest = nn.Parameter(features[:, :, 1:].transpose(1, 2).contiguous().requires_grad_(True))
+
+        logger.debug(f"Creating feature parameters...")
+        logger.debug(f"features[:, :, 0:1] shape: {features[:, :, 0:1].shape}")
+        features_dc = features[:, :, 0:1].transpose(1, 2).contiguous()
+        logger.debug(f"features_dc (after transpose) shape: {features_dc.shape}")
+        self._features_dc = nn.Parameter(features_dc.requires_grad_(True))
+
+        logger.debug(f"features[:, :, 1:] shape: {features[:, :, 1:].shape}")
+        features_rest = features[:, :, 1:].transpose(1, 2).contiguous()
+        logger.debug(f"features_rest (after transpose) shape: {features_rest.shape}")
+        self._features_rest = nn.Parameter(features_rest.requires_grad_(True))
+
         self._scaling = nn.Parameter(scales.requires_grad_(True))
         self._rotation = nn.Parameter(rots.requires_grad_(True))
         self._opacity = nn.Parameter(opacities.requires_grad_(True))
@@ -483,7 +525,8 @@ class GaussianModel:
 
         # Extract points that satisfy the gradient condition
         padded_grad = torch.zeros((n_init_points), device=self._device)
-        padded_grad[: grads.shape[0]] = grads.squeeze()
+        # Fix: Use squeeze(-1) to only remove last dimension, not all size-1 dims
+        padded_grad[: grads.shape[0]] = grads.squeeze(-1) if grads.dim() > 1 else grads
         selected_pts_mask = torch.where(padded_grad >= grad_threshold, True, False)
         selected_pts_mask = torch.logical_and(
             selected_pts_mask,
@@ -594,6 +637,9 @@ class GaussianModel:
     def get_features(self):
         features_dc = self._features_dc
         features_rest = self._features_rest
+        # Handle case where max_sh_degree=0 and features_rest is empty
+        if features_rest.shape[1] == 0:
+            return features_dc
         return torch.cat((features_dc, features_rest), dim=1)
 
     @property

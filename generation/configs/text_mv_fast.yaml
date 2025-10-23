@@ -32,13 +32,14 @@ guidance_scale: 50  # Down from 120 - faster diffusion steps
 
 warmup_rgb_loss: True
 
-# CRITICAL SPEED OPTIMIZATION: Use batch_size=4 for MVDream's 4-view architecture
-# This processes all 4 views simultaneously instead of sequentially
-batch_size: 4
+# CRITICAL SPEED OPTIMIZATION: Use batch_size=1 for MVDream's 4-view architecture
+# Each batch generates 4 views (1 main + 3 MVDream additional views)
+# batch_size=1 means 1 iteration = 4 views total for MVDream
+batch_size: 1
 
-# CRITICAL: Reduced from 1500 to 250 (6x faster!)
-# This is the MAIN bottleneck - each iter ~0.1s
-iters: 250
+# CRITICAL: Reduced to 50 to meet <30s target
+# Actual speed: ~0.6s/iter (not 0.1s), so 50 iters = ~30s for 3D stage
+iters: 50
 
 anneal_timestep: True
 iters_refine: 0  # Skip refinement for speed
@@ -61,24 +62,24 @@ W: 512
 
 ### Gaussian splatting - SPEED OPTIMIZED
 num_pts: 4000  # Reduced from 8000 - faster initialization & densification
-sh_degree: 0   # Keep at 0 (no spherical harmonics = faster)
+sh_degree: 1   # Changed from 0 to 1 to fix empty tensor issue
 
-# Faster learning rates for quick convergence
+# Faster learning rates for quick convergence (adjusted for 50 iters)
 position_lr_init: 0.0015    # Increased from 0.001
 position_lr_final: 0.00005  # Increased from 0.00002
 position_lr_delay_mult: 0.01  # Reduced from 0.02
-position_lr_max_steps: 100  # Reduced from 450 (40% of iters)
+position_lr_max_steps: 20  # 40% of 50 iters = 20
 
 feature_lr: 0.015    # Increased from 0.01
 opacity_lr: 0.08     # Increased from 0.05
 scaling_lr: 0.008    # Increased from 0.005
 rotation_lr: 0.008   # Increased from 0.005
 
-# AGGRESSIVE densification schedule
+# AGGRESSIVE densification schedule (adjusted for 50 iters)
 percent_dense: 0.02  # Increased from 0.015 - more aggressive pruning
 density_start_iter: 0
-density_end_iter: 200  # Stop at 80% of total iters
-densification_interval: 25  # More frequent (every 25 instead of 50)
+density_end_iter: 40  # Stop at 80% of total iters (80% of 50 = 40)
+densification_interval: 10  # Densify every 10 iters (5 times total during training)
 opacity_reset_interval: 500  # Less frequent (won't trigger in 250 iters)
 densify_grad_threshold: 0.015  # Higher threshold = less densification = faster
 
