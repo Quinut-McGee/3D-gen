@@ -26,7 +26,7 @@ class CLIPValidator:
         self,
         device: str = "cuda",
         threshold: float = 0.6,
-        model_name: str = "ViT-B/32"
+        model_name: str = "ViT-L/14"
     ):
         """
         Args:
@@ -136,7 +136,7 @@ class CLIPValidator:
         """
         try:
             # Import here to avoid circular dependency
-            from ..rendering.quick_render import render_ply_to_images
+            from rendering.quick_render import render_ply_to_images
 
             # Render PLY to images
             images = render_ply_to_images(ply_bytes, num_views=num_views)

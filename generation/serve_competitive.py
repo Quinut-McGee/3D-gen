@@ -20,6 +20,7 @@ from loguru import logger
 import torch
 from PIL import Image
 import gc
+import numpy as np
 
 from omegaconf import OmegaConf
 
@@ -44,8 +45,8 @@ def get_args():
     parser.add_argument(
         "--flux-steps",
         type=int,
-        default=20,
-        help="SD 1.5 inference steps (15-25 recommended, 20=best balance)"
+        default=4,
+        help="FLUX.1-schnell inference steps (4 is optimal for schnell variant)"
     )
     parser.add_argument(
         "--validation-threshold",
@@ -238,8 +239,8 @@ async def generate(prompt: str = Form()) -> Response:
         # CUDA sync before generation
         torch.cuda.synchronize()
 
-        # Enhance prompt for better CLIP scores
-        enhanced_prompt = f"{prompt}, highly detailed, 8k, professional 3D render, sharp focus, octane render"
+        # Enhance prompt for better 2D image generation (not 3D terms!)
+        enhanced_prompt = f"{prompt}, highly detailed, professional photo, centered object, white background, studio lighting"
 
         # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
         image = app.state.flux_generator.generate(
@@ -324,47 +325,81 @@ async def generate(prompt: str = Form()) -> Response:
         t4 = time.time()
         logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
 
-        # Clean up 3D generation memory and intermediate data
-        del gaussian_processor
-        cleanup_memory()
-        logger.debug(f"  GPU memory freed after 3D generation")
-
-        # Step 4: CLIP validation
+        # Step 4: CLIP validation (BEFORE cleaning up the model!)
         if app.state.clip_validator:
             logger.info("  [4/4] Validating with CLIP...")
 
-            # Need to recreate the RGB image for validation (we deleted it earlier)
-            # Use the RGBA image, convert back to RGB
-            validation_image = rgba_image.convert("RGB")
+            # CRITICAL: Free GPU memory before rendering to avoid OOM crash
+            logger.debug("  Freeing GPU memory before rendering...")
 
-            # Note: CLIP validator automatically moves to GPU and back to CPU
-            passes, score = app.state.clip_validator.validate_image(
-                validation_image,
-                prompt
+            # Move MVDream models to CPU temporarily
+            for model in app.state.gaussian_models:
+                if hasattr(model, 'to'):
+                    model.to('cpu')
+
+            # Aggressive cleanup
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+            cleanup_memory()
+
+            logger.debug("  GPU memory freed, starting 4-view rendering...")
+
+            # Render the 3D model to images (now we have GPU memory available)
+            from rendering.quick_render import render_gaussian_model_to_images
+
+            # Use the existing GaussianModel directly (don't reload from PLY)
+            rendered_images = render_gaussian_model_to_images(
+                gaussian_processor.get_gs_model(),
+                num_views=4,
+                resolution=512  # Use 512 for good CLIP scores
             )
 
-            t5 = time.time()
-            logger.info(f"  ✅ Validation done ({t5-t4:.2f}s)")
+            # Move MVDream back to GPU after rendering
+            for model in app.state.gaussian_models:
+                if hasattr(model, 'to'):
+                    model.to('cuda')
 
-            # Clean up validation memory
-            del validation_image
-            cleanup_memory()
-            logger.debug(f"  GPU memory freed after validation")
+            if rendered_images:
+                # Validate each view
+                scores = []
+                for i, img in enumerate(rendered_images):
+                    _, view_score = app.state.clip_validator.validate_image(img, prompt)
+                    scores.append(view_score)
+                    logger.debug(f"    View {i+1}/4: CLIP={view_score:.3f}")
 
-            if not passes:
-                logger.warning(
-                    f"  ⚠️  VALIDATION FAILED: CLIP={score:.3f} < {args.validation_threshold}"
-                )
-                logger.warning("  Returning empty result to avoid cooldown penalty")
+                score = np.mean(scores)
+                passes = score >= args.validation_threshold
 
-                # Return empty PLY instead of bad result
-                empty_buffer = BytesIO()
-                return Response(
-                    empty_buffer.getvalue(),
-                    media_type="application/octet-stream",
-                    headers={"X-Validation-Failed": "true", "X-CLIP-Score": str(score)}
-                )
+                t5 = time.time()
+                logger.info(f"  ✅ Validation done ({t5-t4:.2f}s)")
+                logger.info(f"  Average CLIP score: {score:.3f}")
+            else:
+                logger.error("Failed to render 3D model for validation")
+                passes = False
+                score = 0.0
+                t5 = time.time()
 
+        # NOW clean up the model (after validation)
+        del gaussian_processor
+        cleanup_memory()
+        logger.debug(f"  GPU memory freed after 3D generation and validation")
+
+        # Check if validation passed
+        if app.state.clip_validator and not passes:
+            logger.warning(
+                f"  ⚠️  VALIDATION FAILED: CLIP={score:.3f} < {args.validation_threshold}"
+            )
+            logger.warning("  Returning empty result to avoid cooldown penalty")
+
+            # Return empty PLY instead of bad result
+            empty_buffer = BytesIO()
+            return Response(
+                empty_buffer.getvalue(),
+                media_type="application/octet-stream",
+                headers={"X-Validation-Failed": "true", "X-CLIP-Score": str(score)}
+            )
+
+        if app.state.clip_validator:
             logger.info(f"  ✅ VALIDATION PASSED: CLIP={score:.3f}")
 
         # Success!
