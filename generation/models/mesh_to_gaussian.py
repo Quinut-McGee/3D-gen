@@ -10,10 +10,11 @@ Target: 3-5 seconds for conversion
 
 import numpy as np
 import trimesh
-from typing import Tuple
+from typing import Tuple, Optional
 from io import BytesIO
 import struct
 import logging
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,7 @@ class MeshToGaussianConverter:
         """
         self.num_gaussians = num_gaussians
         self.base_scale = base_scale
+        self.last_model = None  # Cache the last created GaussianModel for rendering
 
         logger.info(f"MeshToGaussianConverter initialized: {num_gaussians} gaussians, base_scale={base_scale}")
 
@@ -94,6 +96,27 @@ class MeshToGaussianConverter:
         # Step 7: Convert colors to spherical harmonics (DC component)
         f_dc = self._rgb_to_sh(colors)
 
+        # Step 7.5: Create and cache GaussianModel for rendering validation
+        try:
+            from DreamGaussianLib.GaussianSplattingModel import GaussianModel
+
+            gs_model = GaussianModel(sh_degree=1)
+
+            # Populate with computed data
+            gs_model._xyz = torch.from_numpy(points).float().cuda()
+            gs_model._features_dc = torch.from_numpy(f_dc).float().cuda().unsqueeze(1)  # Add channel dimension
+            gs_model._opacity = torch.from_numpy(opacities).float().cuda().unsqueeze(1)  # Add dimension
+            gs_model._scaling = torch.from_numpy(scales).float().cuda()
+            gs_model._rotation = torch.from_numpy(rotations).float().cuda()
+
+            # Cache for rendering
+            self.last_model = gs_model
+            logger.debug(f"Cached GaussianModel with {len(points)} gaussians for rendering")
+
+        except Exception as e:
+            logger.warning(f"Failed to create GaussianModel (rendering unavailable): {e}")
+            self.last_model = None
+
         # Step 8: Export to PLY
         ply_data = self._export_to_ply(points, normals, f_dc, opacities, scales, rotations)
 
@@ -101,6 +124,15 @@ class MeshToGaussianConverter:
         logger.info(f"Mesh to Gaussian conversion completed in {elapsed:.2f}s")
 
         return ply_data
+
+    def get_last_model(self):
+        """
+        Get the last created GaussianModel for rendering validation.
+
+        Returns:
+            GaussianModel or None if no model has been created yet
+        """
+        return self.last_model
 
     def _sample_surface_points(self, mesh: trimesh.Trimesh, num_points: int) -> Tuple[np.ndarray, np.ndarray]:
         """

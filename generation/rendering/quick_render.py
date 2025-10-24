@@ -3,12 +3,18 @@ Quick PLY rendering for validation.
 Uses existing GaussianRenderer for fast multi-view rendering.
 """
 
+import os
 import io
 import torch
 import numpy as np
 from PIL import Image
 from typing import List, Optional
 from loguru import logger
+
+# Ensure ninja is in PATH before importing CUDA extensions
+conda_bin = '/home/kobe/miniconda3/envs/three-gen-mining/bin'
+if conda_bin not in os.environ.get('PATH', ''):
+    os.environ['PATH'] = f"{conda_bin}:{os.environ.get('PATH', '')}"
 
 # Import existing Gaussian rendering infrastructure
 from DreamGaussianLib.rendering.gs_camera import OrbitCamera

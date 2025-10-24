@@ -39,6 +39,7 @@ from models.mesh_to_gaussian import MeshToGaussianConverter
 import httpx  # For calling InstantMesh microservice
 import trimesh  # For loading PLY mesh from InstantMesh
 import io  # For BytesIO with PLY data
+from rendering.quick_render import render_gaussian_model_to_images  # For 3D validation
 
 
 def get_args():
@@ -409,12 +410,58 @@ async def generate(prompt: str = Form()) -> Response:
         if app.state.clip_validator:
             logger.info("  [5/5] Validating with CLIP...")
 
-            # TEMPORARY: Validate the 2D RGBA image instead of rendering 3D
-            # (3D rendering has persistent OOM issues that need deeper investigation)
-            logger.warning("  Using 2D image validation (temporary workaround)")
+            # Render 3D Gaussian Splat for validation using cached model
+            try:
+                logger.debug("  Rendering 3D Gaussian Splat for CLIP validation...")
 
-            # Convert RGBA to RGB for CLIP
-            validation_image = rgba_image.convert("RGB")
+                # Get the cached GaussianModel from converter
+                gs_model = app.state.mesh_to_gaussian.get_last_model()
+
+                if gs_model is not None:
+                    rendered_views = render_gaussian_model_to_images(
+                        model=gs_model,
+                        num_views=4,  # 4 views for robust validation
+                        resolution=512,
+                        device="cuda"
+                    )
+
+                    if rendered_views and len(rendered_views) > 0:
+                        # Use first view for CLIP validation (or average across all)
+                        validation_image = rendered_views[0]
+                        logger.debug(f"  Using 3D render (view 1/{len(rendered_views)}) for validation")
+                    else:
+                        # Fallback to 2D image if rendering fails
+                        logger.warning("  3D rendering failed, falling back to 2D image")
+                        validation_image = rgba_image.convert("RGB")
+                else:
+                    logger.warning("  No cached GaussianModel available, using 2D fallback")
+                    validation_image = rgba_image.convert("RGB")
+
+            except RuntimeError as e:
+                if "out of memory" in str(e).lower():
+                    logger.warning(f"  OOM during 3D rendering, trying with lower resolution")
+                    # Retry with lower settings
+                    try:
+                        gs_model = app.state.mesh_to_gaussian.get_last_model()
+                        if gs_model is not None:
+                            rendered_views = render_gaussian_model_to_images(
+                                model=gs_model,
+                                num_views=2,  # Fewer views
+                                resolution=256,  # Lower resolution
+                                device="cuda"
+                            )
+                            validation_image = rendered_views[0] if rendered_views else rgba_image.convert("RGB")
+                        else:
+                            validation_image = rgba_image.convert("RGB")
+                    except:
+                        logger.warning("  Retry failed, using 2D fallback")
+                        validation_image = rgba_image.convert("RGB")
+                else:
+                    logger.warning(f"  3D rendering error: {e}, using 2D fallback")
+                    validation_image = rgba_image.convert("RGB")
+            except Exception as e:
+                logger.warning(f"  Unexpected error during 3D rendering: {e}, using 2D fallback")
+                validation_image = rgba_image.convert("RGB")
 
             # Validate with CLIP
             app.state.clip_validator.to_gpu()
@@ -426,10 +473,12 @@ async def generate(prompt: str = Form()) -> Response:
 
             t6 = time.time()
             logger.info(f"  ✅ Validation done ({t6-t5:.2f}s)")
-            logger.info(f"  2D Image CLIP score: {score:.3f}")
+            logger.info(f"  3D Render CLIP score: {score:.3f}")
 
             # Clean up
             del validation_image
+            if 'rendered_views' in locals():
+                del rendered_views
             cleanup_memory()
 
         # GPU memory cleaned up after validation
