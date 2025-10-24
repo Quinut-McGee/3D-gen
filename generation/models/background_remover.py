@@ -56,7 +56,9 @@ class SOTABackgroundRemover:
             logger.info("✅ BRIA RMBG 2.0 ready (on CPU, will move to GPU when needed)")
 
         except Exception as e:
+            import traceback
             logger.error(f"Failed to load BRIA RMBG 2.0: {e}")
+            logger.error(f"Full traceback:\n{traceback.format_exc()}")
             logger.warning("Falling back to basic background removal")
             self.model = None
 

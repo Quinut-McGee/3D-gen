@@ -238,12 +238,15 @@ async def generate(prompt: str = Form()) -> Response:
         # CUDA sync before generation
         torch.cuda.synchronize()
 
-        # Use 256x256 to reduce memory pressure (can upscale later if needed)
+        # Enhance prompt for better CLIP scores
+        enhanced_prompt = f"{prompt}, highly detailed, 8k, professional 3D render, sharp focus, octane render"
+
+        # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
         image = app.state.flux_generator.generate(
-            prompt=prompt,
+            prompt=enhanced_prompt,
             num_inference_steps=args.flux_steps,
-            height=256,
-            width=256
+            height=512,
+            width=512
         )
 
         t2 = time.time()

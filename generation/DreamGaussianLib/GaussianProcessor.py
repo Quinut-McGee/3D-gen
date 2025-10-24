@@ -354,7 +354,6 @@ class GaussianProcessor:
 
                 # Fix: Handle multi-dimensional visibility_filter and radii
                 # meta_radii can be (batch, num_points) or (batch, num_points, 2) for x,y coordinates
-                logger.debug(f"visibility_filter shape: {visibility_filter.shape}, meta_radii shape: {meta_radii.shape}, max_radii2D shape: {self._model.max_radii2D.shape}")
 
                 # Extract first view's data for both visibility and radii
                 if visibility_filter.dim() == 3:
@@ -369,8 +368,6 @@ class GaussianProcessor:
                     # Already 1D
                     visibility_filter_1d = visibility_filter
                     meta_radii_1d = meta_radii
-
-                logger.debug(f"After fix - visibility_filter_1d: {visibility_filter_1d.shape}, meta_radii_1d: {meta_radii_1d.shape}")
 
                 self._model.max_radii2D[visibility_filter_1d] = torch.max(
                     self._model.max_radii2D[visibility_filter_1d],

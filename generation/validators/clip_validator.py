@@ -74,8 +74,20 @@ class CLIPValidator:
             # Preprocess image
             image_input = self.preprocess(image).unsqueeze(0).to(self.device)
 
+            # Defensive handling: Detect and fix invalid prompts
+            # Some miner requests send base64 images as prompts
+            if len(prompt) > 200 or prompt.startswith('iVBOR') or '==' in prompt[-10:]:
+                logger.warning(f"Invalid prompt detected (length={len(prompt)}, likely base64 image). Using fallback.")
+                prompt = "a 3D object"  # Fallback generic prompt
+
+            # CLIP has max context length of 77 tokens (~200 chars)
+            # Truncate if needed
+            if len(prompt) > 77:
+                logger.warning(f"Prompt too long ({len(prompt)} chars), truncating to 77")
+                prompt = prompt[:77]
+
             # Tokenize text
-            text_input = clip.tokenize([prompt]).to(self.device)
+            text_input = clip.tokenize([prompt], truncate=True).to(self.device)
 
             # Get embeddings
             image_features = self.model.encode_image(image_input)
