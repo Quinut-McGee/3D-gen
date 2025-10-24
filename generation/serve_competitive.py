@@ -29,9 +29,16 @@ from models.flux_generator import FluxImageGenerator
 from models.background_remover import SOTABackgroundRemover
 from validators.clip_validator import CLIPValidator
 
-# DreamGaussian 3D generation (optimized for speed)
-from DreamGaussianLib import ModelsPreLoader
-from DreamGaussianLib.GaussianProcessor import GaussianProcessor
+# COMMENTED OUT: DreamGaussian (keeping as fallback option)
+# from DreamGaussianLib import ModelsPreLoader
+# from DreamGaussianLib.GaussianProcessor import GaussianProcessor
+
+# NEW: Microservice-based pipeline for competitive <25s generation
+# InstantMesh runs in separate microservice (port 10007) with isolated dependencies
+from models.mesh_to_gaussian import MeshToGaussianConverter
+import httpx  # For calling InstantMesh microservice
+import trimesh  # For loading PLY mesh from InstantMesh
+import io  # For BytesIO with PLY data
 
 
 def get_args():
@@ -72,7 +79,9 @@ class AppState:
     """Holds all loaded models"""
     flux_generator: FluxImageGenerator = None
     background_remover: SOTABackgroundRemover = None
-    gaussian_models: list = None  # DreamGaussian models
+    # gaussian_models: list = None  # DreamGaussian (commented out)
+    instantmesh_service_url: str = "http://localhost:10007"  # Microservice URL
+    mesh_to_gaussian: MeshToGaussianConverter = None     # NEW
     clip_validator: CLIPValidator = None
 
 
@@ -174,22 +183,45 @@ def startup_event():
     app.state.background_remover = SOTABackgroundRemover(device=device)
     logger.info("✅ BRIA RMBG 2.0 ready")
 
-    # 3. Load DreamGaussian (3D generation - optimized for speed)
-    logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
-    config = OmegaConf.load(args.config)
-    app.state.gaussian_models = ModelsPreLoader.preload_model(config, device)
-    logger.info(f"✅ DreamGaussian ready (on {device}, optimized config)")
+    # 3. Check InstantMesh microservice (running separately on port 10007)
+    logger.info("\n[3/5] Checking InstantMesh microservice...")
+    try:
+        with httpx.Client(timeout=5.0) as client:
+            response = client.get(f"{app.state.instantmesh_service_url}/health")
+            if response.status_code == 200:
+                health_data = response.json()
+                if health_data.get("status") == "healthy":
+                    logger.info(f"✅ InstantMesh microservice ready at {app.state.instantmesh_service_url}")
+                else:
+                    logger.warning(f"⚠️  InstantMesh microservice not ready: {health_data}")
+            else:
+                logger.error(f"❌ InstantMesh microservice health check failed: {response.status_code}")
+    except Exception as e:
+        logger.error(f"❌ InstantMesh microservice not available: {e}")
+        logger.error("Ensure the service is running: pm2 start instantmesh.config.js")
+        raise
 
-    # 4. Load CLIP validator (if enabled)
+    # 4. Initialize Mesh-to-Gaussian converter
+    logger.info("\n[4/5] Initializing Mesh-to-Gaussian converter...")
+    app.state.mesh_to_gaussian = MeshToGaussianConverter(num_gaussians=8000, base_scale=0.005)
+    logger.info("✅ Mesh-to-Gaussian converter ready (3-5s conversion)")
+
+    # FALLBACK: DreamGaussian code (keep commented for easy rollback)
+    # logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
+    # config = OmegaConf.load(args.config)
+    # app.state.gaussian_models = ModelsPreLoader.preload_model(config, device)
+    # logger.info(f"✅ DreamGaussian ready (on {device}, optimized config)")
+
+    # 5. Load CLIP validator (if enabled)
     if args.enable_validation:
-        logger.info("\n[4/4] Loading CLIP validator...")
+        logger.info("\n[5/5] Loading CLIP validator...")
         app.state.clip_validator = CLIPValidator(
             device=device,
             threshold=args.validation_threshold
         )
         logger.info(f"✅ CLIP validator ready (threshold={args.validation_threshold})")
     else:
-        logger.warning("\n[4/4] CLIP validation DISABLED (not recommended)")
+        logger.warning("\n[5/5] CLIP validation DISABLED (not recommended)")
         app.state.clip_validator = None
 
     logger.info("\n" + "=" * 60)
@@ -198,7 +230,7 @@ def startup_event():
     logger.info(f"Config: {args.config}")
     logger.info(f"SD 1.5 steps: {args.flux_steps}")
     logger.info(f"Validation: {'ON' if args.enable_validation else 'OFF'}")
-    logger.info(f"Expected speed: 18-25 seconds per generation")
+    logger.info(f"Expected speed: 22-26 seconds per generation")
     logger.info("=" * 60 + "\n")
 
 
@@ -282,47 +314,100 @@ async def generate(prompt: str = Form()) -> Response:
         cleanup_memory()
         logger.debug(f"  GPU memory freed after background removal")
 
-        # Step 3: 3D generation with DreamGaussian (optimized)
-        logger.info("  [3/4] Generating 3D with DreamGaussian...")
-        cleanup_memory()
-
-        import tempfile
-        import os
-
-        with tempfile.NamedTemporaryFile(suffix='_rgba.png', delete=False) as tmp:
-            rgba_image.save(tmp.name)
-            tmp_path = tmp.name
-
-        caption_path = tmp_path.replace('_rgba.png', '_caption.txt')
-        with open(caption_path, 'w') as f:
-            f.write(prompt)
+        # Step 3: 3D mesh generation with InstantMesh microservice (1-2s)
+        t3_start = time.time()
+        logger.info("  [3/5] Generating 3D mesh with InstantMesh microservice...")
 
         try:
-            config = OmegaConf.load(args.config)
-            config.input = tmp_path
-            config.prompt = prompt
+            # Convert RGBA image to base64 for HTTP transfer
+            import io
+            import base64
+            buffer = io.BytesIO()
+            rgba_image.save(buffer, format='PNG')
+            image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
 
-            gaussian_processor = GaussianProcessor(config, prompt)
-            gaussian_processor.train(app.state.gaussian_models, config.iters)
+            # Call InstantMesh microservice
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.post(
+                    f"{app.state.instantmesh_service_url}/generate_mesh",
+                    json={
+                        "image_base64": image_base64,
+                        "scale": 1.0,
+                        "input_size": 320
+                    }
+                )
 
-            buffer = BytesIO()
-            gaussian_processor.get_gs_model().save_ply(buffer)
-            buffer.seek(0)
-            ply_bytes = buffer.getvalue()
+                if response.status_code != 200:
+                    raise RuntimeError(f"InstantMesh service returned status {response.status_code}: {response.text}")
 
-        finally:
-            # Clean up temp files
-            if os.path.exists(tmp_path):
-                os.remove(tmp_path)
-            if os.path.exists(caption_path):
-                os.remove(caption_path)
+                result = response.json()
 
-        t4 = time.time()
-        logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
+            # Decode mesh from base64
+            mesh_bytes = base64.b64decode(result["mesh_base64"])
+            mesh = trimesh.load(io.BytesIO(mesh_bytes), file_type='ply')
 
-        # Step 4: CLIP validation
+            t4 = time.time()
+            logger.info(f"  ✅ Mesh generation done ({t4-t3_start:.2f}s, service: {result['generation_time']:.2f}s)")
+            logger.info(f"     Mesh quality: {result['num_vertices']} vertices, {result['num_faces']} faces")
+
+        except Exception as e:
+            logger.error(f"InstantMesh microservice call failed: {e}", exc_info=True)
+            raise
+
+        # Step 4: Convert mesh to Gaussian Splat PLY (3-5s)
+        t4_start = time.time()
+        logger.info("  [4/5] Converting mesh to Gaussian Splat...")
+
+        try:
+            # Convert mesh to Gaussian Splat PLY (subnet-compatible format)
+            ply_buffer = app.state.mesh_to_gaussian.convert(
+                mesh,
+                num_gaussians=8000  # Target number of Gaussian splats
+            )
+            ply_bytes = ply_buffer.getvalue()
+
+            # Clean up mesh from memory
+            del mesh
+            cleanup_memory()
+
+            t5 = time.time()
+            logger.info(f"  ✅ Mesh-to-Gaussian conversion done ({t5-t4_start:.2f}s)")
+            logger.info(f"     Generated {len(ply_bytes)/1024:.1f} KB Gaussian Splat PLY")
+
+        except Exception as e:
+            logger.error(f"Mesh-to-Gaussian conversion failed: {e}", exc_info=True)
+            cleanup_memory()
+            raise
+
+        # FALLBACK: DreamGaussian code (keep commented for easy rollback)
+        # import tempfile, os
+        # with tempfile.NamedTemporaryFile(suffix='_rgba.png', delete=False) as tmp:
+        #     rgba_image.save(tmp.name)
+        #     tmp_path = tmp.name
+        # caption_path = tmp_path.replace('_rgba.png', '_caption.txt')
+        # with open(caption_path, 'w') as f:
+        #     f.write(prompt)
+        # try:
+        #     config = OmegaConf.load(args.config)
+        #     config.input = tmp_path
+        #     config.prompt = prompt
+        #     gaussian_processor = GaussianProcessor(config, prompt)
+        #     gaussian_processor.train(app.state.gaussian_models, config.iters)
+        #     buffer = BytesIO()
+        #     gaussian_processor.get_gs_model().save_ply(buffer)
+        #     buffer.seek(0)
+        #     ply_bytes = buffer.getvalue()
+        # finally:
+        #     if os.path.exists(tmp_path):
+        #         os.remove(tmp_path)
+        #     if os.path.exists(caption_path):
+        #         os.remove(caption_path)
+        # t4 = time.time()
+        # logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
+
+        # Step 5: CLIP validation
         if app.state.clip_validator:
-            logger.info("  [4/4] Validating with CLIP...")
+            logger.info("  [5/5] Validating with CLIP...")
 
             # TEMPORARY: Validate the 2D RGBA image instead of rendering 3D
             # (3D rendering has persistent OOM issues that need deeper investigation)
@@ -339,16 +424,15 @@ async def generate(prompt: str = Form()) -> Response:
             )
             app.state.clip_validator.to_cpu()
 
-            t5 = time.time()
-            logger.info(f"  ✅ Validation done ({t5-t4:.2f}s)")
+            t6 = time.time()
+            logger.info(f"  ✅ Validation done ({t6-t5:.2f}s)")
             logger.info(f"  2D Image CLIP score: {score:.3f}")
 
             # Clean up
             del validation_image
             cleanup_memory()
 
-        # Clean up the gaussian processor after validation
-        del gaussian_processor
+        # GPU memory cleaned up after validation
         cleanup_memory()
         logger.debug(f"  GPU memory freed after 3D generation and validation")
 
@@ -376,11 +460,12 @@ async def generate(prompt: str = Form()) -> Response:
         logger.info("=" * 60)
         logger.info(f"✅ GENERATION COMPLETE")
         logger.info(f"   Total time: {t_total:.2f}s")
-        logger.info(f"   SD 1.5: {t2-t1:.2f}s")
+        logger.info(f"   FLUX (2-step): {t2-t1:.2f}s")
         logger.info(f"   Background: {t3-t2:.2f}s")
-        logger.info(f"   3D: {t4-t3:.2f}s")
+        logger.info(f"   InstantMesh: {t4-t3:.2f}s")
+        logger.info(f"   Mesh→Gaussian: {t5-t4:.2f}s")
         if app.state.clip_validator:
-            logger.info(f"   Validation: {t5-t4:.2f}s")
+            logger.info(f"   Validation: {t6-t5:.2f}s")
             logger.info(f"   CLIP Score: {score:.3f}")
         logger.info(f"   File size: {len(ply_bytes)/1024:.1f} KB")
         logger.info("=" * 60)
@@ -423,7 +508,9 @@ async def health_check():
         "models_loaded": {
             "flux": app.state.flux_generator is not None,
             "background_remover": app.state.background_remover is not None,
-            "dreamgaussian": app.state.gaussian_models is not None,
+            "instantmesh_service": app.state.instantmesh_service_url,  # Microservice URL
+            "mesh_to_gaussian": app.state.mesh_to_gaussian is not None,
+            # "dreamgaussian": app.state.gaussian_models is not None,  # Commented out
             "clip_validator": app.state.clip_validator is not None
         },
         "config": {
