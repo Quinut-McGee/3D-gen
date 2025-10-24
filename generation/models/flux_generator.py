@@ -63,15 +63,15 @@ class FluxImageGenerator:
                 load_in_8bit=True,
             )
 
-            # Load full pipeline with quantization
+            # Load pipeline WITHOUT moving to GPU yet
             self.pipe = FluxPipeline.from_pretrained(
                 "black-forest-labs/FLUX.1-schnell",
                 torch_dtype=torch.bfloat16,
                 transformer_kwargs={"quantization_config": bnb_config}
             )
 
-            # Move to GPU
-            self.pipe.to(self.device)
+            # DON'T call self.pipe.to(self.device) here!
+            # Sequential CPU offload will handle device placement
 
             logger.info("✅ FLUX.1-schnell loaded with 8-bit quantization")
             logger.info(f"   Expected VRAM usage: ~6GB (vs 12GB unquantized)")
@@ -83,7 +83,7 @@ class FluxImageGenerator:
                 "black-forest-labs/FLUX.1-schnell",
                 torch_dtype=torch.bfloat16
             )
-            self.pipe.to(self.device)
+            # DON'T call self.pipe.to(self.device) here either!
 
         # Enable memory optimizations
         try:
@@ -92,17 +92,21 @@ class FluxImageGenerator:
         except Exception as e:
             logger.warning(f"⚠️  xFormers not available: {e}")
 
-        # Enable VAE optimizations
-        self.pipe.enable_vae_slicing()
-        self.pipe.enable_vae_tiling()
-        logger.info("✅ VAE slicing and tiling enabled")
+        # Enable VAE optimizations (if available)
+        try:
+            self.pipe.enable_vae_slicing()
+            self.pipe.enable_vae_tiling()
+            logger.info("✅ VAE slicing and tiling enabled")
+        except AttributeError:
+            logger.debug("VAE slicing/tiling not available for FLUX (not needed)")
 
-        # Enable sequential CPU offload for further memory savings
+        # Enable sequential CPU offload FIRST, before any device placement
         self.pipe.enable_sequential_cpu_offload()
         logger.info("✅ Sequential CPU offload enabled")
+        logger.info("   FLUX will move layers to GPU on-demand (~1-2GB peak)")
 
         self.is_loaded = True
-        self.is_on_gpu = True
+        self.is_on_gpu = False  # Not fully on GPU - managed by sequential offload
         logger.info("🚀 FLUX.1-schnell ready for generation")
 
     @torch.no_grad()

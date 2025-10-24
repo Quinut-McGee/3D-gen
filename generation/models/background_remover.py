@@ -160,6 +160,7 @@ class SOTABackgroundRemover:
                 rgba.putalpha(alpha)
                 return rgba
 
+
             return output
 
         except ImportError:
