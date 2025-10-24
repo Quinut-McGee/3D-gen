@@ -27,12 +27,11 @@ from omegaconf import OmegaConf
 # SOTA models
 from models.flux_generator import FluxImageGenerator
 from models.background_remover import SOTABackgroundRemover
-from models.triposr_generator import TripoSRGenerator  # NEW: Fast 3D generation (6-8s vs DreamGaussian's 27s)
 from validators.clip_validator import CLIPValidator
 
-# ROLLBACK OPTION: DreamGaussian (27s, proven but slow)
-# from DreamGaussianLib import ModelsPreLoader
-# from DreamGaussianLib.GaussianProcessor import GaussianProcessor
+# DreamGaussian 3D generation (optimized for speed)
+from DreamGaussianLib import ModelsPreLoader
+from DreamGaussianLib.GaussianProcessor import GaussianProcessor
 
 
 def get_args():
@@ -73,7 +72,7 @@ class AppState:
     """Holds all loaded models"""
     flux_generator: FluxImageGenerator = None
     background_remover: SOTABackgroundRemover = None
-    triposr_generator: TripoSRGenerator = None  # NEW: Replaces gaussian_models
+    gaussian_models: list = None  # DreamGaussian models
     clip_validator: CLIPValidator = None
 
 
@@ -175,16 +174,11 @@ def startup_event():
     app.state.background_remover = SOTABackgroundRemover(device=device)
     logger.info("✅ BRIA RMBG 2.0 ready")
 
-    # 3. Load TripoSR (fast 3D generation - 6-8s vs DreamGaussian's 27s)
-    logger.info("\n[3/4] Loading TripoSR (fast 3D generation)...")
-    app.state.triposr_generator = TripoSRGenerator(device=device, chunk_size=8192)
-    logger.info("✅ TripoSR ready (6-8s per generation vs DreamGaussian's 27s)")
-
-    # ROLLBACK OPTION: DreamGaussian (commented out for easy rollback)
-    # logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
-    # config = OmegaConf.load(args.config)
-    # app.state.gaussian_models = ModelsPreLoader.preload_model(config, device)
-    # logger.info(f"✅ DreamGaussian ready (on {device})")
+    # 3. Load DreamGaussian (3D generation - optimized for speed)
+    logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
+    config = OmegaConf.load(args.config)
+    app.state.gaussian_models = ModelsPreLoader.preload_model(config, device)
+    logger.info(f"✅ DreamGaussian ready (on {device}, optimized config)")
 
     # 4. Load CLIP validator (if enabled)
     if args.enable_validation:
@@ -288,69 +282,43 @@ async def generate(prompt: str = Form()) -> Response:
         cleanup_memory()
         logger.debug(f"  GPU memory freed after background removal")
 
-        # Step 3: 3D generation with TripoSR (6-8s vs DreamGaussian's 27s)
-        logger.info("  [3/4] Generating 3D with TripoSR...")
+        # Step 3: 3D generation with DreamGaussian (optimized)
+        logger.info("  [3/4] Generating 3D with DreamGaussian...")
+        cleanup_memory()
 
-        # Move TripoSR to GPU
-        app.state.triposr_generator.to_gpu()
+        import tempfile
+        import os
+
+        with tempfile.NamedTemporaryFile(suffix='_rgba.png', delete=False) as tmp:
+            rgba_image.save(tmp.name)
+            tmp_path = tmp.name
+
+        caption_path = tmp_path.replace('_rgba.png', '_caption.txt')
+        with open(caption_path, 'w') as f:
+            f.write(prompt)
 
         try:
-            # Generate 3D Gaussian Splat from RGBA image
-            ply_buffer = app.state.triposr_generator.generate_from_image(
-                rgba_image,
-                foreground_ratio=0.85  # Standard foreground ratio
-            )
-            ply_bytes = ply_buffer.getvalue()
+            config = OmegaConf.load(args.config)
+            config.input = tmp_path
+            config.prompt = prompt
 
-            # Offload TripoSR to free GPU memory
-            app.state.triposr_generator.to_cpu()
-            cleanup_memory()
+            gaussian_processor = GaussianProcessor(config, prompt)
+            gaussian_processor.train(app.state.gaussian_models, config.iters)
 
-            t4 = time.time()
-            logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
+            buffer = BytesIO()
+            gaussian_processor.get_gs_model().save_ply(buffer)
+            buffer.seek(0)
+            ply_bytes = buffer.getvalue()
 
-        except Exception as e:
-            logger.error(f"TripoSR generation failed: {e}", exc_info=True)
-            app.state.triposr_generator.to_cpu()
-            cleanup_memory()
-            raise
+        finally:
+            # Clean up temp files
+            if os.path.exists(tmp_path):
+                os.remove(tmp_path)
+            if os.path.exists(caption_path):
+                os.remove(caption_path)
 
-        # ROLLBACK OPTION: DreamGaussian code (commented out for easy rollback)
-        # logger.info("  [3/4] Generating 3D with DreamGaussian...")
-        # cleanup_memory()
-        #
-        # import tempfile
-        # import os
-        #
-        # with tempfile.NamedTemporaryFile(suffix='_rgba.png', delete=False) as tmp:
-        #     rgba_image.save(tmp.name)
-        #     tmp_path = tmp.name
-        #
-        # caption_path = tmp_path.replace('_rgba.png', '_caption.txt')
-        # with open(caption_path, 'w') as f:
-        #     f.write(prompt)
-        #
-        # try:
-        #     config = OmegaConf.load(args.config)
-        #     config.input = tmp_path
-        #     config.prompt = prompt
-        #
-        #     gaussian_processor = GaussianProcessor(config, prompt)
-        #     gaussian_processor.train(app.state.gaussian_models, config.iters)
-        #
-        #     buffer = BytesIO()
-        #     gaussian_processor.get_gs_model().save_ply(buffer)
-        #     buffer.seek(0)
-        #     ply_bytes = buffer.getvalue()
-        #
-        # finally:
-        #     if os.path.exists(tmp_path):
-        #         os.remove(tmp_path)
-        #     if os.path.exists(caption_path):
-        #         os.remove(caption_path)
-        #
-        # t4 = time.time()
-        # logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
+        t4 = time.time()
+        logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
 
         # Step 4: CLIP validation
         if app.state.clip_validator:
@@ -379,7 +347,9 @@ async def generate(prompt: str = Form()) -> Response:
             del validation_image
             cleanup_memory()
 
-        # Clean up memory after validation
+        # Clean up the gaussian processor after validation
+        del gaussian_processor
+        cleanup_memory()
         logger.debug(f"  GPU memory freed after 3D generation and validation")
 
         # Check if validation passed
@@ -453,7 +423,7 @@ async def health_check():
         "models_loaded": {
             "flux": app.state.flux_generator is not None,
             "background_remover": app.state.background_remover is not None,
-            "triposr": app.state.triposr_generator is not None,
+            "dreamgaussian": app.state.gaussian_models is not None,
             "clip_validator": app.state.clip_validator is not None
         },
         "config": {
