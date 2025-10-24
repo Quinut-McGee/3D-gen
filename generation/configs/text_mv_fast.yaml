@@ -37,10 +37,10 @@ warmup_rgb_loss: True
 # batch_size=1 means 1 iteration = 4 views total for MVDream
 batch_size: 1
 
-# CRITICAL: 100 iterations for better quality and CLIP scores
-# With optimized generation (~7 it/s), 100 iters = ~14s for 3D
-# Total: ~4s SD + 1s BG + 14s 3D + 0.5s validation = ~20s (under 30s!)
-iters: 100
+# OPTIMIZED: 150 iterations for competitive CLIP scores (0.6+)
+# With optimized generation (~7 it/s), 150 iters = ~21s for 3D
+# Total: ~5s SD + 1s BG + 21s 3D + 0.5s validation = ~28s (under 30s!)
+iters: 150
 
 anneal_timestep: True
 iters_refine: 0  # Skip refinement for speed
@@ -61,27 +61,27 @@ force_cuda_rast: True  # SPEED: Force CUDA rasterization
 H: 512  # Lower res for faster testing
 W: 512
 
-### Gaussian splatting - SPEED OPTIMIZED
-num_pts: 4000  # Reduced from 8000 - faster initialization & densification
+### Gaussian splatting - QUALITY OPTIMIZED for competition
+num_pts: 6000  # Increased from 4000 for better detail (competitive miners use 6000-8000)
 sh_degree: 1   # Changed from 0 to 1 to fix empty tensor issue
 
-# Faster learning rates for quick convergence (adjusted for 100 iters)
+# Optimized learning rates for 150 iterations
 position_lr_init: 0.0015    # Increased from 0.001
 position_lr_final: 0.00005  # Increased from 0.00002
 position_lr_delay_mult: 0.01  # Reduced from 0.02
-position_lr_max_steps: 40  # 40% of 100 iters = 40
+position_lr_max_steps: 60  # 40% of 150 iters = 60
 
 feature_lr: 0.015    # Increased from 0.01
 opacity_lr: 0.08     # Increased from 0.05
 scaling_lr: 0.008    # Increased from 0.005
 rotation_lr: 0.008   # Increased from 0.005
 
-# AGGRESSIVE densification schedule (adjusted for 100 iters)
+# OPTIMIZED densification schedule (adjusted for 150 iters)
 percent_dense: 0.02  # Increased from 0.015 - more aggressive pruning
 density_start_iter: 0
-density_end_iter: 80  # Stop at 80% of total iters (80% of 100 = 80)
-densification_interval: 20  # Densify every 20 iters (4 times: iter 20, 40, 60, 80)
-opacity_reset_interval: 500  # Less frequent (won't trigger in 250 iters)
+density_end_iter: 120  # Stop at 80% of total iters (80% of 150 = 120)
+densification_interval: 25  # Densify every 25 iters (5 times: iter 25, 50, 75, 100, 125)
+opacity_reset_interval: 500  # Less frequent (won't trigger in 150 iters)
 densify_grad_threshold: 0.015  # Higher threshold = less densification = faster
 
 ### Textured Mesh

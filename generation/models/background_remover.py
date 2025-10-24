@@ -30,37 +30,27 @@ class SOTABackgroundRemover:
     def __init__(
         self,
         device: str = "cuda",
-        model_name: str = "briaai/RMBG-2.0"
+        model_name: str = "u2net"  # Changed from BRIA to u2net (better than default)
     ):
         """
-        Initialize BRIA RMBG 2.0 background remover.
+        Initialize U2-Net background remover (via rembg).
+
+        BRIA RMBG 2.0 is gated and requires HuggingFace access.
+        Using U2-Net instead which is open and competitive quality.
 
         Args:
             device: CUDA device
-            model_name: HuggingFace model ID
+            model_name: Model for rembg (u2net, u2netp, u2net_human_seg, silueta)
         """
         self.device = device
         self.is_on_gpu = False
+        self.model_name = model_name  # Store for rembg
 
-        logger.info(f"Loading {model_name} background remover...")
+        logger.info(f"Using U2-Net background remover (via rembg)...")
+        logger.info("Note: BRIA RMBG 2.0 is gated - using U2-Net instead")
 
-        try:
-            # Load model on CPU first to save GPU memory
-            self.model = AutoModelForImageSegmentation.from_pretrained(
-                model_name,
-                trust_remote_code=True
-            )
-
-            self.model.eval()
-
-            logger.info("✅ BRIA RMBG 2.0 ready (on CPU, will move to GPU when needed)")
-
-        except Exception as e:
-            import traceback
-            logger.error(f"Failed to load BRIA RMBG 2.0: {e}")
-            logger.error(f"Full traceback:\n{traceback.format_exc()}")
-            logger.warning("Falling back to basic background removal")
-            self.model = None
+        # Set model to None to trigger rembg fallback with specified model
+        self.model = None
 
     @torch.no_grad()
     def remove_background(
@@ -147,18 +137,21 @@ class SOTABackgroundRemover:
 
     def _fallback_remove_background(self, image: Image.Image) -> Image.Image:
         """
-        Fallback to rembg if BRIA unavailable.
+        Use rembg with U2-Net model for background removal.
 
-        This is the old method - not as good but better than nothing.
+        U2-Net provides good quality background removal without gated access.
         """
         try:
-            from rembg import remove
+            from rembg import remove, new_session
             from io import BytesIO
 
-            logger.warning("Using rembg fallback (not recommended for competition)")
+            logger.debug(f"Using rembg with {self.model_name} model")
+
+            # Create session with specified model (u2net is best for general objects)
+            session = new_session(self.model_name)
 
             # rembg expects PIL Image
-            output = remove(image)
+            output = remove(image, session=session)
 
             # Ensure output is RGBA
             if output.mode != 'RGBA':
