@@ -154,6 +154,17 @@ async def generate(prompt: str = Form()) -> Response:
     """
     t_start = time.time()
 
+    # Defensive: Sanitize prompt (some miner requests send base64 images as prompts)
+    original_prompt = prompt
+    if len(prompt) > 200 or prompt.startswith('iVBOR') or '==' in prompt[-10:]:
+        logger.warning(f"⚠️  Invalid prompt detected (length={len(prompt)}, likely base64 image)")
+        logger.warning(f"   First 50 chars: {prompt[:50]}...")
+        prompt = "a 3D object"  # Fallback to generic prompt
+        logger.info(f"   Using fallback prompt: '{prompt}'")
+    elif len(prompt) > 77:
+        logger.warning(f"⚠️  Prompt too long ({len(prompt)} chars), truncating to 77")
+        prompt = prompt[:77]
+
     logger.info(f"🎯 Generation request: '{prompt}'")
 
     try:
@@ -161,8 +172,11 @@ async def generate(prompt: str = Form()) -> Response:
         t1 = time.time()
         logger.info("  [1/4] Generating image with SDXL-Turbo...")
 
+        # Enhance prompt for better quality
+        enhanced_prompt = f"{prompt}, highly detailed, 8k, professional 3D render, sharp focus, octane render"
+
         image = app.state.sdxl_generator.generate(
-            prompt=prompt,
+            prompt=enhanced_prompt,
             num_inference_steps=args.sdxl_steps,
             height=512,
             width=512
@@ -171,6 +185,12 @@ async def generate(prompt: str = Form()) -> Response:
         t2 = time.time()
         logger.info(f"  ✅ SDXL-Turbo done ({t2-t1:.2f}s)")
 
+        # Free VRAM after SDXL generation (but keep image for next step)
+        app.state.sdxl_generator.clear_cache()
+        import gc
+        gc.collect()
+        torch.cuda.empty_cache()
+
         # Step 2: Background removal with BRIA RMBG 2.0
         logger.info("  [2/4] Removing background with BRIA RMBG 2.0...")
 
@@ -178,6 +198,11 @@ async def generate(prompt: str = Form()) -> Response:
             image,
             threshold=0.5
         )
+
+        # Now free the input image
+        del image
+        gc.collect()
+        torch.cuda.empty_cache()
 
         t3 = time.time()
         logger.info(f"  ✅ Background removal done ({t3-t2:.2f}s)")
@@ -189,9 +214,14 @@ async def generate(prompt: str = Form()) -> Response:
         import tempfile
         import os
 
-        with tempfile.NamedTemporaryFile(suffix='.png', delete=False) as tmp:
+        with tempfile.NamedTemporaryFile(suffix='_rgba.png', delete=False) as tmp:
             rgba_image.save(tmp.name)
             tmp_path = tmp.name
+
+        # Also save prompt to caption file (DreamGaussian expects this)
+        caption_path = tmp_path.replace('_rgba.png', '_caption.txt')
+        with open(caption_path, 'w') as f:
+            f.write(prompt)
 
         try:
             # Load config
@@ -210,9 +240,11 @@ async def generate(prompt: str = Form()) -> Response:
             ply_bytes = buffer.getvalue()
 
         finally:
-            # Clean up temp file
+            # Clean up temp files
             if os.path.exists(tmp_path):
                 os.remove(tmp_path)
+            if os.path.exists(caption_path):
+                os.remove(caption_path)
 
         t4 = time.time()
         logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
@@ -221,9 +253,10 @@ async def generate(prompt: str = Form()) -> Response:
         if app.state.clip_validator:
             logger.info("  [4/4] Validating with CLIP...")
 
-            # Validate using the generated image (faster than rendering PLY)
+            # Validate using the RGBA image converted to RGB (image was deleted for memory)
+            validation_image = rgba_image.convert("RGB")
             passes, score = app.state.clip_validator.validate_image(
-                image,
+                validation_image,
                 prompt
             )
 
@@ -245,6 +278,11 @@ async def generate(prompt: str = Form()) -> Response:
                 )
 
             logger.info(f"  ✅ VALIDATION PASSED: CLIP={score:.3f}")
+
+            # Clean up validation image
+            del validation_image
+            gc.collect()
+            torch.cuda.empty_cache()
 
         # Success!
         t_total = time.time() - t_start
