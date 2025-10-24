@@ -351,7 +351,7 @@ async def generate(prompt: str = Form()) -> Response:
             rendered_images = render_gaussian_model_to_images(
                 gaussian_processor.get_gs_model(),
                 num_views=4,
-                resolution=512  # Use 512 for good CLIP scores
+                resolution=256  # Use 256 to avoid OOM (CLIP still works at lower res)
             )
 
             # Move MVDream back to GPU after rendering

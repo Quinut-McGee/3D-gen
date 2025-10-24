@@ -49,7 +49,9 @@ def render_ply_to_images(
         images = []
         angles = np.linspace(0, 360, num_views, endpoint=False)
 
-        for angle in angles:
+        for i, angle in enumerate(angles):
+            logger.debug(f"  Rendering view {i+1}/{num_views} (angle={angle:.1f}°)...")
+
             # Create camera
             camera = OrbitCamera(resolution, resolution, fov_y=49.1)
             camera.compute_transform_orbit(
@@ -89,6 +91,16 @@ def render_ply_to_images(
 
             images.append(pil_image)
 
+            # CRITICAL: Clean up GPU memory after each view to prevent OOM
+            del image, image_np, gs_data, means3D, rotations, scales, opacity, rgbs, features
+            del camera  # Free camera tensors too
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.synchronize()
+
+            logger.debug(f"  View {i+1}/{num_views} rendered successfully, GPU cache cleared")
+
         return images
 
     except Exception as e:
@@ -116,7 +128,9 @@ def render_gaussian_model_to_images(
         images = []
         angles = np.linspace(0, 360, num_views, endpoint=False)
 
-        for angle in angles:
+        for i, angle in enumerate(angles):
+            logger.debug(f"  Rendering view {i+1}/{num_views} (angle={angle:.1f}°)...")
+
             # Create camera
             camera = OrbitCamera(resolution, resolution, fov_y=49.1)
             camera.compute_transform_orbit(
@@ -155,6 +169,16 @@ def render_gaussian_model_to_images(
             pil_image = Image.fromarray(image_np)
 
             images.append(pil_image)
+
+            # CRITICAL: Clean up GPU memory after each view to prevent OOM
+            del image, image_np, gs_data, means3D, rotations, scales, opacity, rgbs, features
+            del camera  # Free camera tensors too
+
+            if torch.cuda.is_available():
+                torch.cuda.empty_cache()
+                torch.cuda.synchronize()
+
+            logger.debug(f"  View {i+1}/{num_views} rendered successfully, GPU cache cleared")
 
         return images
 
