@@ -255,78 +255,136 @@ async def generate(prompt: str = Form()) -> Response:
     """
     t_start = time.time()
 
-    logger.info(f"🎯 Generation request: '{prompt}'")
+    # CRITICAL: Detect and handle base64 image prompts (image-to-3D mode)
+    is_base64_image = (
+        len(prompt) > 500 or
+        prompt.startswith('iVBOR') or
+        prompt.startswith('/9j/') or
+        prompt.startswith('data:image') or
+        ('==' in prompt[-10:] if len(prompt) > 10 else False)
+    )
+
+    if is_base64_image:
+        logger.info(f"🖼️  Detected IMAGE-TO-3D task (base64 prompt length: {len(prompt)})")
+    else:
+        logger.info(f"🎯 Detected TEXT-TO-3D task: '{prompt}'")
 
     try:
         # Clean memory before starting generation
         cleanup_memory()
 
-        # Step 1: Text-to-image with Stable Diffusion 1.5
-        t1 = time.time()
-        logger.info("  [1/4] Generating image with Stable Diffusion 1.5...")
+        # Handle image-to-3D vs text-to-3D differently
+        if is_base64_image:
+            # IMAGE-TO-3D: Decode base64 image, skip FLUX
+            t1 = time.time()
+            logger.info("  [1/4] Decoding base64 image (image-to-3D mode)...")
 
-        # SKIP: Keep DreamGaussian on GPU (RTX 4090 has 24GB VRAM)
-        # Note: Moving models between CPU/GPU causes tensor device mismatches
-        # logger.debug("  Moving DreamGaussian models to CPU to free GPU for SD...")
-        # for model in app.state.gaussian_models:
-        #     if hasattr(model, 'to'):
-        #         model.to('cpu')
+            try:
+                import base64
 
-        # Cleanup memory without moving models
-        torch.cuda.synchronize()
-        cleanup_memory()
+                # Handle data URL format (data:image/png;base64,...)
+                if ',' in prompt[:100]:
+                    base64_data = prompt.split(',', 1)[1]
+                else:
+                    base64_data = prompt
 
-        logger.debug("  Memory cleaned, loading SD to GPU...")
+                # Decode to PIL Image
+                image_bytes = base64.b64decode(base64_data)
+                image = Image.open(io.BytesIO(image_bytes)).convert('RGBA')
 
-        # Now move SD to GPU
-        app.state.flux_generator.ensure_on_gpu()
+                logger.info(f"  ✅ Decoded image: {image.size[0]}x{image.size[1]} RGBA")
 
-        # CUDA sync before generation
-        torch.cuda.synchronize()
+                # Use image directly - NO FLUX needed!
+                rgba_image = image
+                t2 = time.time()
+                t3 = time.time()  # No background removal needed for pre-made RGBA
 
-        # Enhance prompt for better 2D image generation and CLIP scores
-        # CLIP was trained on web captions - photography terms score higher
-        enhanced_prompt = f"a photorealistic {prompt}, professional product photography, studio lighting setup, pure white background, centered composition, sharp focus, highly detailed, 8k resolution, award-winning photography"
+                # Set generic prompt for validation
+                validation_prompt = "a 3D object"
 
-        # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
-        image = app.state.flux_generator.generate(
-            prompt=enhanced_prompt,
-            num_inference_steps=args.flux_steps,
-            height=512,
-            width=512
-        )
+                logger.info(f"  ⏭️  Skipped FLUX + background removal (image provided, {t2-t1:.2f}s)")
 
-        t2 = time.time()
-        logger.info(f"  ✅ SD 1.5 done ({t2-t1:.2f}s)")
+            except Exception as e:
+                logger.error(f"  ❌ Failed to decode base64 image: {e}", exc_info=True)
+                # Return empty result for invalid image
+                empty_buffer = BytesIO()
+                return Response(
+                    empty_buffer.getvalue(),
+                    media_type="application/octet-stream",
+                    status_code=400,
+                    headers={"X-Validation-Failed": "true", "X-Error": "Invalid base64 image"}
+                )
 
-        # DEBUG: Save FLUX output for quality inspection
-        debug_timestamp = int(time.time())
-        image.save(f"/tmp/debug_1_flux_{debug_timestamp}.png")
-        logger.debug(f"  Saved debug image: /tmp/debug_1_flux_{debug_timestamp}.png")
+        else:
+            # TEXT-TO-3D: Original pipeline with FLUX
+            validation_prompt = prompt
 
-        # Aggressively offload SD to free GPU memory for next stage
-        app.state.flux_generator.offload_to_cpu()
-        cleanup_memory()
-        logger.debug(f"  GPU memory freed after SD 1.5")
+            # Step 1: Text-to-image with Stable Diffusion 1.5
+            t1 = time.time()
+            logger.info("  [1/4] Generating image with Stable Diffusion 1.5...")
 
-        # Step 2: Background removal with rembg
-        logger.info("  [2/4] Removing background with rembg...")
+            # SKIP: Keep DreamGaussian on GPU (RTX 4090 has 24GB VRAM)
+            # Note: Moving models between CPU/GPU causes tensor device mismatches
+            # logger.debug("  Moving DreamGaussian models to CPU to free GPU for SD...")
+            # for model in app.state.gaussian_models:
+            #     if hasattr(model, 'to'):
+            #         model.to('cpu')
 
-        # Note: Background remover automatically moves to GPU and back to CPU
-        rgba_image = app.state.background_remover.remove_background(
-            image,
-            threshold=0.5
-        )
+            # Cleanup memory without moving models
+            torch.cuda.synchronize()
+            cleanup_memory()
 
-        t3 = time.time()
-        logger.info(f"  ✅ Background removal done ({t3-t2:.2f}s)")
+            logger.debug("  Memory cleaned, loading SD to GPU...")
 
-        # DEBUG: Save background-removed image for quality inspection
-        rgba_image.save(f"/tmp/debug_2_rembg_{debug_timestamp}.png")
-        logger.debug(f"  Saved debug image: /tmp/debug_2_rembg_{debug_timestamp}.png")
+            # Now move SD to GPU
+            app.state.flux_generator.ensure_on_gpu()
 
-        # Free the input image from memory
-        del image
+            # CUDA sync before generation
+            torch.cuda.synchronize()
+
+            # Enhance prompt for better 2D image generation and CLIP scores
+            # CLIP was trained on web captions - photography terms score higher
+            enhanced_prompt = f"a photorealistic {prompt}, professional product photography, studio lighting setup, pure white background, centered composition, sharp focus, highly detailed, 8k resolution, award-winning photography"
+
+            # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
+            image = app.state.flux_generator.generate(
+                prompt=enhanced_prompt,
+                num_inference_steps=args.flux_steps,
+                height=512,
+                width=512
+            )
+
+            t2 = time.time()
+            logger.info(f"  ✅ SD 1.5 done ({t2-t1:.2f}s)")
+
+            # DEBUG: Save FLUX output for quality inspection
+            debug_timestamp = int(time.time())
+            image.save(f"/tmp/debug_1_flux_{debug_timestamp}.png")
+            logger.debug(f"  Saved debug image: /tmp/debug_1_flux_{debug_timestamp}.png")
+
+            # Aggressively offload SD to free GPU memory for next stage
+            app.state.flux_generator.offload_to_cpu()
+            cleanup_memory()
+            logger.debug(f"  GPU memory freed after SD 1.5")
+
+            # Step 2: Background removal with rembg
+            logger.info("  [2/4] Removing background with rembg...")
+
+            # Note: Background remover automatically moves to GPU and back to CPU
+            rgba_image = app.state.background_remover.remove_background(
+                image,
+                threshold=0.5
+            )
+
+            t3 = time.time()
+            logger.info(f"  ✅ Background removal done ({t3-t2:.2f}s)")
+
+            # DEBUG: Save background-removed image for quality inspection
+            rgba_image.save(f"/tmp/debug_2_rembg_{debug_timestamp}.png")
+            logger.debug(f"  Saved debug image: /tmp/debug_2_rembg_{debug_timestamp}.png")
+
+            # Free the input image from memory
+            del image
         cleanup_memory()
         logger.debug(f"  GPU memory freed after background removal")
 
@@ -423,12 +481,12 @@ async def generate(prompt: str = Form()) -> Response:
 
             # DIAGNOSTIC: Test both 2D FLUX and 3D render
             flux_2d_image = rgba_image.convert("RGB")
-            _, flux_score = app.state.clip_validator.validate_image(flux_2d_image, prompt)
+            _, flux_score = app.state.clip_validator.validate_image(flux_2d_image, validation_prompt)
             logger.info(f"  📊 DIAGNOSTIC - 2D FLUX CLIP score: {flux_score:.3f}")
 
             passes, score = app.state.clip_validator.validate_image(
                 validation_image,
-                prompt
+                validation_prompt
             )
             app.state.clip_validator.to_cpu()
 
