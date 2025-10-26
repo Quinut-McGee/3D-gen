@@ -3,7 +3,7 @@ module.exports = {
     name: 'generation-competitive',
     script: 'serve_competitive.py',
     interpreter: '/home/kobe/miniconda3/envs/three-gen-mining/bin/python',
-    args: '--port 8093 --config configs/text_mv_fast.yaml --flux-steps 4 --enable-validation',  // Path A: 4-step FLUX + 3D render validation
+    args: '--port 8093 --config configs/text_mv_fast.yaml --flux-steps 6',  // 6 steps for better quality while staying under 30s (was 4)
     env: {
       CUDA_VISIBLE_DEVICES: '0',           // Use only GPU 0 (RTX 4090)
       PYTORCH_CUDA_ALLOC_CONF: 'expandable_segments:True,max_split_size_mb:256,garbage_collection_threshold:0.8',  // Optimize VRAM usage, reduce fragmentation, aggressive GC

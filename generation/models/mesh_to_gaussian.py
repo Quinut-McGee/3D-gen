@@ -44,7 +44,7 @@ class MeshToGaussianConverter:
 
         logger.info(f"MeshToGaussianConverter initialized: {num_gaussians} gaussians, base_scale={base_scale}")
 
-    def convert(self, mesh: trimesh.Trimesh, num_gaussians: int = None) -> BytesIO:
+    def convert(self, mesh: trimesh.Trimesh, rgba_image=None, num_gaussians: int = None) -> BytesIO:
         """
         Convert triangle mesh to Gaussian Splat PLY format.
 
@@ -52,6 +52,7 @@ class MeshToGaussianConverter:
 
         Args:
             mesh: Input trimesh.Trimesh object
+            rgba_image: PIL Image (RGBA) for 2D color sampling - REQUIRED!
             num_gaussians: Override default number of gaussians
 
         Returns:
@@ -60,7 +61,7 @@ class MeshToGaussianConverter:
         Process:
         1. Sample points uniformly from mesh surface (Poisson disk sampling)
         2. Compute normals at sampled points
-        3. Extract colors from mesh (vertex colors or default)
+        3. Sample colors from 2D RGBA image via projection (CRITICAL FOR QUALITY!)
         4. Compute scales based on local surface density
         5. Compute rotations from normals (align with surface)
         6. Set reasonable opacities
@@ -69,6 +70,9 @@ class MeshToGaussianConverter:
         """
         import time
         start_time = time.time()
+
+        if rgba_image is None:
+            raise ValueError("rgba_image is required for 2D color sampling! Cannot produce quality results without it.")
 
         if num_gaussians is None:
             num_gaussians = self.num_gaussians
@@ -81,8 +85,10 @@ class MeshToGaussianConverter:
         # Step 2: Compute normals at sampled points
         normals = self._compute_normals(mesh, points, face_indices)
 
-        # Step 3: Extract colors
-        colors = self._extract_colors(mesh, points, face_indices)
+        # Step 3: Sample colors from 2D RGBA image (NEW METHOD - critical for quality!)
+        logger.info("  Sampling colors from 2D RGBA image...")
+        colors = self._sample_colors_from_2d_image(points, rgba_image, mesh)
+        logger.info(f"  Sampled {len(colors)} colors from image")
 
         # Step 4: Compute scales
         scales = self._compute_scales(mesh, points, face_indices, self.base_scale)
@@ -102,12 +108,29 @@ class MeshToGaussianConverter:
 
             gs_model = GaussianModel(sh_degree=1)
 
-            # Populate with computed data
+            # CRITICAL: Apply inverse transforms for Gaussian Splatting
+            # Opacity must be in inverse sigmoid space
+            from scipy.special import logit
+            opacities_clipped = np.clip(opacities, 0.001, 0.999)  # Avoid infinities at 0/1
+            opacities_inverse_sigmoid = logit(opacities_clipped)
+
+            # Scales must be in log space
+            scales_log = np.log(scales + 1e-8)  # Avoid log(0)
+
+            # Populate with computed data (with proper transforms)
             gs_model._xyz = torch.from_numpy(points).float().cuda()
-            gs_model._features_dc = torch.from_numpy(f_dc).float().cuda().unsqueeze(1)  # Add channel dimension
-            gs_model._opacity = torch.from_numpy(opacities).float().cuda().unsqueeze(1)  # Add dimension
-            gs_model._scaling = torch.from_numpy(scales).float().cuda()
-            gs_model._rotation = torch.from_numpy(rotations).float().cuda()
+            gs_model._features_dc = torch.from_numpy(f_dc).float().cuda().unsqueeze(1)  # Shape: [N, 1, 3]
+            gs_model._opacity = torch.from_numpy(opacities_inverse_sigmoid).float().cuda().unsqueeze(1)  # Shape: [N, 1], inverse sigmoid
+            gs_model._scaling = torch.from_numpy(scales_log).float().cuda()  # Shape: [N, 3], log space
+            gs_model._rotation = torch.from_numpy(rotations).float().cuda()  # Shape: [N, 4], quaternions
+
+            # DEBUG: Log Gaussian data stats
+            logger.debug(f"Gaussian data stats:")
+            logger.debug(f"  positions: shape={gs_model._xyz.shape}, range=[{gs_model._xyz.min():.3f}, {gs_model._xyz.max():.3f}]")
+            logger.debug(f"  scales: shape={gs_model._scaling.shape}, range=[{gs_model._scaling.min():.3f}, {gs_model._scaling.max():.3f}]")
+            logger.debug(f"  opacity: shape={gs_model._opacity.shape}, range=[{gs_model._opacity.min():.3f}, {gs_model._opacity.max():.3f}]")
+            logger.debug(f"  rotation: shape={gs_model._rotation.shape}, range=[{gs_model._rotation.min():.3f}, {gs_model._rotation.max():.3f}]")
+            logger.debug(f"  features_dc: shape={gs_model._features_dc.shape}, range=[{gs_model._features_dc.min():.3f}, {gs_model._features_dc.max():.3f}]")
 
             # Cache for rendering
             self.last_model = gs_model
@@ -300,10 +323,69 @@ class MeshToGaussianConverter:
             opacities: [N] opacity values in range [0, 1]
         """
         # For surface sampling, we want high opacity (we're confident about surface)
-        # Could vary based on mesh quality, curvature, etc., but start simple
-        opacities = np.ones(len(points)) * 0.95
+        # Higher opacity = more solid/visible Gaussians in renders
+        opacities = np.ones(len(points)) * 0.99
 
         return opacities
+
+    def _sample_colors_from_2d_image(self, points: np.ndarray, rgba_image, mesh: trimesh.Trimesh) -> np.ndarray:
+        """
+        Sample colors from 2D RGBA image by projecting 3D points.
+
+        This is the CRITICAL METHOD for getting correct colors from FLUX output.
+        Instead of extracting non-existent vertex colors from InstantMesh,
+        we project 3D Gaussian positions back to 2D and sample from the FLUX image.
+
+        Args:
+            points: [N, 3] array of 3D positions
+            rgba_image: PIL Image (RGBA) from FLUX → background removal
+            mesh: trimesh.Trimesh for bounds calculation
+
+        Returns:
+            colors: [N, 3] array of RGB colors in [0, 1] range
+        """
+        from PIL import Image
+
+        logger.debug(f"  Sampling colors from 2D image: {rgba_image.size}")
+
+        # Convert image to numpy array
+        img_array = np.array(rgba_image.convert('RGB')).astype(np.float32) / 255.0
+        h, w = img_array.shape[:2]
+
+        # Get mesh bounding box for normalization
+        bbox = mesh.bounds  # [[min_x, min_y, min_z], [max_x, max_y, max_z]]
+        center = (bbox[0] + bbox[1]) / 2.0
+        scale = (bbox[1] - bbox[0]).max()
+
+        # Normalize points to [-1, 1] range
+        normalized_points = (points - center) / (scale / 2.0)
+
+        # Orthographic projection: use X and Y, ignore Z
+        # Map [-1, 1] → [0, width-1] and [0, height-1]
+        u = ((normalized_points[:, 0] + 1.0) * 0.5 * (w - 1)).astype(np.int32)
+        v = ((1.0 - (normalized_points[:, 1] + 1.0) * 0.5) * (h - 1)).astype(np.int32)  # Flip Y axis
+
+        # Clamp to valid image bounds
+        u = np.clip(u, 0, w - 1)
+        v = np.clip(v, 0, h - 1)
+
+        # Sample colors from image
+        colors = img_array[v, u]  # Shape: [N, 3], RGB in [0, 1]
+
+        # Handle transparency: points on background get default color
+        if rgba_image.mode == 'RGBA':
+            alpha_array = np.array(rgba_image)[:, :, 3].astype(np.float32) / 255.0
+            alpha_sampled = alpha_array[v, u]
+
+            # Where alpha < 0.1 (transparent background), use neutral gray
+            background_mask = alpha_sampled < 0.1
+            colors[background_mask] = 0.5  # Neutral gray for background
+
+            logger.debug(f"  Found {background_mask.sum()} background points")
+
+        logger.debug(f"  Color range: [{colors.min():.3f}, {colors.max():.3f}]")
+
+        return colors
 
     def _rgb_to_sh(self, colors: np.ndarray) -> np.ndarray:
         """

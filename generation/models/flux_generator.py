@@ -28,7 +28,7 @@ class FluxImageGenerator:
     def __init__(
         self,
         device: str = "cuda",
-        enable_quantization: bool = True  # MUST be True for 24GB GPUs
+        enable_quantization: bool = False  # TEST: Disabled for FP16 quality test
     ):
         """
         Initialize FLUX.1-schnell with 8-bit quantization.

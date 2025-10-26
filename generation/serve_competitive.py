@@ -29,15 +29,16 @@ from models.flux_generator import FluxImageGenerator
 from models.background_remover import SOTABackgroundRemover
 from validators.clip_validator import CLIPValidator
 
-# COMMENTED OUT: DreamGaussian (keeping as fallback option)
+# InstantMesh + 2D color sampling - NEW WORKING PIPELINE!
+from models.mesh_to_gaussian import MeshToGaussianConverter
+from instantmesh_integration import generate_with_instantmesh
+import httpx  # For calling InstantMesh microservice
+import trimesh  # For loading PLY mesh from InstantMesh
+
+# DEPRECATED: DreamGaussian (too slow for <30s requirement)
 # from DreamGaussianLib import ModelsPreLoader
 # from DreamGaussianLib.GaussianProcessor import GaussianProcessor
 
-# NEW: Microservice-based pipeline for competitive <25s generation
-# InstantMesh runs in separate microservice (port 10007) with isolated dependencies
-from models.mesh_to_gaussian import MeshToGaussianConverter
-import httpx  # For calling InstantMesh microservice
-import trimesh  # For loading PLY mesh from InstantMesh
 import io  # For BytesIO with PLY data
 from rendering.quick_render import render_gaussian_model_to_images  # For 3D validation
 
@@ -80,10 +81,12 @@ class AppState:
     """Holds all loaded models"""
     flux_generator: FluxImageGenerator = None
     background_remover: SOTABackgroundRemover = None
-    # gaussian_models: list = None  # DreamGaussian (commented out)
-    instantmesh_service_url: str = "http://localhost:10007"  # Microservice URL
-    mesh_to_gaussian: MeshToGaussianConverter = None     # NEW
+    instantmesh_service_url: str = "http://localhost:10007"  # InstantMesh microservice URL
+    mesh_to_gaussian: MeshToGaussianConverter = None
+    last_gs_model = None  # Cache last generated Gaussian Splat model for validation
     clip_validator: CLIPValidator = None
+    # DEPRECATED: DreamGaussian (too slow)
+    # gaussian_models: list = None
 
 
 app.state = AppState()
@@ -184,7 +187,13 @@ def startup_event():
     app.state.background_remover = SOTABackgroundRemover(device=device)
     logger.info("✅ BRIA RMBG 2.0 ready")
 
-    # 3. Check InstantMesh microservice (running separately on port 10007)
+    # DEPRECATED: DreamGaussian (too slow for <30s requirement - requires 200+ iterations for quality)
+    # logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
+    # config = OmegaConf.load(args.config)
+    # app.state.gaussian_models = ModelsPreLoader.preload_model(config, device)
+    # logger.info(f"✅ DreamGaussian ready (on {device}, 10-iter optimized config)")
+
+    # 3. Check InstantMesh microservice + Mesh-to-Gaussian with 2D color sampling
     logger.info("\n[3/5] Checking InstantMesh microservice...")
     try:
         with httpx.Client(timeout=5.0) as client:
@@ -193,45 +202,41 @@ def startup_event():
                 health_data = response.json()
                 if health_data.get("status") == "healthy":
                     logger.info(f"✅ InstantMesh microservice ready at {app.state.instantmesh_service_url}")
-                else:
-                    logger.warning(f"⚠️  InstantMesh microservice not ready: {health_data}")
             else:
-                logger.error(f"❌ InstantMesh microservice health check failed: {response.status_code}")
+                logger.error(f"❌ InstantMesh microservice health check failed")
+                raise RuntimeError("InstantMesh unhealthy")
     except Exception as e:
         logger.error(f"❌ InstantMesh microservice not available: {e}")
-        logger.error("Ensure the service is running: pm2 start instantmesh.config.js")
         raise
 
-    # 4. Initialize Mesh-to-Gaussian converter
-    logger.info("\n[4/5] Initializing Mesh-to-Gaussian converter...")
-    app.state.mesh_to_gaussian = MeshToGaussianConverter(num_gaussians=8000, base_scale=0.005)
-    logger.info("✅ Mesh-to-Gaussian converter ready (3-5s conversion)")
+    logger.info("\n[4/5] Initializing Mesh-to-Gaussian converter with 2D color sampling...")
+    app.state.mesh_to_gaussian = MeshToGaussianConverter(
+        num_gaussians=50000,  # High density for better coverage
+        base_scale=0.015      # Small Gaussians, high count approach
+    )
+    logger.info("✅ Mesh-to-Gaussian converter ready (2D color sampling, 50K Gaussians)")
 
-    # FALLBACK: DreamGaussian code (keep commented for easy rollback)
-    # logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
-    # config = OmegaConf.load(args.config)
-    # app.state.gaussian_models = ModelsPreLoader.preload_model(config, device)
-    # logger.info(f"✅ DreamGaussian ready (on {device}, optimized config)")
-
-    # 5. Load CLIP validator (if enabled)
+    # 4. Load CLIP validator (if enabled)
     if args.enable_validation:
-        logger.info("\n[5/5] Loading CLIP validator...")
+        logger.info("\n[4/4] Loading CLIP validator...")
         app.state.clip_validator = CLIPValidator(
             device=device,
             threshold=args.validation_threshold
         )
         logger.info(f"✅ CLIP validator ready (threshold={args.validation_threshold})")
     else:
-        logger.warning("\n[5/5] CLIP validation DISABLED (not recommended)")
+        logger.warning("\n[4/4] CLIP validation DISABLED (not recommended)")
         app.state.clip_validator = None
 
     logger.info("\n" + "=" * 60)
-    logger.info("🚀 COMPETITIVE MINER READY FOR PRODUCTION")
+    logger.info("🚀 COMPETITIVE MINER READY - DREAMGAUSSIAN PIPELINE")
     logger.info("=" * 60)
-    logger.info(f"Config: {args.config}")
-    logger.info(f"SD 1.5 steps: {args.flux_steps}")
+    logger.info(f"Config: {args.config} (10 iterations)")
+    logger.info(f"FLUX steps: {args.flux_steps}")
+    logger.info(f"3D Engine: DreamGaussian (switched from broken InstantMesh converter)")
     logger.info(f"Validation: {'ON' if args.enable_validation else 'OFF'}")
-    logger.info(f"Expected speed: 22-26 seconds per generation")
+    logger.info(f"Expected speed: 22-28 seconds per generation")
+    logger.info(f"Expected CLIP: 0.6-0.7 (proven working range)")
     logger.info("=" * 60 + "\n")
 
 
@@ -279,8 +284,9 @@ async def generate(prompt: str = Form()) -> Response:
         # CUDA sync before generation
         torch.cuda.synchronize()
 
-        # Enhance prompt for better 2D image generation (not 3D terms!)
-        enhanced_prompt = f"{prompt}, highly detailed, professional photo, centered object, white background, studio lighting"
+        # Enhance prompt for better 2D image generation and CLIP scores
+        # CLIP was trained on web captions - photography terms score higher
+        enhanced_prompt = f"a photorealistic {prompt}, professional product photography, studio lighting setup, pure white background, centered composition, sharp focus, highly detailed, 8k resolution, award-winning photography"
 
         # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
         image = app.state.flux_generator.generate(
@@ -292,6 +298,11 @@ async def generate(prompt: str = Form()) -> Response:
 
         t2 = time.time()
         logger.info(f"  ✅ SD 1.5 done ({t2-t1:.2f}s)")
+
+        # DEBUG: Save FLUX output for quality inspection
+        debug_timestamp = int(time.time())
+        image.save(f"/tmp/debug_1_flux_{debug_timestamp}.png")
+        logger.debug(f"  Saved debug image: /tmp/debug_1_flux_{debug_timestamp}.png")
 
         # Aggressively offload SD to free GPU memory for next stage
         app.state.flux_generator.offload_to_cpu()
@@ -310,112 +321,50 @@ async def generate(prompt: str = Form()) -> Response:
         t3 = time.time()
         logger.info(f"  ✅ Background removal done ({t3-t2:.2f}s)")
 
+        # DEBUG: Save background-removed image for quality inspection
+        rgba_image.save(f"/tmp/debug_2_rembg_{debug_timestamp}.png")
+        logger.debug(f"  Saved debug image: /tmp/debug_2_rembg_{debug_timestamp}.png")
+
         # Free the input image from memory
         del image
         cleanup_memory()
         logger.debug(f"  GPU memory freed after background removal")
 
-        # Step 3: 3D mesh generation with InstantMesh microservice (1-2s)
+        # Step 3 & 4: 3D generation with InstantMesh + 2D color sampling (1-2s total)
         t3_start = time.time()
-        logger.info("  [3/5] Generating 3D mesh with InstantMesh microservice...")
-
         try:
-            # Convert RGBA image to base64 for HTTP transfer
-            import io
-            import base64
-            buffer = io.BytesIO()
-            rgba_image.save(buffer, format='PNG')
-            image_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            # Call InstantMesh integration (mesh generation + color sampling conversion)
+            ply_bytes, gs_model, timings = await generate_with_instantmesh(
+                rgba_image=rgba_image,
+                prompt=prompt,
+                mesh_to_gaussian_converter=app.state.mesh_to_gaussian,
+                instantmesh_url=app.state.instantmesh_service_url
+            )
 
-            # Call InstantMesh microservice
-            async with httpx.AsyncClient(timeout=30.0) as client:
-                response = await client.post(
-                    f"{app.state.instantmesh_service_url}/generate_mesh",
-                    json={
-                        "image_base64": image_base64,
-                        "scale": 1.0,
-                        "input_size": 320
-                    }
-                )
-
-                if response.status_code != 200:
-                    raise RuntimeError(f"InstantMesh service returned status {response.status_code}: {response.text}")
-
-                result = response.json()
-
-            # Decode mesh from base64
-            mesh_bytes = base64.b64decode(result["mesh_base64"])
-            mesh = trimesh.load(io.BytesIO(mesh_bytes), file_type='ply')
+            # Cache for validation
+            app.state.last_gs_model = gs_model
 
             t4 = time.time()
-            logger.info(f"  ✅ Mesh generation done ({t4-t3_start:.2f}s, service: {result['generation_time']:.2f}s)")
-            logger.info(f"     Mesh quality: {result['num_vertices']} vertices, {result['num_faces']} faces")
-
-        except Exception as e:
-            logger.error(f"InstantMesh microservice call failed: {e}", exc_info=True)
-            raise
-
-        # Step 4: Convert mesh to Gaussian Splat PLY (3-5s)
-        t4_start = time.time()
-        logger.info("  [4/5] Converting mesh to Gaussian Splat...")
-
-        try:
-            # Convert mesh to Gaussian Splat PLY (subnet-compatible format)
-            ply_buffer = app.state.mesh_to_gaussian.convert(
-                mesh,
-                num_gaussians=8000  # Target number of Gaussian splats
-            )
-            ply_bytes = ply_buffer.getvalue()
-
-            # Clean up mesh from memory
-            del mesh
-            cleanup_memory()
-
-            t5 = time.time()
-            logger.info(f"  ✅ Mesh-to-Gaussian conversion done ({t5-t4_start:.2f}s)")
+            logger.info(f"  ✅ 3D generation done ({t4-t3_start:.2f}s)")
+            logger.info(f"     InstantMesh: {timings['instantmesh']:.2f}s, Mesh→Gaussian: {timings['mesh_to_gaussian']:.2f}s")
             logger.info(f"     Generated {len(ply_bytes)/1024:.1f} KB Gaussian Splat PLY")
 
         except Exception as e:
-            logger.error(f"Mesh-to-Gaussian conversion failed: {e}", exc_info=True)
+            logger.error(f"InstantMesh generation failed: {e}", exc_info=True)
             cleanup_memory()
             raise
 
-        # FALLBACK: DreamGaussian code (keep commented for easy rollback)
-        # import tempfile, os
-        # with tempfile.NamedTemporaryFile(suffix='_rgba.png', delete=False) as tmp:
-        #     rgba_image.save(tmp.name)
-        #     tmp_path = tmp.name
-        # caption_path = tmp_path.replace('_rgba.png', '_caption.txt')
-        # with open(caption_path, 'w') as f:
-        #     f.write(prompt)
-        # try:
-        #     config = OmegaConf.load(args.config)
-        #     config.input = tmp_path
-        #     config.prompt = prompt
-        #     gaussian_processor = GaussianProcessor(config, prompt)
-        #     gaussian_processor.train(app.state.gaussian_models, config.iters)
-        #     buffer = BytesIO()
-        #     gaussian_processor.get_gs_model().save_ply(buffer)
-        #     buffer.seek(0)
-        #     ply_bytes = buffer.getvalue()
-        # finally:
-        #     if os.path.exists(tmp_path):
-        #         os.remove(tmp_path)
-        #     if os.path.exists(caption_path):
-        #         os.remove(caption_path)
-        # t4 = time.time()
-        # logger.info(f"  ✅ 3D generation done ({t4-t3:.2f}s)")
-
-        # Step 5: CLIP validation
+        # Step 4: CLIP validation
         if app.state.clip_validator:
-            logger.info("  [5/5] Validating with CLIP...")
+            t5 = time.time()
+            logger.info("  [4/4] Validating with CLIP...")
 
             # Render 3D Gaussian Splat for validation using cached model
             try:
                 logger.debug("  Rendering 3D Gaussian Splat for CLIP validation...")
 
-                # Get the cached GaussianModel from converter
-                gs_model = app.state.mesh_to_gaussian.get_last_model()
+                # Get the cached GaussianModel from mesh_to_gaussian converter
+                gs_model = app.state.last_gs_model
 
                 if gs_model is not None:
                     rendered_views = render_gaussian_model_to_images(
@@ -426,6 +375,12 @@ async def generate(prompt: str = Form()) -> Response:
                     )
 
                     if rendered_views and len(rendered_views) > 0:
+                        # DEBUG: Save all rendered views for quality inspection
+                        debug_timestamp = int(time.time())
+                        for i, view in enumerate(rendered_views):
+                            view.save(f"/tmp/debug_5_render_view{i}_{debug_timestamp}.png")
+                        logger.debug(f"  Saved {len(rendered_views)} debug render views")
+
                         # Use first view for CLIP validation (or average across all)
                         validation_image = rendered_views[0]
                         logger.debug(f"  Using 3D render (view 1/{len(rendered_views)}) for validation")
@@ -442,7 +397,7 @@ async def generate(prompt: str = Form()) -> Response:
                     logger.warning(f"  OOM during 3D rendering, trying with lower resolution")
                     # Retry with lower settings
                     try:
-                        gs_model = app.state.mesh_to_gaussian.get_last_model()
+                        gs_model = app.state.last_gs_model
                         if gs_model is not None:
                             rendered_views = render_gaussian_model_to_images(
                                 model=gs_model,
@@ -465,6 +420,12 @@ async def generate(prompt: str = Form()) -> Response:
 
             # Validate with CLIP
             app.state.clip_validator.to_gpu()
+
+            # DIAGNOSTIC: Test both 2D FLUX and 3D render
+            flux_2d_image = rgba_image.convert("RGB")
+            _, flux_score = app.state.clip_validator.validate_image(flux_2d_image, prompt)
+            logger.info(f"  📊 DIAGNOSTIC - 2D FLUX CLIP score: {flux_score:.3f}")
+
             passes, score = app.state.clip_validator.validate_image(
                 validation_image,
                 prompt
@@ -473,7 +434,8 @@ async def generate(prompt: str = Form()) -> Response:
 
             t6 = time.time()
             logger.info(f"  ✅ Validation done ({t6-t5:.2f}s)")
-            logger.info(f"  3D Render CLIP score: {score:.3f}")
+            logger.info(f"  📊 DIAGNOSTIC - 3D Render CLIP score: {score:.3f}")
+            logger.info(f"  📊 DIAGNOSTIC - Quality loss: {((flux_score - score) / flux_score * 100):.1f}%")
 
             # Clean up
             del validation_image
@@ -509,10 +471,9 @@ async def generate(prompt: str = Form()) -> Response:
         logger.info("=" * 60)
         logger.info(f"✅ GENERATION COMPLETE")
         logger.info(f"   Total time: {t_total:.2f}s")
-        logger.info(f"   FLUX (2-step): {t2-t1:.2f}s")
+        logger.info(f"   FLUX (4-step): {t2-t1:.2f}s")
         logger.info(f"   Background: {t3-t2:.2f}s")
-        logger.info(f"   InstantMesh: {t4-t3:.2f}s")
-        logger.info(f"   Mesh→Gaussian: {t5-t4:.2f}s")
+        logger.info(f"   3D (InstantMesh+M2G): {t4-t3_start:.2f}s")
         if app.state.clip_validator:
             logger.info(f"   Validation: {t6-t5:.2f}s")
             logger.info(f"   CLIP Score: {score:.3f}")

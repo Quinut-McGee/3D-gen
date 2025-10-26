@@ -127,24 +127,30 @@ async def _submit_results_async(
 
     This doesn't block the worker from processing next task.
     """
+    submission_start = time.time()
     try:
         async with bt.dendrite(wallet=wallet) as dendrite:
             submit_time = time.time_ns()
 
             # Sign message
+            t1 = time.time()
             message = (
                 f"{MINER_LICENSE_CONSENT_DECLARATION}"
                 f"{submit_time}{task.prompt}{metagraph.hotkeys[validator_uid]}{wallet.hotkey.ss58_address}"
             )
             signature = base64.b64encode(dendrite.keypair.sign(message)).decode(encoding="utf-8")
+            signing_time = time.time() - t1
 
             # Compress results
+            t2 = time.time()
             if results:
                 compressed_results = base64.b64encode(pyspz.compress(results, workers=-1)).decode(encoding="utf-8")
             else:
                 compressed_results = ""
+            compression_time = time.time() - t2
 
             # Submit
+            t3 = time.time()
             synapse = SubmitResults(
                 task_id=task.id,
                 results=compressed_results,
@@ -156,10 +162,19 @@ async def _submit_results_async(
                 target_axon=metagraph.axons[validator_uid],
                 synapse=synapse,
                 deserialize=False,
-                timeout=300.0
+                timeout=60.0  # Reduced from 300s - validators should respond quickly
+            )
+            network_time = time.time() - t3
+
+            total_time = time.time() - submission_start
+
+            # Log feedback with timing breakdown
+            bt.logging.info(
+                f"Submission to [{validator_uid}] timing: "
+                f"sign={signing_time:.2f}s, compress={compression_time:.2f}s, "
+                f"network={network_time:.2f}s, total={total_time:.2f}s"
             )
 
-            # Log feedback
             if response.feedback:
                 feedback = response.feedback
                 score = "failed" if feedback.validation_failed else feedback.task_fidelity_score
@@ -173,5 +188,9 @@ async def _submit_results_async(
             else:
                 bt.logging.warning(f"No feedback from validator {validator_uid}")
 
+    except asyncio.TimeoutError:
+        total_time = time.time() - submission_start
+        bt.logging.error(f"Submission to validator {validator_uid} TIMED OUT after {total_time:.1f}s")
     except Exception as e:
-        bt.logging.error(f"Submission failed: {e}")
+        total_time = time.time() - submission_start
+        bt.logging.error(f"Submission failed after {total_time:.1f}s: {e}")

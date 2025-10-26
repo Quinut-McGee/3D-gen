@@ -63,7 +63,7 @@ def render_ply_to_images(
             camera.compute_transform_orbit(
                 elevation=0,
                 azimuth=angle,
-                radius=3.0
+                radius=2.5  # Closer camera for better framing (1.78 bbox * 1.5)
             )
 
             # Get Gaussian data
@@ -142,7 +142,7 @@ def render_gaussian_model_to_images(
             camera.compute_transform_orbit(
                 elevation=0,
                 azimuth=angle,
-                radius=3.0
+                radius=2.5  # Closer camera for better framing (1.78 bbox * 1.5)
             )
 
             # Get Gaussian data from existing model

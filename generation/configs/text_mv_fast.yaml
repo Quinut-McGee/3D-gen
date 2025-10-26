@@ -37,10 +37,11 @@ warmup_rgb_loss: True
 # batch_size=1 means 1 iteration = 4 views total for MVDream
 batch_size: 1
 
-# SPEED OPTIMIZATION: Path A - 20 iterations for <30s target
-# Target: 28.3s total time (FLUX 12s + BG 0.7s + 3D 15.6s)
-# 20 iters at ~1.3 it/s = ~15.6s for 3D generation
-iters: 20
+# QUALITY OPTIMIZATION: 100 iterations to allow Gaussians to learn
+# Target: ~34s total time (FLUX 26s + BG 1.5s + 3D ~40s + validation 0.5s)
+# 100 iters needed for Gaussians to converge to meaningful features
+# With pruning disabled, need more iterations to learn proper colors/positions
+iters: 100
 
 anneal_timestep: True
 iters_refine: 0  # Skip refinement for speed
@@ -65,24 +66,24 @@ W: 512
 num_pts: 6000  # Increased from 4000 for better detail (competitive miners use 6000-8000)
 sh_degree: 1   # Changed from 0 to 1 to fix empty tensor issue
 
-# Optimized learning rates for 20 iterations
-position_lr_init: 0.002     # Increased for faster convergence
-position_lr_final: 0.0001   # Higher final LR
+# Standard DreamGaussian learning rates for 100 iterations
+position_lr_init: 0.00016     # Standard value (was 0.002 - too high)
+position_lr_final: 0.0000016  # Standard value (was 0.0001 - too high)
 position_lr_delay_mult: 0.01
-position_lr_max_steps: 8    # 40% of 20 iters = 8
+position_lr_max_steps: 40     # 40% of 100 iters = 40
 
-feature_lr: 0.015    # Increased from 0.01
-opacity_lr: 0.08     # Increased from 0.05
-scaling_lr: 0.008    # Increased from 0.005
-rotation_lr: 0.008   # Increased from 0.005
+feature_lr: 0.0025    # Standard value (was 0.015 - too high)
+opacity_lr: 0.05      # Standard value (was 0.08 - too high)
+scaling_lr: 0.005     # Standard value (was 0.008 - too high)
+rotation_lr: 0.001    # Standard value (was 0.008 - way too high)
 
-# OPTIMIZED densification schedule (adjusted for 20 iters)
-percent_dense: 0.025  # More aggressive pruning for speed
-density_start_iter: 0
-density_end_iter: 16  # Stop at 80% of total iters (80% of 20 = 16)
-densification_interval: 5  # Densify every 5 iters (3-4 times: iter 5, 10, 15)
-opacity_reset_interval: 500  # Less frequent (won't trigger in 50 iters)
-densify_grad_threshold: 0.015  # Higher threshold = less densification = faster
+# DISABLED densification - keep all 6000 Gaussians to diagnose training
+percent_dense: 1.0  # Never prune (100% kept)
+density_start_iter: 999  # Never start
+density_end_iter: 999  # Never end
+densification_interval: 999  # Never trigger
+opacity_reset_interval: 999  # Never reset
+densify_grad_threshold: 999.0  # Never densify
 
 ### Textured Mesh
 geom_lr: 0.0001
