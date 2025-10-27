@@ -77,8 +77,8 @@ class CompetitiveMiner:
 
         self.task_manager = AsyncTaskManager(
             max_concurrent_tasks=concurrent_tasks,
-            max_queue_size=20,
-            pull_interval=10.0
+            max_queue_size=2,  # Reduced to 2 for faster delivery (max wait ~50s vs 75s)
+            pull_interval=5.0  # Reduced from 10.0 to 5.0 for faster task intake (saves ~2.5s avg)
         )
 
     def _self_check_for_registration(self) -> None:

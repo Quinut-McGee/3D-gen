@@ -55,18 +55,20 @@ async def process_task_competitive(
             bt.logging.debug(f"Generation size OK: {len(results)} bytes")
             stats["tasks_validated"] += 1
 
-    # Submit (async, non-blocking)
+    # Submit (async, non-blocking to allow worker to continue)
+    # Fire-and-forget allows worker to start next generation immediately
     asyncio.create_task(
         _submit_results_async(
             wallet=wallet,
             metagraph=metagraph,
             validator_uid=validator_uid,
             task=task,
-            results=results
+            results=results,
+            prompt=task.prompt  # For better logging
         )
     )
 
-    bt.logging.info(f"Task submitted to validator {validator_uid}")
+    bt.logging.info(f"Task queued for submission to validator {validator_uid}")
 
 
 async def _generate(generate_url: str, prompt: str, timeout: float = 60.0) -> bytes | None:
@@ -120,7 +122,8 @@ async def _submit_results_async(
     metagraph: bt.metagraph,
     validator_uid: int,
     task: ProtocolTask,
-    results: bytes
+    results: bytes,
+    prompt: str = ""
 ):
     """
     Submit results asynchronously (fire-and-forget).
@@ -128,6 +131,7 @@ async def _submit_results_async(
     This doesn't block the worker from processing next task.
     """
     submission_start = time.time()
+    bt.logging.debug(f"Starting submission of '{prompt[:50]}...' to validator {validator_uid}")
     try:
         async with bt.dendrite(wallet=wallet) as dendrite:
             submit_time = time.time_ns()
