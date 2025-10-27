@@ -63,6 +63,14 @@ class AsyncTaskManager:
         # Maps: {validator_uid: {task_id1, task_id2, ...}}
         self.active_validator_tasks: Dict[int, Set[str]] = {}
 
+        # Global task deduplication (prevents cross-validator duplicates)
+        # Maps: {task_id: submission_timestamp}
+        self.recently_submitted_tasks: Dict[str, float] = {}
+
+        # Task cleanup tracking (keeps tasks in active tracking after completion)
+        # Maps: {task_id: cleanup_timestamp}
+        self.task_cleanup_times: Dict[str, float] = {}
+
         # Statistics
         self.stats = {
             "tasks_pulled": 0,
@@ -127,7 +135,10 @@ class AsyncTaskManager:
             ],
 
             # Stats logger
-            asyncio.create_task(self._stats_logger())
+            asyncio.create_task(self._stats_logger()),
+
+            # Cleanup old task tracking entries
+            asyncio.create_task(self._cleanup_old_tasks())
         ]
 
         # Wait for all tasks
@@ -185,6 +196,17 @@ class AsyncTaskManager:
 
                     if result and result.task:
                         task_id = result.task.id
+
+                        # GLOBAL deduplication check (prevents same task from ANY validator)
+                        if task_id in self.recently_submitted_tasks:
+                            time_since_submission = current_time - self.recently_submitted_tasks[task_id]
+                            if time_since_submission < 300.0:  # 5 minutes
+                                logger.warning(
+                                    f"🚫 GLOBAL DUPLICATE DETECTED: Task {task_id} was submitted {time_since_submission:.1f}s ago. "
+                                    f"Skipping to prevent re-submission."
+                                )
+                                self.stats["duplicates_prevented"] += 1
+                                continue
 
                         # Check if this task from this validator is already being processed
                         if uid in self.active_validator_tasks and task_id in self.active_validator_tasks[uid]:
@@ -301,6 +323,11 @@ class AsyncTaskManager:
 
                 self.stats["tasks_completed"] += 1
 
+                # Mark task as recently submitted (global deduplication)
+                if task_id is not None:
+                    self.recently_submitted_tasks[task_id] = time.time()
+                    logger.debug(f"Task {task_id} marked as recently submitted for global deduplication")
+
             except asyncio.CancelledError:
                 # Worker is being shut down
                 logger.debug(f"Worker {worker_id} cancelled during shutdown")
@@ -311,15 +338,17 @@ class AsyncTaskManager:
                 self.stats["tasks_failed"] += 1
 
             finally:
-                # Critical: Remove task from active tracking AFTER processing
-                # This allows the same task to be pulled again if needed
+                # *** CRITICAL FIX: Delayed task cleanup ***
+                # Don't remove immediately! Keep task in active tracking for 60s after completion.
+                # This prevents validator from re-assigning same task before it processes our submission.
                 if validator_uid is not None and task_id is not None:
-                    if validator_uid in self.active_validator_tasks:
-                        self.active_validator_tasks[validator_uid].discard(task_id)
-                        logger.debug(
-                            f"Worker {worker_id} cleaned up task {task_id} from validator {validator_uid}. "
-                            f"Remaining active tasks: {len(self.active_validator_tasks[validator_uid])}"
-                        )
+                    # Schedule cleanup for 60 seconds in the future
+                    cleanup_time = time.time() + 60.0
+                    self.task_cleanup_times[task_id] = cleanup_time
+                    logger.debug(
+                        f"Worker {worker_id} scheduled cleanup of task {task_id} from validator {validator_uid} in 60s. "
+                        f"Active tasks from this validator: {len(self.active_validator_tasks.get(validator_uid, set()))}"
+                    )
 
                 # Only call task_done if we actually got a task from the queue
                 if got_task:
@@ -356,10 +385,10 @@ class AsyncTaskManager:
             # *** CRITICAL FIX: Per-validator polling cooldown ***
             # Prevents re-polling same validator before workers finish generation (~25s)
             # This fixes the primary bug: same validator giving same task to all 3 workers
-            # 20s balances task availability vs duplicate prevention
+            # 35s = generation time (20-25s) + submission time (5s) + validator processing (5-10s)
             if uid in self.last_validator_poll:
                 time_since_last_poll = current_time - self.last_validator_poll[uid]
-                if time_since_last_poll < 20.0:  # 20 second cooldown
+                if time_since_last_poll < 35.0:  # 35 second cooldown (increased from 20s)
                     self.stats["validators_skipped_cooldown"] += 1
                     continue
 
@@ -388,6 +417,59 @@ class AsyncTaskManager:
                 f"PollCooldowns={self.stats['validators_skipped_cooldown']}, "
                 f"Queue={self.task_queue.qsize()}/{self.max_queue_size}"
             )
+
+    async def _cleanup_old_tasks(self):
+        """
+        Periodically clean up old task tracking entries.
+
+        Removes:
+        - Tasks from active_validator_tasks that are past their cleanup time
+        - Old entries from recently_submitted_tasks (older than 5 minutes)
+        """
+        while True:
+            await asyncio.sleep(30)  # Run every 30 seconds
+
+            try:
+                current_time = time.time()
+                cleaned_tasks = 0
+                cleaned_submissions = 0
+
+                # Clean up tasks that have passed their scheduled cleanup time
+                tasks_to_cleanup = [
+                    (task_id, cleanup_time)
+                    for task_id, cleanup_time in self.task_cleanup_times.items()
+                    if cleanup_time <= current_time
+                ]
+
+                for task_id, _ in tasks_to_cleanup:
+                    # Remove from per-validator tracking
+                    for validator_uid in list(self.active_validator_tasks.keys()):
+                        if task_id in self.active_validator_tasks[validator_uid]:
+                            self.active_validator_tasks[validator_uid].discard(task_id)
+                            cleaned_tasks += 1
+
+                    # Remove from cleanup schedule
+                    del self.task_cleanup_times[task_id]
+
+                # Clean up old submissions (older than 5 minutes)
+                old_submissions = [
+                    task_id
+                    for task_id, submit_time in self.recently_submitted_tasks.items()
+                    if current_time - submit_time > 300.0  # 5 minutes
+                ]
+
+                for task_id in old_submissions:
+                    del self.recently_submitted_tasks[task_id]
+                    cleaned_submissions += 1
+
+                if cleaned_tasks > 0 or cleaned_submissions > 0:
+                    logger.debug(
+                        f"🧹 Cleanup: Removed {cleaned_tasks} tasks from active tracking, "
+                        f"{cleaned_submissions} old submissions from deduplication cache"
+                    )
+
+            except Exception as e:
+                logger.error(f"Error in cleanup task: {e}")
 
     def get_stats(self) -> Dict:
         """Get current statistics"""
