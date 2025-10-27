@@ -55,6 +55,14 @@ class AsyncTaskManager:
         # Cooldown tracking per validator
         self.validator_cooldowns: Dict[int, float] = {}
 
+        # Per-validator polling cooldown (prevents re-polling too quickly)
+        # Maps: {validator_uid: last_poll_timestamp}
+        self.last_validator_poll: Dict[int, float] = {}
+
+        # Per-validator active task tracking (prevents duplicates)
+        # Maps: {validator_uid: {task_id1, task_id2, ...}}
+        self.active_validator_tasks: Dict[int, Set[str]] = {}
+
         # Statistics
         self.stats = {
             "tasks_pulled": 0,
@@ -62,6 +70,8 @@ class AsyncTaskManager:
             "tasks_failed": 0,
             "tasks_validated": 0,
             "tasks_rejected": 0,
+            "duplicates_prevented": 0,
+            "validators_skipped_cooldown": 0,  # Track polling cooldown effectiveness
         }
 
         logger.info(
@@ -161,26 +171,60 @@ class AsyncTaskManager:
 
                 # Process results
                 tasks_added = 0
+                current_time = time.time()
+
                 for uid, result in zip(validator_uids, results):
                     if isinstance(result, Exception):
                         logger.debug(f"Validator {uid} pull failed: {result}")
                         continue
 
+                    # Only update polling timestamp if validator responded (even with no task)
+                    # This prevents re-polling validators that are online but have no tasks
+                    if result is not None:
+                        self.last_validator_poll[uid] = current_time
+
                     if result and result.task:
+                        task_id = result.task.id
+
+                        # Check if this task from this validator is already being processed
+                        if uid in self.active_validator_tasks and task_id in self.active_validator_tasks[uid]:
+                            logger.warning(
+                                f"🚫 DUPLICATE DETECTED: Task {task_id} from validator {uid} "
+                                f"already in progress (active: {len(self.active_validator_tasks[uid])} tasks). "
+                                f"This should be rare due to polling cooldown."
+                            )
+                            self.stats["duplicates_prevented"] += 1
+                            continue
+
                         try:
+                            # Add to per-validator tracking
+                            if uid not in self.active_validator_tasks:
+                                self.active_validator_tasks[uid] = set()
+                            self.active_validator_tasks[uid].add(task_id)
+
                             # Add to queue (non-blocking)
                             self.task_queue.put_nowait((uid, result.task, result.cooldown_until))
                             tasks_added += 1
                             self.stats["tasks_pulled"] += 1
+
+                            logger.debug(
+                                f"Added task {task_id} from validator {uid} to queue. "
+                                f"Active tasks from this validator: {len(self.active_validator_tasks[uid])}"
+                            )
                         except asyncio.QueueFull:
                             logger.warning("Task queue full, dropping task")
+                            # Remove from tracking since we didn't queue it
+                            self.active_validator_tasks[uid].discard(task_id)
 
                     # Update cooldown
                     if result and result.cooldown_until:
                         self.validator_cooldowns[uid] = result.cooldown_until
 
                 if tasks_added > 0:
-                    logger.info(f"Added {tasks_added} tasks to queue")
+                    logger.info(
+                        f"✅ Added {tasks_added} tasks to queue from {len(validator_uids)} validators polled. "
+                        f"Queue size: {self.task_queue.qsize()}/{self.max_queue_size}"
+                    )
 
             except Exception as e:
                 logger.error(f"Validator polling error: {e}")
@@ -228,9 +272,15 @@ class AsyncTaskManager:
         logger.info(f"Worker {worker_id} started with endpoint {endpoint}")
 
         while True:
+            validator_uid = None
+            task_id = None
+            got_task = False
+
             try:
                 # Get task from queue (blocking)
                 validator_uid, task, cooldown_until = await self.task_queue.get()
+                task_id = task.id
+                got_task = True
 
                 logger.info(
                     f"Worker {worker_id} processing task: '{task.prompt}' "
@@ -251,12 +301,29 @@ class AsyncTaskManager:
 
                 self.stats["tasks_completed"] += 1
 
+            except asyncio.CancelledError:
+                # Worker is being shut down
+                logger.debug(f"Worker {worker_id} cancelled during shutdown")
+                break
+
             except Exception as e:
                 logger.error(f"Worker {worker_id} task processing error: {e}")
                 self.stats["tasks_failed"] += 1
 
             finally:
-                self.task_queue.task_done()
+                # Critical: Remove task from active tracking AFTER processing
+                # This allows the same task to be pulled again if needed
+                if validator_uid is not None and task_id is not None:
+                    if validator_uid in self.active_validator_tasks:
+                        self.active_validator_tasks[validator_uid].discard(task_id)
+                        logger.debug(
+                            f"Worker {worker_id} cleaned up task {task_id} from validator {validator_uid}. "
+                            f"Remaining active tasks: {len(self.active_validator_tasks[validator_uid])}"
+                        )
+
+                # Only call task_done if we actually got a task from the queue
+                if got_task:
+                    self.task_queue.task_done()
 
     def _get_available_validators(
         self,
@@ -267,10 +334,11 @@ class AsyncTaskManager:
         Get all validators that are:
         - Serving
         - Meet stake requirements
-        - Not on cooldown
+        - Not on cooldown (task cooldown from validator)
+        - Not recently polled (polling cooldown - prevents duplicate pulls)
         - Not blacklisted
         """
-        current_time = int(time.time())
+        current_time = time.time()
         available = []
 
         for uid in range(metagraph.n):
@@ -281,9 +349,19 @@ class AsyncTaskManager:
             if metagraph.S[uid] < validator_selector._min_stake:
                 continue
 
-            # Check cooldown
+            # Check task assignment cooldown (from validator response)
             if self.validator_cooldowns.get(uid, 0) > current_time:
                 continue
+
+            # *** CRITICAL FIX: Per-validator polling cooldown ***
+            # Prevents re-polling same validator before workers finish generation (~25s)
+            # This fixes the primary bug: same validator giving same task to all 3 workers
+            # 20s balances task availability vs duplicate prevention
+            if uid in self.last_validator_poll:
+                time_since_last_poll = current_time - self.last_validator_poll[uid]
+                if time_since_last_poll < 20.0:  # 20 second cooldown
+                    self.stats["validators_skipped_cooldown"] += 1
+                    continue
 
             # Check blacklist (will add this next)
             if hasattr(validator_selector, 'is_blacklisted'):
@@ -300,12 +378,14 @@ class AsyncTaskManager:
             await asyncio.sleep(60)  # Every minute
 
             logger.info(
-                f"AsyncTaskManager stats: "
+                f"📊 AsyncTaskManager stats: "
                 f"Pulled={self.stats['tasks_pulled']}, "
                 f"Completed={self.stats['tasks_completed']}, "
                 f"Failed={self.stats['tasks_failed']}, "
                 f"Validated={self.stats['tasks_validated']}, "
                 f"Rejected={self.stats['tasks_rejected']}, "
+                f"DupesPrevented={self.stats['duplicates_prevented']}, "
+                f"PollCooldowns={self.stats['validators_skipped_cooldown']}, "
                 f"Queue={self.task_queue.qsize()}/{self.max_queue_size}"
             )
 
