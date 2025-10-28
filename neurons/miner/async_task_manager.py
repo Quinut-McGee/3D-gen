@@ -385,10 +385,12 @@ class AsyncTaskManager:
             # *** CRITICAL FIX: Per-validator polling cooldown ***
             # Prevents re-polling same validator before workers finish generation (~25s)
             # This fixes the primary bug: same validator giving same task to all 3 workers
-            # 35s = generation time (20-25s) + submission time (5s) + validator processing (5-10s)
+            # 28s = generation time (20-25s avg=23s) + submission (1.5s) + validator processing (3-5s avg=4s)
+            # Reduced from 35s to 28s to improve throughput with limited validators (7 available)
+            # Still safe due to 60s task retention + global deduplication backup layers
             if uid in self.last_validator_poll:
                 time_since_last_poll = current_time - self.last_validator_poll[uid]
-                if time_since_last_poll < 35.0:  # 35 second cooldown (increased from 20s)
+                if time_since_last_poll < 28.0:  # 28 second cooldown (optimized from 35s)
                     self.stats["validators_skipped_cooldown"] += 1
                     continue
 

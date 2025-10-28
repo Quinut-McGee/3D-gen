@@ -183,11 +183,15 @@ async def _submit_results_async(
                 feedback = response.feedback
                 score = "failed" if feedback.validation_failed else feedback.task_fidelity_score
 
+                # Extract observation count if available
+                obs_count = getattr(feedback, 'generations_within_the_window', 'N/A')
+
                 bt.logging.info(
                     f"Feedback from [{validator_uid}]: Score={score}, "
                     f"AvgScore={feedback.average_fidelity_score:.3f}, "
                     f"ELO={feedback.current_duel_rating}, "
-                    f"Reward={feedback.current_miner_reward:.4f}"
+                    f"Reward={feedback.current_miner_reward:.4f}, "
+                    f"Observations={obs_count}"
                 )
             else:
                 bt.logging.warning(f"No feedback from validator {validator_uid}")
