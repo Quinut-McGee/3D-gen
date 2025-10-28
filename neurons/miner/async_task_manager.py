@@ -189,9 +189,9 @@ class AsyncTaskManager:
                         logger.debug(f"Validator {uid} pull failed: {result}")
                         continue
 
-                    # Only update polling timestamp if validator responded (even with no task)
-                    # This prevents re-polling validators that are online but have no tasks
-                    if result is not None:
+                    # Only update polling timestamp if validator actually GAVE US A TASK
+                    # If validator has no task, we should try again sooner
+                    if result and result.task:
                         self.last_validator_poll[uid] = current_time
 
                     if result and result.task:
