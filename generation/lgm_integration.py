@@ -21,7 +21,7 @@ sys.path.insert(0, LGM_PATH)
 
 try:
     from core.models import LGM
-    from core.options import AllConfigs
+    from core.options import Options, config_defaults
     from mvdream.pipeline_mvdream import MVDreamPipeline
     import kiui
     from kiui.op import recenter
@@ -42,49 +42,37 @@ class LGMGaussianGenerator:
     Output: 100K-300K gaussians (10-30 MB files)
     """
 
-    def __init__(self, model_path: str = "ashawkey/imagedream-ipmv-diffusers", device: str = "cuda"):
+    def __init__(self, mvdream_model: str = "ashawkey/imagedream-ipmv-diffusers", device: str = "cuda"):
         """
         Initialize LGM pipeline
 
         Args:
-            model_path: HuggingFace model path for MVDream
+            mvdream_model: HuggingFace model path for MVDream
             device: Device to run on ('cuda' or 'cpu')
         """
         logger.info(f"Loading LGM pipeline...")
         self.device = torch.device(device if torch.cuda.is_available() else 'cpu')
 
-        # Create default options for LGM
-        # Using big model for maximum gaussians
-        opt = AllConfigs()
-        opt.resume = "big"  # or "default", "small" - big gives most gaussians
-        opt.input_size = 256  # Input image size
-        opt.fovy = 49.1
-        opt.znear = 0.5
-        opt.zfar = 2.5
-        opt.cam_radius = 1.5
-
-        self.opt = opt
+        # Create options for LGM using "big" configuration
+        # Big model gives maximum gaussians (128x128 splat size)
+        self.opt = config_defaults['big']
 
         # Load LGM model
-        logger.info(f"  Loading LGM model (mode: {opt.resume})...")
-        self.model = LGM(opt)
+        logger.info(f"  Loading LGM model (big mode)...")
+        self.model = LGM(self.opt)
 
-        # Load pretrained weights
-        # For HuggingFace models, weights are auto-downloaded
-        if opt.resume == "big":
-            # Big model checkpoint
-            model_url = "https://huggingface.co/ashawkey/LGM/resolve/main/model_fp16_fixrot.safetensors"
-            local_path = os.path.join(LGM_PATH, "model_fp16_fixrot.safetensors")
+        # Load pretrained weights for big model
+        lgm_weights_path = os.path.join(LGM_PATH, "pretrained", "model_fp16_fixrot.safetensors")
 
-            if not os.path.exists(local_path):
-                logger.info(f"  Downloading LGM big model weights...")
-                import urllib.request
-                urllib.request.urlretrieve(model_url, local_path)
-                logger.info(f"  Downloaded to {local_path}")
+        if not os.path.exists(lgm_weights_path):
+            logger.error(f"Model weights not found at {lgm_weights_path}")
+            logger.error("Please download: https://huggingface.co/ashawkey/LGM/resolve/main/model_fp16_fixrot.safetensors")
+            raise FileNotFoundError(f"Model weights not found: {lgm_weights_path}")
 
-            ckpt = load_file(local_path, device='cpu')
-            self.model.load_state_dict(ckpt, strict=False)
-            logger.info(f"  Loaded checkpoint from {local_path}")
+        logger.info(f"  Loading weights from {lgm_weights_path}...")
+        ckpt = load_file(lgm_weights_path, device='cpu')
+        self.model.load_state_dict(ckpt, strict=False)
+        logger.info(f"  ✅ Loaded checkpoint")
 
         self.model = self.model.half().to(self.device)
         self.model.eval()
@@ -93,18 +81,18 @@ class LGMGaussianGenerator:
         self.rays_embeddings = self.model.prepare_default_rays(self.device)
 
         # Projection matrix for rendering
-        tan_half_fov = np.tan(0.5 * np.deg2rad(opt.fovy))
+        tan_half_fov = np.tan(0.5 * np.deg2rad(self.opt.fovy))
         self.proj_matrix = torch.zeros(4, 4, dtype=torch.float32, device=self.device)
         self.proj_matrix[0, 0] = 1 / tan_half_fov
         self.proj_matrix[1, 1] = 1 / tan_half_fov
-        self.proj_matrix[2, 2] = (opt.zfar + opt.znear) / (opt.zfar - opt.znear)
-        self.proj_matrix[3, 2] = - (opt.zfar * opt.znear) / (opt.zfar - opt.znear)
+        self.proj_matrix[2, 2] = (self.opt.zfar + self.opt.znear) / (self.opt.zfar - self.opt.znear)
+        self.proj_matrix[3, 2] = - (self.opt.zfar * self.opt.znear) / (self.opt.zfar - self.opt.znear)
         self.proj_matrix[2, 3] = 1
 
         # Load MVDream pipeline for multi-view generation
         logger.info(f"  Loading MVDream pipeline for multi-view generation...")
         self.mvdream_pipe = MVDreamPipeline.from_pretrained(
-            model_path,
+            mvdream_model,  # Use mvdream_model parameter, not lgm_weights_path!
             torch_dtype=torch.float16,
             trust_remote_code=True,
         )

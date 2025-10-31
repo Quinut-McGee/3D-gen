@@ -1,0 +1,107 @@
+2025-10-31 19:05:04.726 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:04.734 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:04.734 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:04.734 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:04.734 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:04.734 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:04.735 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:05:10.271 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:10.284 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:10.284 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:10.284 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:10.284 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:10.284 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:10.285 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:05:15.835 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:15.848 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:15.848 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:15.849 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:15.849 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:15.849 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:15.849 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:05:21.396 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:21.410 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:21.410 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:21.410 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:21.410 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:21.410 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:21.411 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:05:26.897 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:26.905 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:26.905 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:26.905 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:26.905 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:26.905 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:26.905 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:05:32.229 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:32.236 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:32.236 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:32.236 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:32.236 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:32.236 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:32.236 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:05:37.535 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:37.542 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:37.542 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:37.542 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:37.542 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:37.542 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:37.542 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:05:43.048 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:43.062 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:43.062 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:43.062 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:43.062 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:43.062 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:43.062 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:05:48.616 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:05:48.629 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:05:48.630 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:05:48.630 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:05:48.630 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:05:48.630 | ERROR    | __main__:load_pipeline:82 - ❌ Failed to load TRELLIS pipeline: No module named 'trellis'
+2025-10-31 19:05:48.630 | ERROR    | __main__:load_pipeline:83 - Traceback (most recent call last):
+  File "/home/kobe/404-gen/v1/3D-gen/generation/serve_trellis.py", line 69, in load_pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+ModuleNotFoundError: No module named 'trellis'
+
+2025-10-31 19:06:10.784 | INFO     | __main__:main:226 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-10-31 19:06:10.791 | INFO     | __main__:load_pipeline:61 - ======================================================================
+2025-10-31 19:06:10.791 | INFO     | __main__:load_pipeline:62 - 🚀 TRELLIS MICROSERVICE STARTING
+2025-10-31 19:06:10.791 | INFO     | __main__:load_pipeline:63 - ======================================================================
+2025-10-31 19:06:10.791 | INFO     | __main__:load_pipeline:66 - Loading TRELLIS-image-large pipeline...
+2025-10-31 19:06:35.109 | INFO     | __main__:load_pipeline:77 - ✅ TRELLIS pipeline loaded in 24.3s
+2025-10-31 19:06:35.109 | INFO     | __main__:load_pipeline:78 - 📡 Ready to accept requests on port 10008
+2025-10-31 19:06:35.109 | INFO     | __main__:load_pipeline:79 - ======================================================================
