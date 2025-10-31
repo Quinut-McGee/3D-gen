@@ -62,7 +62,9 @@ async def _complete_one_task(
             validator_selector.set_cooldown(validator_uid, pull.cooldown_until)
         return
 
-    bt.logging.debug(f"Task received. Prompt: {pull.task.prompt}.")
+    # Truncate prompt for logging if it's too long (e.g., base64 image)
+    prompt_preview = pull.task.prompt[:80] + "..." if len(pull.task.prompt) > 80 else pull.task.prompt
+    bt.logging.debug(f"Task received. Prompt: {prompt_preview}.")
 
     results = await _generate(generate_url, pull.task.prompt) or b""
 

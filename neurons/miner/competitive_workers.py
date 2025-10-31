@@ -34,7 +34,9 @@ async def process_task_competitive(
 
     This is called by AsyncTaskManager workers.
     """
-    bt.logging.debug(f"Processing task '{task.prompt}' from validator {validator_uid}")
+    # Truncate prompt for logging if it's too long (e.g., base64 image)
+    prompt_preview = task.prompt[:80] + "..." if len(task.prompt) > 80 else task.prompt
+    bt.logging.debug(f"Processing task '{prompt_preview}' from validator {validator_uid}")
 
     # Generate
     results = await _generate(endpoint, task.prompt)

@@ -41,7 +41,7 @@ async def generate_with_instantmesh(rgba_image, prompt, mesh_to_gaussian_convert
                 json={
                     "image_base64": image_base64,
                     "scale": 1.0,
-                    "input_size": 384  # Increased from 320 for better mesh quality (512 max, but 384 is good balance)
+                    "input_size": 512  # Maximum quality for InstantMesh - better geometry supports higher gaussian counts
                 }
             )
 
@@ -71,7 +71,7 @@ async def generate_with_instantmesh(rgba_image, prompt, mesh_to_gaussian_convert
         ply_buffer = mesh_to_gaussian_converter.convert(
             mesh,
             rgba_image=rgba_image,  # This enables correct colors!
-            num_gaussians=12000  # Can adjust for quality/speed trade-off
+            num_gaussians=50000  # Testing validator acceptance at higher counts (5.2 MB target)
         )
 
         # Get PLY bytes

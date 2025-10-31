@@ -304,8 +304,10 @@ class AsyncTaskManager:
                 task_id = task.id
                 got_task = True
 
+                # Truncate prompt if it's too long (e.g., base64 image)
+                prompt_preview = task.prompt[:80] + "..." if len(task.prompt) > 80 else task.prompt
                 logger.info(
-                    f"Worker {worker_id} processing task: '{task.prompt}' "
+                    f"Worker {worker_id} processing task: '{prompt_preview}' "
                     f"from validator {validator_uid}"
                 )
 
