@@ -57,3 +57,5 @@ quic/
 *.deb
 *.run
 cuda_*
+LGM/
+TRELLIS/
