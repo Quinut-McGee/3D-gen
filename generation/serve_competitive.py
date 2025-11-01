@@ -430,6 +430,25 @@ async def generate(prompt: str = Form()) -> Response:
             logger.info(f"     Generated {len(ply_bytes)/1024:.1f} KB Gaussian Splat PLY")
             logger.info(f"     📊 Generation stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB")
 
+        except ValueError as e:
+            # Quality gate: Sparse generation detected
+            if "Insufficient gaussian density" in str(e):
+                logger.warning(f"  ⚠️ Generation quality too low, skipping submission to avoid Score=0.0")
+                logger.warning(f"  Details: {e}")
+                cleanup_memory()
+                # Return empty response to skip this task
+                empty_buffer = BytesIO()
+                return Response(
+                    empty_buffer.getvalue(),
+                    media_type="application/octet-stream",
+                    status_code=200,  # 200 but empty = skip this task
+                    headers={"X-Skip-Reason": "Quality gate failed - sparse generation"}
+                )
+            else:
+                # Other ValueError - re-raise
+                logger.error(f"TRELLIS generation failed: {e}", exc_info=True)
+                cleanup_memory()
+                raise
         except Exception as e:
             import httpx
             if isinstance(e, (httpx.ConnectError, httpx.TimeoutException)):

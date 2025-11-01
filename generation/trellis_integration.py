@@ -35,15 +35,15 @@ def enhance_image_for_trellis(rgba_image):
     # 1. Enhance fine details (brings out texture)
     enhanced = rgba_image.filter(ImageFilter.DETAIL)
 
-    # 2. Sharpen edges - INCREASED from 1.5x (was too conservative)
+    # 2. Sharpen edges - INCREASED to 2.5x for consistent high-density generations
     sharpener = ImageEnhance.Sharpness(enhanced)
-    enhanced = sharpener.enhance(2.0)  # Back to 2.0x - needed for sparse prompts
+    enhanced = sharpener.enhance(2.5)  # 2.5x - aggressive sharpening for dense voxels
 
-    # 3. Increase contrast - INCREASED from 1.2x (was too conservative)
+    # 3. Increase contrast - INCREASED to 1.5x for better feature detection
     contrast = ImageEnhance.Contrast(enhanced)
-    enhanced = contrast.enhance(1.3)  # Back to 1.3x - needed for feature detection
+    enhanced = contrast.enhance(1.5)  # 1.5x - stronger contrast for surface details
 
-    logger.debug("  ✅ Image enhanced: sharpness 2.0x, contrast 1.3x, detail filter applied")
+    logger.debug("  ✅ Image enhanced: sharpness 2.5x, contrast 1.5x, detail filter applied")
     return enhanced
 
 
@@ -122,6 +122,16 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         t3_end = time.time()
         logger.info(f"  ✅ TRELLIS generation done ({t3_end-t3_start:.2f}s, service: {result['generation_time']:.2f}s)")
         logger.info(f"     Gaussians: {result['num_gaussians']:,}, File size: {result['file_size_mb']:.1f} MB")
+
+        # QUALITY GATE: Reject sparse generations that will receive Score=0.0 from validators
+        MIN_GAUSSIANS = 150_000  # Validator quality threshold
+        num_gaussians = result['num_gaussians']
+
+        if num_gaussians < MIN_GAUSSIANS:
+            logger.error(f"❌ SPARSE GENERATION DETECTED: {num_gaussians:,} < {MIN_GAUSSIANS:,} threshold!")
+            logger.error(f"   This would receive Score=0.0 from validators - rejecting to avoid penalty")
+            logger.error(f"   Prompt: '{prompt[:100]}...'")
+            raise ValueError(f"Insufficient gaussian density: {num_gaussians:,} gaussians (minimum: {MIN_GAUSSIANS:,})")
 
     except httpx.TimeoutException:
         logger.error("TRELLIS microservice timeout (60s)")

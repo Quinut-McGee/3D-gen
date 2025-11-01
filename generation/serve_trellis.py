@@ -127,8 +127,8 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             # Sparse structure: Detects voxels on object surface
             # SLAT: Fills voxels with gaussian details
             sparse_structure_sampler_params={
-                "steps": 25,  # +25% steps for denser voxel detection (was 20)
-                "cfg_strength": 9.0,  # Stronger guidance for more voxels (was 8.5)
+                "steps": 30,  # Increased for denser voxel detection and higher gaussian counts
+                "cfg_strength": 11.0,  # Stronger guidance to push above 150K gaussian threshold
             },
             slat_sampler_params={
                 "steps": 20,  # Keep at 20 - already good for texture detail

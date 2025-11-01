@@ -4148,3 +4148,837 @@ torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 20.00 MiB. GPU 0 h
 2025-11-01 16:32:56.414 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.64s
 2025-11-01 16:32:56.414 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
 2025-11-01 16:32:56.453 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:37:14.752 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:37:14.780 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:37:14.780 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:37:19.757 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.98s
+2025-11-01 16:37:19.757 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:37:21.161 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:37:21.161 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 382,144
+2025-11-01 16:37:21.162 | INFO     | __main__:generate_gaussian:180 -    File size: 24.8 MB
+2025-11-01 16:37:21.162 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.41s
+2025-11-01 16:37:21.162 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:37:21.191 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:40:51.911 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:40:51.941 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:40:51.941 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:40:56.855 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.91s
+2025-11-01 16:40:56.856 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:40:57.778 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:40:57.778 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 245,184
+2025-11-01 16:40:57.778 | INFO     | __main__:generate_gaussian:180 -    File size: 15.9 MB
+2025-11-01 16:40:57.778 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.87s
+2025-11-01 16:40:57.778 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:40:57.802 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:44:49.910 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:44:49.973 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 16:44:49.973 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:44:53.694 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.72s
+2025-11-01 16:44:53.694 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:44:54.243 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:44:54.243 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 254,752
+2025-11-01 16:44:54.243 | INFO     | __main__:generate_gaussian:180 -    File size: 16.5 MB
+2025-11-01 16:44:54.243 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.33s
+2025-11-01 16:44:54.243 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:44:54.263 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:48:38.448 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:48:38.476 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:48:38.477 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:48:43.288 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.81s
+2025-11-01 16:48:43.288 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:48:43.953 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:48:43.953 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 255,360
+2025-11-01 16:48:43.953 | INFO     | __main__:generate_gaussian:180 -    File size: 16.6 MB
+2025-11-01 16:48:43.953 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.50s
+2025-11-01 16:48:43.953 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:48:43.975 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:49:17.748 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:49:17.776 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:49:17.776 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:49:21.779 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.00s
+2025-11-01 16:49:21.779 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:49:22.104 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:49:22.104 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 159,328
+2025-11-01 16:49:22.104 | INFO     | __main__:generate_gaussian:180 -    File size: 10.3 MB
+2025-11-01 16:49:22.104 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.36s
+2025-11-01 16:49:22.104 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:49:22.123 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:49:34.946 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:49:34.952 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:49:34.952 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:49:38.784 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.83s
+2025-11-01 16:49:38.784 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:49:39.605 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:49:39.606 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 376,992
+2025-11-01 16:49:39.606 | INFO     | __main__:generate_gaussian:180 -    File size: 24.4 MB
+2025-11-01 16:49:39.606 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.66s
+2025-11-01 16:49:39.606 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:49:39.638 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:50:07.926 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:50:07.948 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:50:07.948 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:50:13.502 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.55s
+2025-11-01 16:50:13.503 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:50:15.494 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:50:15.494 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 767,136
+2025-11-01 16:50:15.494 | INFO     | __main__:generate_gaussian:180 -    File size: 49.7 MB
+2025-11-01 16:50:15.494 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.57s
+2025-11-01 16:50:15.494 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:50:15.545 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:50:38.327 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:50:38.353 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:50:38.354 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:50:44.806 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 6.45s
+2025-11-01 16:50:44.806 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:50:47.120 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:50:47.120 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 915,904
+2025-11-01 16:50:47.120 | INFO     | __main__:generate_gaussian:180 -    File size: 59.4 MB
+2025-11-01 16:50:47.120 | INFO     | __main__:generate_gaussian:181 -    Total time: 8.79s
+2025-11-01 16:50:47.120 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:50:47.171 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:50:50.710 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:50:50.772 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 16:50:50.772 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:50:54.405 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.63s
+2025-11-01 16:50:54.405 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:50:54.762 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:50:54.762 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 173,504
+2025-11-01 16:50:54.762 | INFO     | __main__:generate_gaussian:180 -    File size: 11.3 MB
+2025-11-01 16:50:54.762 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.05s
+2025-11-01 16:50:54.762 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:50:54.784 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:51:35.639 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:51:35.661 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:51:35.661 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:51:41.281 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.62s
+2025-11-01 16:51:41.281 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:51:43.169 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:51:43.169 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 728,512
+2025-11-01 16:51:43.169 | INFO     | __main__:generate_gaussian:180 -    File size: 47.2 MB
+2025-11-01 16:51:43.169 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.53s
+2025-11-01 16:51:43.169 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:51:43.221 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:52:01.612 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:52:01.640 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 16:52:01.640 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:52:05.195 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.55s
+2025-11-01 16:52:05.196 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:52:05.465 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:52:05.465 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 134,816
+2025-11-01 16:52:05.465 | INFO     | __main__:generate_gaussian:180 -    File size: 8.7 MB
+2025-11-01 16:52:05.465 | INFO     | __main__:generate_gaussian:181 -    Total time: 3.85s
+2025-11-01 16:52:05.465 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:52:05.485 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 16:52:15.656 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 16:52:15.719 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 16:52:15.719 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 16:52:19.806 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.09s
+2025-11-01 16:52:19.806 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 16:52:20.725 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 16:52:20.725 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 411,936
+2025-11-01 16:52:20.725 | INFO     | __main__:generate_gaussian:180 -    File size: 26.7 MB
+2025-11-01 16:52:20.725 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.07s
+2025-11-01 16:52:20.725 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 16:52:20.762 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:00:56.420 | INFO     | __main__:main:247 - Starting TRELLIS microservice on 0.0.0.0:10008
+2025-11-01 17:00:56.438 | INFO     | __main__:startup:64 - ======================================================================
+2025-11-01 17:00:56.438 | INFO     | __main__:startup:65 - 🚀 TRELLIS MICROSERVICE STARTING (PRE-LOADING MODE)
+2025-11-01 17:00:56.438 | INFO     | __main__:startup:66 - ======================================================================
+2025-11-01 17:00:56.438 | INFO     | __main__:startup:67 - ⚡ FLUX uses CPU offload (~2-3GB), leaving room for TRELLIS (~13GB)
+2025-11-01 17:00:56.438 | INFO     | __main__:startup:68 - ⚡ Pre-loading TRELLIS to avoid 24s lazy-load delay...
+2025-11-01 17:01:39.769 | INFO     | __main__:startup:81 - ✅ TRELLIS pre-loaded in 30.0s
+2025-11-01 17:01:39.769 | INFO     | __main__:startup:82 - 📡 Ready for FAST generation (~5-6s per request)
+2025-11-01 17:01:39.769 | INFO     | __main__:startup:83 - ======================================================================
+2025-11-01 17:04:09.652 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:04:09.713 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:04:09.713 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:04:17.107 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 7.39s
+2025-11-01 17:04:17.107 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:04:17.908 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:04:17.908 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 197,376
+2025-11-01 17:04:17.908 | INFO     | __main__:generate_gaussian:180 -    File size: 12.8 MB
+2025-11-01 17:04:17.908 | INFO     | __main__:generate_gaussian:181 -    Total time: 8.26s
+2025-11-01 17:04:17.908 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:04:17.947 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:04:46.241 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:04:46.266 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:04:46.267 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:04:53.253 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 6.99s
+2025-11-01 17:04:53.253 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:04:55.827 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:04:55.828 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 1,144,576
+2025-11-01 17:04:55.828 | INFO     | __main__:generate_gaussian:180 -    File size: 74.2 MB
+2025-11-01 17:04:55.828 | INFO     | __main__:generate_gaussian:181 -    Total time: 9.59s
+2025-11-01 17:04:55.828 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:04:55.863 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:05:45.798 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:05:45.852 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:05:45.852 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:05:52.757 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 6.90s
+2025-11-01 17:05:52.758 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:05:55.050 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:05:55.051 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 1,026,336
+2025-11-01 17:05:55.051 | INFO     | __main__:generate_gaussian:180 -    File size: 66.6 MB
+2025-11-01 17:05:55.051 | INFO     | __main__:generate_gaussian:181 -    Total time: 9.25s
+2025-11-01 17:05:55.051 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:05:55.100 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:06:00.095 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:06:00.153 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:06:00.154 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:06:04.385 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.23s
+2025-11-01 17:06:04.385 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:06:05.142 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:06:05.143 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 348,960
+2025-11-01 17:06:05.143 | INFO     | __main__:generate_gaussian:180 -    File size: 22.6 MB
+2025-11-01 17:06:05.143 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.05s
+2025-11-01 17:06:05.143 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:06:05.166 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:07:16.698 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:07:16.720 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:07:16.720 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:07:22.657 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.94s
+2025-11-01 17:07:22.657 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:07:24.635 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:07:24.635 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 717,312
+2025-11-01 17:07:24.635 | INFO     | __main__:generate_gaussian:180 -    File size: 46.5 MB
+2025-11-01 17:07:24.635 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.94s
+2025-11-01 17:07:24.635 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:07:24.683 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:07:46.099 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:07:46.123 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:07:46.123 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:07:50.291 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.17s
+2025-11-01 17:07:50.291 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:07:51.008 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:07:51.008 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 317,984
+2025-11-01 17:07:51.008 | INFO     | __main__:generate_gaussian:180 -    File size: 20.6 MB
+2025-11-01 17:07:51.008 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.91s
+2025-11-01 17:07:51.008 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:07:51.030 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:10:52.066 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:10:52.129 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:10:52.130 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:10:56.232 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.10s
+2025-11-01 17:10:56.233 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:10:56.690 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:10:56.690 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 204,000
+2025-11-01 17:10:56.690 | INFO     | __main__:generate_gaussian:180 -    File size: 13.2 MB
+2025-11-01 17:10:56.690 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.62s
+2025-11-01 17:10:56.690 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:10:56.706 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:11:22.343 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:11:22.368 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:11:22.369 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:11:26.563 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.19s
+2025-11-01 17:11:26.563 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:11:27.659 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:11:27.659 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 317,888
+2025-11-01 17:11:27.659 | INFO     | __main__:generate_gaussian:180 -    File size: 20.6 MB
+2025-11-01 17:11:27.659 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.32s
+2025-11-01 17:11:27.659 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:11:27.679 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:16:29.989 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:16:30.021 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:16:30.021 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:16:34.632 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.61s
+2025-11-01 17:16:34.632 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:16:35.185 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:16:35.185 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 268,512
+2025-11-01 17:16:35.185 | INFO     | __main__:generate_gaussian:180 -    File size: 17.4 MB
+2025-11-01 17:16:35.185 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.20s
+2025-11-01 17:16:35.185 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:16:35.205 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:16:37.094 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:16:37.146 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:16:37.146 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:16:42.731 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.58s
+2025-11-01 17:16:42.731 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:16:44.240 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:16:44.241 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 373,824
+2025-11-01 17:16:44.241 | INFO     | __main__:generate_gaussian:180 -    File size: 24.2 MB
+2025-11-01 17:16:44.241 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.15s
+2025-11-01 17:16:44.241 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:16:44.267 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:18:14.933 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:18:14.963 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:18:14.963 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:18:23.768 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 8.80s
+2025-11-01 17:18:23.768 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:18:29.100 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:18:29.100 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 1,240,352
+2025-11-01 17:18:29.100 | INFO     | __main__:generate_gaussian:180 -    File size: 80.4 MB
+2025-11-01 17:18:29.101 | INFO     | __main__:generate_gaussian:181 -    Total time: 14.17s
+2025-11-01 17:18:29.101 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:18:29.132 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:19:52.118 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:19:52.186 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:19:52.187 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:19:57.637 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.45s
+2025-11-01 17:19:57.638 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:19:58.479 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:19:58.479 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 223,584
+2025-11-01 17:19:58.479 | INFO     | __main__:generate_gaussian:180 -    File size: 14.5 MB
+2025-11-01 17:19:58.479 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.36s
+2025-11-01 17:19:58.479 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:19:58.493 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:21:59.830 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:21:59.852 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:21:59.853 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:22:05.826 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.97s
+2025-11-01 17:22:05.826 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:22:07.500 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:22:07.500 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 670,400
+2025-11-01 17:22:07.500 | INFO     | __main__:generate_gaussian:180 -    File size: 43.5 MB
+2025-11-01 17:22:07.501 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.67s
+2025-11-01 17:22:07.501 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:22:07.536 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:22:28.451 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:22:28.457 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:22:28.457 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:22:34.481 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 6.02s
+2025-11-01 17:22:34.481 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:22:36.441 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:22:36.441 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 762,112
+2025-11-01 17:22:36.441 | INFO     | __main__:generate_gaussian:180 -    File size: 49.4 MB
+2025-11-01 17:22:36.441 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.99s
+2025-11-01 17:22:36.442 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:22:36.482 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:23:39.823 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:23:39.849 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:23:39.849 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:23:45.484 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.63s
+2025-11-01 17:23:45.485 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:23:47.506 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:23:47.506 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 525,696
+2025-11-01 17:23:47.506 | INFO     | __main__:generate_gaussian:180 -    File size: 34.1 MB
+2025-11-01 17:23:47.506 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.68s
+2025-11-01 17:23:47.506 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:23:47.536 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:25:15.126 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:25:15.152 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:25:15.152 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:25:20.722 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.57s
+2025-11-01 17:25:20.722 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:25:22.250 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:25:22.250 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 605,856
+2025-11-01 17:25:22.250 | INFO     | __main__:generate_gaussian:180 -    File size: 39.3 MB
+2025-11-01 17:25:22.250 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.12s
+2025-11-01 17:25:22.250 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:25:22.282 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:26:24.733 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:26:24.758 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:26:24.759 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:26:30.322 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.56s
+2025-11-01 17:26:30.322 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:26:31.756 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:26:31.757 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 355,872
+2025-11-01 17:26:31.757 | INFO     | __main__:generate_gaussian:180 -    File size: 23.1 MB
+2025-11-01 17:26:31.757 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.02s
+2025-11-01 17:26:31.757 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:26:31.781 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:27:21.403 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:27:21.430 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:27:21.430 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:27:26.130 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.70s
+2025-11-01 17:27:26.130 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:27:27.392 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:27:27.392 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 525,760
+2025-11-01 17:27:27.392 | INFO     | __main__:generate_gaussian:180 -    File size: 34.1 MB
+2025-11-01 17:27:27.392 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.99s
+2025-11-01 17:27:27.392 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:27:27.433 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:28:52.060 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:28:52.120 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:28:52.120 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:28:57.697 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.58s
+2025-11-01 17:28:57.697 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:28:59.452 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:28:59.453 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 428,608
+2025-11-01 17:28:59.453 | INFO     | __main__:generate_gaussian:180 -    File size: 27.8 MB
+2025-11-01 17:28:59.453 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.39s
+2025-11-01 17:28:59.453 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:28:59.491 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:30:36.913 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:30:36.937 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:30:36.938 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:30:40.933 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.99s
+2025-11-01 17:30:40.933 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:30:41.427 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:30:41.427 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 242,848
+2025-11-01 17:30:41.427 | INFO     | __main__:generate_gaussian:180 -    File size: 15.7 MB
+2025-11-01 17:30:41.427 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.51s
+2025-11-01 17:30:41.427 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:30:41.451 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:31:11.478 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:31:11.505 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:31:11.505 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:31:15.482 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.98s
+2025-11-01 17:31:15.482 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:31:15.705 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:31:15.705 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 101,984
+2025-11-01 17:31:15.705 | INFO     | __main__:generate_gaussian:180 -    File size: 6.6 MB
+2025-11-01 17:31:15.705 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.23s
+2025-11-01 17:31:15.705 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:31:15.717 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:32:44.527 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:32:44.550 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:32:44.550 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:32:50.508 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.96s
+2025-11-01 17:32:50.508 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:32:52.638 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:32:52.638 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 819,200
+2025-11-01 17:32:52.638 | INFO     | __main__:generate_gaussian:180 -    File size: 53.1 MB
+2025-11-01 17:32:52.638 | INFO     | __main__:generate_gaussian:181 -    Total time: 8.11s
+2025-11-01 17:32:52.638 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:32:52.690 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:36:39.232 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:36:39.259 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:36:39.259 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:36:43.260 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.00s
+2025-11-01 17:36:43.260 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:36:43.548 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:36:43.548 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 132,640
+2025-11-01 17:36:43.549 | INFO     | __main__:generate_gaussian:180 -    File size: 8.6 MB
+2025-11-01 17:36:43.549 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.32s
+2025-11-01 17:36:43.549 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:36:43.563 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:37:33.909 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:37:33.974 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:37:33.974 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:37:39.611 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.64s
+2025-11-01 17:37:39.612 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:37:41.502 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:37:41.502 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 731,680
+2025-11-01 17:37:41.502 | INFO     | __main__:generate_gaussian:180 -    File size: 47.4 MB
+2025-11-01 17:37:41.502 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.59s
+2025-11-01 17:37:41.502 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:37:41.553 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:39:05.476 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:39:05.498 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:39:05.498 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:39:09.576 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.08s
+2025-11-01 17:39:09.576 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:39:10.189 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:39:10.189 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 274,400
+2025-11-01 17:39:10.189 | INFO     | __main__:generate_gaussian:180 -    File size: 17.8 MB
+2025-11-01 17:39:10.189 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.71s
+2025-11-01 17:39:10.189 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:39:10.208 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:41:42.511 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:41:42.538 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:41:42.538 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:41:46.855 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.32s
+2025-11-01 17:41:46.855 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:41:47.741 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:41:47.741 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 391,232
+2025-11-01 17:41:47.741 | INFO     | __main__:generate_gaussian:180 -    File size: 25.4 MB
+2025-11-01 17:41:47.741 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.23s
+2025-11-01 17:41:47.741 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:41:47.773 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:42:55.550 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:42:55.578 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:42:55.578 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:43:01.087 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.51s
+2025-11-01 17:43:01.088 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:43:02.568 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:43:02.568 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 348,704
+2025-11-01 17:43:02.568 | INFO     | __main__:generate_gaussian:180 -    File size: 22.6 MB
+2025-11-01 17:43:02.568 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.02s
+2025-11-01 17:43:02.568 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:43:02.590 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:43:24.390 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:43:24.409 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:43:24.410 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:43:29.472 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.06s
+2025-11-01 17:43:29.472 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:43:30.557 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:43:30.557 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 512,832
+2025-11-01 17:43:30.557 | INFO     | __main__:generate_gaussian:180 -    File size: 33.3 MB
+2025-11-01 17:43:30.557 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.17s
+2025-11-01 17:43:30.557 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:43:30.586 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:44:09.656 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:44:09.718 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:44:09.718 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:44:14.480 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.76s
+2025-11-01 17:44:14.480 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:44:15.411 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:44:15.411 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 446,528
+2025-11-01 17:44:15.411 | INFO     | __main__:generate_gaussian:180 -    File size: 29.0 MB
+2025-11-01 17:44:15.411 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.75s
+2025-11-01 17:44:15.411 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:44:15.438 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:45:57.325 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:45:57.353 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:45:57.353 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:46:03.183 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.83s
+2025-11-01 17:46:03.183 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:46:05.699 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:46:05.699 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 612,192
+2025-11-01 17:46:05.699 | INFO     | __main__:generate_gaussian:180 -    File size: 39.7 MB
+2025-11-01 17:46:05.699 | INFO     | __main__:generate_gaussian:181 -    Total time: 8.37s
+2025-11-01 17:46:05.699 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:46:05.730 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:49:19.279 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:49:19.304 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:49:19.304 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:49:24.727 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.42s
+2025-11-01 17:49:24.727 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:49:25.158 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:49:25.158 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 113,376
+2025-11-01 17:49:25.159 | INFO     | __main__:generate_gaussian:180 -    File size: 7.4 MB
+2025-11-01 17:49:25.159 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.88s
+2025-11-01 17:49:25.159 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:49:25.172 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:53:09.919 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:53:09.976 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:53:09.977 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:53:15.726 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.75s
+2025-11-01 17:53:15.726 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:53:17.068 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:53:17.068 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 630,880
+2025-11-01 17:53:17.068 | INFO     | __main__:generate_gaussian:180 -    File size: 40.9 MB
+2025-11-01 17:53:17.068 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.15s
+2025-11-01 17:53:17.068 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:53:17.109 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:55:40.624 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:55:40.662 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:55:40.662 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:55:44.964 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.30s
+2025-11-01 17:55:44.964 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:55:45.218 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:55:45.218 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 113,120
+2025-11-01 17:55:45.218 | INFO     | __main__:generate_gaussian:180 -    File size: 7.3 MB
+2025-11-01 17:55:45.218 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.59s
+2025-11-01 17:55:45.218 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:55:45.235 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:57:02.185 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:57:02.202 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:57:02.203 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:57:07.696 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.49s
+2025-11-01 17:57:07.696 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:57:08.942 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:57:08.942 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 353,856
+2025-11-01 17:57:08.942 | INFO     | __main__:generate_gaussian:180 -    File size: 22.9 MB
+2025-11-01 17:57:08.942 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.76s
+2025-11-01 17:57:08.942 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:57:08.967 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:58:35.310 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:58:35.337 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:58:35.337 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:58:40.902 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.56s
+2025-11-01 17:58:40.902 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:58:41.254 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:58:41.254 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 88,800
+2025-11-01 17:58:41.254 | INFO     | __main__:generate_gaussian:180 -    File size: 5.8 MB
+2025-11-01 17:58:41.254 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.94s
+2025-11-01 17:58:41.254 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:58:41.273 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:58:43.045 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:58:43.101 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 17:58:43.101 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:58:48.590 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.49s
+2025-11-01 17:58:48.591 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:58:49.449 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:58:49.449 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 221,568
+2025-11-01 17:58:49.449 | INFO     | __main__:generate_gaussian:180 -    File size: 14.4 MB
+2025-11-01 17:58:49.449 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.40s
+2025-11-01 17:58:49.449 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:58:49.487 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 17:59:42.233 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 17:59:42.263 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 17:59:42.263 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 17:59:47.964 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.70s
+2025-11-01 17:59:47.965 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 17:59:49.556 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 17:59:49.556 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 415,328
+2025-11-01 17:59:49.556 | INFO     | __main__:generate_gaussian:180 -    File size: 26.9 MB
+2025-11-01 17:59:49.556 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.32s
+2025-11-01 17:59:49.556 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 17:59:49.594 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:01:09.684 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:01:09.713 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:01:09.713 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:01:15.292 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.58s
+2025-11-01 18:01:15.292 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:01:16.460 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:01:16.461 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 300,352
+2025-11-01 18:01:16.461 | INFO     | __main__:generate_gaussian:180 -    File size: 19.5 MB
+2025-11-01 18:01:16.461 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.78s
+2025-11-01 18:01:16.461 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:01:16.492 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:01:44.450 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:01:44.468 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:01:44.468 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:01:49.983 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.51s
+2025-11-01 18:01:49.983 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:01:50.527 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:01:50.528 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 137,984
+2025-11-01 18:01:50.528 | INFO     | __main__:generate_gaussian:180 -    File size: 8.9 MB
+2025-11-01 18:01:50.528 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.08s
+2025-11-01 18:01:50.528 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:01:50.549 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:03:50.614 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:03:50.632 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:03:50.633 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:03:56.407 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.77s
+2025-11-01 18:03:56.407 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:03:58.898 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:03:58.898 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 571,648
+2025-11-01 18:03:58.898 | INFO     | __main__:generate_gaussian:180 -    File size: 37.1 MB
+2025-11-01 18:03:58.898 | INFO     | __main__:generate_gaussian:181 -    Total time: 8.28s
+2025-11-01 18:03:58.898 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:03:58.943 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:04:44.522 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:04:44.547 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:04:44.548 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:04:48.555 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.01s
+2025-11-01 18:04:48.555 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:04:48.719 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:04:48.719 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 73,344
+2025-11-01 18:04:48.719 | INFO     | __main__:generate_gaussian:180 -    File size: 4.8 MB
+2025-11-01 18:04:48.719 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.20s
+2025-11-01 18:04:48.719 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:04:48.743 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:05:01.660 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:05:01.686 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:05:01.686 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:05:07.358 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.67s
+2025-11-01 18:05:07.358 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:05:08.721 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:05:08.722 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 343,808
+2025-11-01 18:05:08.722 | INFO     | __main__:generate_gaussian:180 -    File size: 22.3 MB
+2025-11-01 18:05:08.722 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.06s
+2025-11-01 18:05:08.722 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:05:08.758 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:07:11.109 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:07:11.137 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:07:11.138 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:07:15.132 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.99s
+2025-11-01 18:07:15.132 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:07:15.538 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:07:15.538 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 186,208
+2025-11-01 18:07:15.538 | INFO     | __main__:generate_gaussian:180 -    File size: 12.1 MB
+2025-11-01 18:07:15.538 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.43s
+2025-11-01 18:07:15.538 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:07:15.568 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:09:36.657 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:09:36.688 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:09:36.688 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:09:44.326 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 7.64s
+2025-11-01 18:09:44.327 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:09:48.934 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:09:48.934 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 1,309,760
+2025-11-01 18:09:48.934 | INFO     | __main__:generate_gaussian:180 -    File size: 84.9 MB
+2025-11-01 18:09:48.934 | INFO     | __main__:generate_gaussian:181 -    Total time: 12.28s
+2025-11-01 18:09:48.934 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:09:48.974 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:12:30.770 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:12:30.780 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:12:30.780 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:12:36.281 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.50s
+2025-11-01 18:12:36.281 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:12:36.510 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:12:36.510 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 58,176
+2025-11-01 18:12:36.510 | INFO     | __main__:generate_gaussian:180 -    File size: 3.8 MB
+2025-11-01 18:12:36.510 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.74s
+2025-11-01 18:12:36.510 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:12:36.531 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:15:44.128 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:15:44.156 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:15:44.157 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:15:48.202 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.05s
+2025-11-01 18:15:48.203 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:15:48.396 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:15:48.396 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 89,408
+2025-11-01 18:15:48.396 | INFO     | __main__:generate_gaussian:180 -    File size: 5.8 MB
+2025-11-01 18:15:48.396 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.27s
+2025-11-01 18:15:48.396 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:15:48.424 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:16:09.589 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:16:09.616 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:16:09.617 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:16:14.449 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.83s
+2025-11-01 18:16:14.449 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:16:15.540 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:16:15.540 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 465,952
+2025-11-01 18:16:15.540 | INFO     | __main__:generate_gaussian:180 -    File size: 30.2 MB
+2025-11-01 18:16:15.540 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.95s
+2025-11-01 18:16:15.540 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:16:15.580 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:16:20.374 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:16:20.441 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 18:16:20.441 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:16:25.408 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.97s
+2025-11-01 18:16:25.408 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:16:26.649 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:16:26.650 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 566,816
+2025-11-01 18:16:26.650 | INFO     | __main__:generate_gaussian:180 -    File size: 36.8 MB
+2025-11-01 18:16:26.650 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.28s
+2025-11-01 18:16:26.650 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:16:26.688 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:18:39.091 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:18:39.122 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:18:39.122 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:18:44.343 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.22s
+2025-11-01 18:18:44.344 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:18:44.546 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:18:44.547 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 97,728
+2025-11-01 18:18:44.547 | INFO     | __main__:generate_gaussian:180 -    File size: 6.3 MB
+2025-11-01 18:18:44.547 | INFO     | __main__:generate_gaussian:181 -    Total time: 5.46s
+2025-11-01 18:18:44.547 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:18:44.565 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:19:16.122 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:19:16.150 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:19:16.150 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:19:21.539 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.39s
+2025-11-01 18:19:21.539 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:19:22.309 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:19:22.309 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 260,672
+2025-11-01 18:19:22.309 | INFO     | __main__:generate_gaussian:180 -    File size: 16.9 MB
+2025-11-01 18:19:22.309 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.19s
+2025-11-01 18:19:22.309 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:19:22.343 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:20:10.887 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:20:10.953 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 18:20:10.953 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:20:16.438 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.48s
+2025-11-01 18:20:16.438 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:20:17.100 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:20:17.100 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 176,448
+2025-11-01 18:20:17.100 | INFO     | __main__:generate_gaussian:180 -    File size: 11.4 MB
+2025-11-01 18:20:17.100 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.21s
+2025-11-01 18:20:17.100 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:20:17.135 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:21:40.916 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:21:40.978 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 18:21:40.978 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:21:46.636 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.66s
+2025-11-01 18:21:46.636 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:21:49.836 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:21:49.836 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 566,816
+2025-11-01 18:21:49.836 | INFO     | __main__:generate_gaussian:180 -    File size: 36.8 MB
+2025-11-01 18:21:49.836 | INFO     | __main__:generate_gaussian:181 -    Total time: 8.92s
+2025-11-01 18:21:49.836 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:21:49.883 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:22:07.212 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:22:07.237 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:22:07.238 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:22:11.206 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.97s
+2025-11-01 18:22:11.206 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:22:11.425 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:22:11.425 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 96,896
+2025-11-01 18:22:11.425 | INFO     | __main__:generate_gaussian:180 -    File size: 6.3 MB
+2025-11-01 18:22:11.425 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.21s
+2025-11-01 18:22:11.425 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:22:11.451 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:24:57.505 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:24:57.531 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:24:57.531 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:25:02.915 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.38s
+2025-11-01 18:25:02.915 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:25:03.589 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:25:03.589 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 180,448
+2025-11-01 18:25:03.589 | INFO     | __main__:generate_gaussian:180 -    File size: 11.7 MB
+2025-11-01 18:25:03.589 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.08s
+2025-11-01 18:25:03.589 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:25:03.615 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:25:29.738 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:25:29.765 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:25:29.766 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:25:35.280 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.51s
+2025-11-01 18:25:35.281 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:25:36.429 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:25:36.430 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 290,848
+2025-11-01 18:25:36.430 | INFO     | __main__:generate_gaussian:180 -    File size: 18.9 MB
+2025-11-01 18:25:36.430 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.69s
+2025-11-01 18:25:36.430 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:25:36.459 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:25:42.147 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:25:42.210 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 18:25:42.210 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:25:47.671 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.46s
+2025-11-01 18:25:47.671 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:25:48.341 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:25:48.342 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 176,448
+2025-11-01 18:25:48.342 | INFO     | __main__:generate_gaussian:180 -    File size: 11.4 MB
+2025-11-01 18:25:48.342 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.19s
+2025-11-01 18:25:48.342 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:25:48.371 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:27:04.938 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:27:05.003 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 18:27:05.003 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:27:10.696 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.69s
+2025-11-01 18:27:10.696 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:27:13.354 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:27:13.354 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 566,816
+2025-11-01 18:27:13.354 | INFO     | __main__:generate_gaussian:180 -    File size: 36.8 MB
+2025-11-01 18:27:13.354 | INFO     | __main__:generate_gaussian:181 -    Total time: 8.42s
+2025-11-01 18:27:13.355 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:27:13.399 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:28:15.694 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:28:15.722 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:28:15.722 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:28:19.696 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 3.97s
+2025-11-01 18:28:19.696 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:28:19.834 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:28:19.834 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 71,136
+2025-11-01 18:28:19.834 | INFO     | __main__:generate_gaussian:180 -    File size: 4.6 MB
+2025-11-01 18:28:19.834 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.14s
+2025-11-01 18:28:19.834 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:28:19.851 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:28:34.948 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:28:34.974 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:28:34.974 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:28:39.012 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.04s
+2025-11-01 18:28:39.012 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:28:39.457 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:28:39.457 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 217,120
+2025-11-01 18:28:39.457 | INFO     | __main__:generate_gaussian:180 -    File size: 14.1 MB
+2025-11-01 18:28:39.458 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.51s
+2025-11-01 18:28:39.458 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:28:39.494 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:30:58.911 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:30:58.975 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 18:30:58.975 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:31:04.468 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.49s
+2025-11-01 18:31:04.469 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:31:05.159 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:31:05.159 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 176,448
+2025-11-01 18:31:05.159 | INFO     | __main__:generate_gaussian:180 -    File size: 11.4 MB
+2025-11-01 18:31:05.159 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.25s
+2025-11-01 18:31:05.159 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:31:05.194 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:32:28.987 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:32:29.053 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 18:32:29.053 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:32:34.511 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.46s
+2025-11-01 18:32:34.511 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:32:36.809 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:32:36.810 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 566,816
+2025-11-01 18:32:36.810 | INFO     | __main__:generate_gaussian:180 -    File size: 36.8 MB
+2025-11-01 18:32:36.810 | INFO     | __main__:generate_gaussian:181 -    Total time: 7.82s
+2025-11-01 18:32:36.810 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:32:36.857 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:33:37.760 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:33:37.790 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (512, 512), mode: RGB
+2025-11-01 18:33:37.790 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:33:41.796 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 4.01s
+2025-11-01 18:33:41.796 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:33:41.931 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:33:41.931 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 57,952
+2025-11-01 18:33:41.931 | INFO     | __main__:generate_gaussian:180 -    File size: 3.8 MB
+2025-11-01 18:33:41.931 | INFO     | __main__:generate_gaussian:181 -    Total time: 4.17s
+2025-11-01 18:33:41.931 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:33:41.955 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
+2025-11-01 18:36:22.888 | INFO     | __main__:generate_gaussian:114 - 📥 Received generation request
+2025-11-01 18:36:22.954 | DEBUG    | __main__:generate_gaussian:117 -    Image size: (1024, 1024), mode: RGB
+2025-11-01 18:36:22.954 | INFO     | __main__:generate_gaussian:120 - 🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...
+2025-11-01 18:36:28.476 | INFO     | __main__:generate_gaussian:140 -    Generation completed in 5.52s
+2025-11-01 18:36:28.477 | INFO     | __main__:generate_gaussian:146 - 💾 Saving PLY file...
+2025-11-01 18:36:29.128 | INFO     | __main__:generate_gaussian:178 - ✅ Generation successful!
+2025-11-01 18:36:29.128 | INFO     | __main__:generate_gaussian:179 -    Gaussians: 176,448
+2025-11-01 18:36:29.128 | INFO     | __main__:generate_gaussian:180 -    File size: 11.4 MB
+2025-11-01 18:36:29.129 | INFO     | __main__:generate_gaussian:181 -    Total time: 6.24s
+2025-11-01 18:36:29.129 | INFO     | __main__:generate_gaussian:187 - ✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)
+2025-11-01 18:36:29.159 | DEBUG    | __main__:generate_gaussian:193 -    Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)
