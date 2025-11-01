@@ -12,7 +12,39 @@ import time
 import tempfile
 import os
 from loguru import logger
-from PIL import Image
+from PIL import Image, ImageFilter, ImageEnhance
+
+
+def enhance_image_for_trellis(rgba_image):
+    """
+    Enhance image detail to ensure TRELLIS generates dense voxel grids.
+
+    More visual detail → more surface features detected → more active voxels → more gaussians
+
+    This prevents sparse generations (57K gaussians) by giving TRELLIS more surface features
+    to detect, even for geometrically simple objects.
+
+    Args:
+        rgba_image: PIL Image (RGBA)
+
+    Returns:
+        Enhanced PIL Image (RGBA) with more visual detail
+    """
+    logger.debug("  Enhancing image detail for dense voxel generation...")
+
+    # 1. Enhance fine details (brings out texture)
+    enhanced = rgba_image.filter(ImageFilter.DETAIL)
+
+    # 2. Sharpen edges - INCREASED from 1.5x (was too conservative)
+    sharpener = ImageEnhance.Sharpness(enhanced)
+    enhanced = sharpener.enhance(2.0)  # Back to 2.0x - needed for sparse prompts
+
+    # 3. Increase contrast - INCREASED from 1.2x (was too conservative)
+    contrast = ImageEnhance.Contrast(enhanced)
+    enhanced = contrast.enhance(1.3)  # Back to 1.3x - needed for feature detection
+
+    logger.debug("  ✅ Image enhanced: sharpness 2.0x, contrast 1.3x, detail filter applied")
+    return enhanced
 
 
 async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhost:10008"):
@@ -35,6 +67,13 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
     logger.info("  [3/4] Generating 3D Gaussians with TRELLIS microservice...")
 
     try:
+        # OPTIMIZATION (2025-11-01): Image enhancement to stabilize gaussian counts
+        # Problem: TRELLIS adaptive voxels → 57K-557K variance (10x range)
+        # Solution: Add visual detail → denser voxel detection → 200K-500K stable
+        # Target: All generations > 200K gaussians
+        # If still seeing <200K: increase sharpness to 2.0x, add prompt enhancement
+        rgba_image = enhance_image_for_trellis(rgba_image)
+
         # Convert RGBA image to RGB (TRELLIS expects RGB)
         if rgba_image.mode == 'RGBA':
             rgb_image = rgba_image.convert('RGB')
@@ -127,7 +166,9 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
     timings = {
         "trellis": t3_end - t3_start,
         "model_load": t4_end - t4_start if gs_model else 0.0,
-        "total_3d": t4_end - t3_start
+        "total_3d": t4_end - t3_start,
+        "num_gaussians": result['num_gaussians'],
+        "file_size_mb": result['file_size_mb']
     }
 
     return ply_bytes, gs_model, timings

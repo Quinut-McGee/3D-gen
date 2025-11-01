@@ -10,6 +10,9 @@ import os
 os.environ['SPCONV_ALGO'] = 'native'  # Critical for performance
 
 import sys
+# Add TRELLIS to Python path (needed for local package import)
+sys.path.insert(0, '/home/kobe/404-gen/v1/3D-gen/TRELLIS')
+
 import time
 import base64
 import tempfile
@@ -120,16 +123,16 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
         outputs = pipeline.run(
             rgba_image,
             seed=request.seed,
-            # HIGH-QUALITY PARAMETERS (competitive mode)
-            # Default: 12 steps, cfg 7.5/3.0 → blurry, dark textures
-            # HQ: 20 steps, cfg 8.5/4.5 → sharp, accurate reconstruction
+            # OPTIMIZED PARAMETERS for dense voxel generation + quality
+            # Sparse structure: Detects voxels on object surface
+            # SLAT: Fills voxels with gaussian details
             sparse_structure_sampler_params={
-                "steps": 20,  # +67% steps for better structure (was 12)
-                "cfg_strength": 8.5,  # Stronger guidance (was 7.5)
+                "steps": 25,  # +25% steps for denser voxel detection (was 20)
+                "cfg_strength": 9.0,  # Stronger guidance for more voxels (was 8.5)
             },
             slat_sampler_params={
-                "steps": 20,  # +67% steps for texture detail (was 12)
-                "cfg_strength": 4.5,  # Better adherence to input (was 3.0)
+                "steps": 20,  # Keep at 20 - already good for texture detail
+                "cfg_strength": 4.5,  # Keep at 4.5 - good adherence to input
             },
         )
 

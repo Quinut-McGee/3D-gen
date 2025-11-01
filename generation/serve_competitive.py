@@ -108,6 +108,25 @@ def cleanup_memory():
         gc.collect()
 
 
+def enhance_prompt_for_detail(prompt):
+    """
+    Add subtle detail hints to bias SD3.5 toward textured surfaces.
+    This gives TRELLIS more visual features to detect → denser voxels.
+
+    Keeps the core prompt intact while hinting at surface complexity.
+    """
+    import random
+
+    detail_hints = [
+        "detailed surface texture",
+        "fine intricate details",
+        "high quality craftsmanship",
+        "complex surface patterns"
+    ]
+
+    return f"{prompt}, {random.choice(detail_hints)}"
+
+
 def precompile_gsplat():
     """
     Pre-compile gsplat CUDA extensions before service starts.
@@ -207,11 +226,12 @@ def startup_event():
                     logger.info(f"✅ TRELLIS microservice ready at {app.state.trellis_service_url}")
                     logger.info(f"   Pipeline: {health_data.get('pipeline_loaded', 'Unknown')}")
             else:
-                logger.error(f"❌ TRELLIS microservice health check failed")
-                raise RuntimeError("TRELLIS unhealthy")
+                logger.warning(f"⚠️ TRELLIS microservice returned non-200 status")
+                logger.warning("  Worker will start anyway, but generations will fail until TRELLIS is up")
     except Exception as e:
-        logger.error(f"❌ TRELLIS microservice not available: {e}")
-        raise
+        logger.warning(f"⚠️ TRELLIS microservice not available: {e}")
+        logger.warning("  Worker will start anyway, but generations will fail until TRELLIS is up")
+        logger.warning("  Requests will return 503 Service Unavailable until TRELLIS recovers")
 
     # DEPRECATED: Mesh-to-Gaussian converter (InstantMesh approach with 50K gaussians)
     # TRELLIS generates native gaussians directly - no mesh conversion needed!
@@ -347,8 +367,8 @@ async def generate(prompt: str = Form()) -> Response:
             # - 8B params with 3 text encoders (T5, CLIP-L, CLIP-G)
             # - Better prompt adherence and depth perception
             # - Expected CLIP scores: 0.60-0.75 (vs FLUX 0.24-0.27)
-            # Use simple prompt - SD3.5 handles 3D-suitable generation naturally
-            enhanced_prompt = prompt
+            # Enhance prompt with detail hints for denser TRELLIS voxel generation
+            enhanced_prompt = enhance_prompt_for_detail(prompt)
 
             # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
             image = app.state.flux_generator.generate(
@@ -408,11 +428,26 @@ async def generate(prompt: str = Form()) -> Response:
             logger.info(f"  ✅ 3D generation done ({t4-t3_start:.2f}s)")
             logger.info(f"     TRELLIS: {timings['trellis']:.2f}s, Model Load: {timings['model_load']:.2f}s")
             logger.info(f"     Generated {len(ply_bytes)/1024:.1f} KB Gaussian Splat PLY")
+            logger.info(f"     📊 Generation stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB")
 
         except Exception as e:
-            logger.error(f"TRELLIS generation failed: {e}", exc_info=True)
-            cleanup_memory()
-            raise
+            import httpx
+            if isinstance(e, (httpx.ConnectError, httpx.TimeoutException)):
+                logger.error(f"⚠️ TRELLIS microservice unavailable: {e}")
+                logger.error("  Returning service unavailable instead of submitting garbage")
+                cleanup_memory()
+                # Return 503 Service Unavailable - miner should NOT submit this
+                empty_buffer = BytesIO()
+                return Response(
+                    empty_buffer.getvalue(),
+                    media_type="application/octet-stream",
+                    status_code=503,  # Service Unavailable
+                    headers={"X-TRELLIS-Error": "Service unavailable"}
+                )
+            else:
+                logger.error(f"TRELLIS generation failed: {e}", exc_info=True)
+                cleanup_memory()
+                raise
 
         # Step 4: CLIP validation
         if app.state.clip_validator:
@@ -524,6 +559,9 @@ async def generate(prompt: str = Form()) -> Response:
 
         if app.state.clip_validator:
             logger.info(f"  ✅ VALIDATION PASSED: CLIP={score:.3f}")
+            logger.info(f"  📊 Final stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB, CLIP={score:.3f}")
+        else:
+            logger.info(f"  📊 Final stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB (CLIP validation disabled)")
 
         # Success!
         t_total = time.time() - t_start

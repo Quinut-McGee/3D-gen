@@ -2,6 +2,10 @@
 Competitive Miner implementation using async task management.
 """
 
+import sys
+# Add neurons directory to Python path for common module imports
+sys.path.insert(0, '/home/kobe/404-gen/v1/3D-gen/neurons')
+
 import asyncio
 import copy
 import bittensor as bt
@@ -131,3 +135,16 @@ class CompetitiveMiner:
             await asyncio.sleep(5)
             self.metagraph_sync.log_info(self.uid)
             self.metagraph_sync.sync()
+
+
+if __name__ == "__main__":
+    # Read config from command line args
+    from miner.config import read_config
+    config = read_config()
+
+    # Create and run miner
+    miner = CompetitiveMiner(config)
+    try:
+        asyncio.run(miner.run())
+    except KeyboardInterrupt:
+        bt.logging.info("🛑 Miner stopped by user")

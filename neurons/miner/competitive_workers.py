@@ -44,10 +44,11 @@ async def process_task_competitive(
     if not results or len(results) < 1000:
         bt.logging.warning(
             f"Generation failed or too small ({len(results) if results else 0} bytes), "
-            "submitting empty to avoid penalty"
+            "SKIPPING submission to avoid Score=0.0 penalty"
         )
-        results = b""
         stats["tasks_rejected"] += 1
+        # DON'T submit empty results - validators will give Score=0.0!
+        return
     else:
         # CLIP validation (optional but recommended)
         if validator_class and results:
@@ -79,7 +80,9 @@ async def _generate(generate_url: str, prompt: str, timeout: float = 60.0) -> by
 
     Timeout is generous (60s) to allow for full pipeline.
     """
-    bt.logging.debug(f"Generating: '{prompt}'")
+    # Truncate prompt for logging (avoid logging huge base64 images)
+    prompt_preview = prompt[:80] + "..." if len(prompt) > 80 else prompt
+    bt.logging.debug(f"Generating: '{prompt_preview}'")
 
     client_timeout = ClientTimeout(total=timeout)
 
@@ -103,6 +106,13 @@ async def _generate(generate_url: str, prompt: str, timeout: float = 60.0) -> by
                         f"Generation completed: {len(results)} bytes, CLIP={clip_score}"
                     )
                     return results
+
+                elif response.status == 503:
+                    # Service unavailable - TRELLIS is down, don't submit anything
+                    trellis_error = response.headers.get("X-TRELLIS-Error", "Unknown")
+                    bt.logging.warning(f"⚠️ TRELLIS microservice unavailable: {trellis_error}")
+                    bt.logging.warning("  Skipping this task to avoid submitting garbage")
+                    return None  # Don't submit anything
 
                 else:
                     bt.logging.error(f"Generation failed with status {response.status}")
