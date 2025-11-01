@@ -31,9 +31,9 @@ logger.add("logs/trellis_microservice.log", rotation="500 MB", retention="10 day
 
 app = FastAPI(title="TRELLIS Microservice", version="1.0.0")
 
-# Global pipeline - loaded once at startup
+# Global pipeline - lazy loaded on demand (Option B: unload after generation)
 pipeline = None
-PIPELINE_LOADED = False
+PIPELINE_LOADED = False  # NOT USED - we lazy load now
 
 
 class GenerateRequest(BaseModel):
@@ -54,34 +54,30 @@ class GenerateResponse(BaseModel):
 
 
 @app.on_event("startup")
-async def load_pipeline():
-    """Load TRELLIS pipeline on startup (takes ~27s)"""
+async def startup():
+    """Startup - PRE-LOAD pipeline (FLUX uses CPU offload, so we have VRAM!)"""
     global pipeline, PIPELINE_LOADED
 
     logger.info("=" * 70)
-    logger.info("🚀 TRELLIS MICROSERVICE STARTING")
+    logger.info("🚀 TRELLIS MICROSERVICE STARTING (PRE-LOADING MODE)")
     logger.info("=" * 70)
+    logger.info("⚡ FLUX uses CPU offload (~2-3GB), leaving room for TRELLIS (~13GB)")
+    logger.info("⚡ Pre-loading TRELLIS to avoid 24s lazy-load delay...")
 
-    try:
-        logger.info("Loading TRELLIS-image-large pipeline...")
-        start_time = time.time()
+    # Pre-load pipeline
+    from trellis.pipelines import TrellisImageTo3DPipeline
+    import torch
+    import time
 
-        from trellis.pipelines import TrellisImageTo3DPipeline
+    load_start = time.time()
+    pipeline = TrellisImageTo3DPipeline.from_pretrained("microsoft/TRELLIS-image-large")
+    pipeline.cuda()
+    load_time = time.time() - load_start
+    PIPELINE_LOADED = True
 
-        pipeline = TrellisImageTo3DPipeline.from_pretrained("microsoft/TRELLIS-image-large")
-        pipeline.cuda()
-
-        load_time = time.time() - start_time
-        PIPELINE_LOADED = True
-
-        logger.info(f"✅ TRELLIS pipeline loaded in {load_time:.1f}s")
-        logger.info("📡 Ready to accept requests on port 10008")
-        logger.info("=" * 70)
-
-    except Exception as e:
-        logger.error(f"❌ Failed to load TRELLIS pipeline: {e}")
-        logger.error(traceback.format_exc())
-        sys.exit(1)
+    logger.info(f"✅ TRELLIS pre-loaded in {load_time:.1f}s")
+    logger.info("📡 Ready for FAST generation (~5-6s per request)")
+    logger.info("=" * 70)
 
 
 @app.get("/health")
@@ -98,7 +94,7 @@ async def health_check():
 @app.post("/generate", response_model=GenerateResponse)
 async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
     """
-    Generate 3D Gaussian Splat from RGBA image
+    Generate 3D Gaussian Splat from RGBA image (LAZY LOADING MODE)
 
     Args:
         request: Contains base64-encoded RGBA image and generation params
@@ -106,25 +102,35 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
     Returns:
         GenerateResponse with base64-encoded PLY and statistics
     """
-    if not PIPELINE_LOADED:
-        raise HTTPException(status_code=503, detail="Pipeline not loaded yet")
-
+    global pipeline
     start_time = time.time()
 
     try:
+        # Pipeline is pre-loaded at startup - ready to use!
         # Decode input image
         logger.info("📥 Received generation request")
         image_bytes = base64.b64decode(request.image_base64)
         rgba_image = Image.open(BytesIO(image_bytes)).convert('RGB')
         logger.debug(f"   Image size: {rgba_image.size}, mode: {rgba_image.mode}")
 
-        # Generate with TRELLIS
-        logger.info("🎨 Generating 3D gaussians with TRELLIS...")
+        # Generate with TRELLIS (HIGH-QUALITY MODE)
+        logger.info("🎨 Generating 3D gaussians with TRELLIS (HIGH-QUALITY)...")
         gen_start = time.time()
 
         outputs = pipeline.run(
             rgba_image,
             seed=request.seed,
+            # HIGH-QUALITY PARAMETERS (competitive mode)
+            # Default: 12 steps, cfg 7.5/3.0 → blurry, dark textures
+            # HQ: 20 steps, cfg 8.5/4.5 → sharp, accurate reconstruction
+            sparse_structure_sampler_params={
+                "steps": 20,  # +67% steps for better structure (was 12)
+                "cfg_strength": 8.5,  # Stronger guidance (was 7.5)
+            },
+            slat_sampler_params={
+                "steps": 20,  # +67% steps for texture detail (was 12)
+                "cfg_strength": 4.5,  # Better adherence to input (was 3.0)
+            },
         )
 
         gen_time = time.time() - gen_start
@@ -170,6 +176,18 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
         logger.info(f"   Gaussians: {num_gaussians:,}")
         logger.info(f"   File size: {file_size_mb:.1f} MB")
         logger.info(f"   Total time: {total_time:.2f}s")
+
+        # KEEP PIPELINE LOADED: With FLUX using CPU offload (~2-3GB), we have room!
+        # FLUX CPU offload: ~2-3GB
+        # TRELLIS loaded: ~13GB
+        # Total: ~15-16GB (fits in 24GB GPU!)
+        logger.info("✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)")
+
+        # Just clear cache to free any temporary allocations
+        import torch
+        torch.cuda.empty_cache()
+        torch.cuda.synchronize()
+        logger.debug("   Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)")
 
         return GenerateResponse(
             ply_base64=ply_base64,

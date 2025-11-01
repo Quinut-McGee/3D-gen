@@ -199,6 +199,92 @@ class GaussianModel:
         el = PlyElement.describe(elements, "vertex")
         PlyData([el]).write(buffer)
 
+    def load_ply(self, buffer):
+        """
+        Load Gaussian splat from PLY file.
+
+        Args:
+            buffer: File path (str) or file-like object (BytesIO) containing PLY data
+        """
+        # Read PLY file
+        if isinstance(buffer, str):
+            plydata = PlyData.read(buffer)
+        else:
+            plydata = PlyData.read(buffer)
+
+        # Get vertex data
+        vertices = plydata['vertex']
+
+        # Parse XYZ positions
+        positions = np.stack([vertices['x'], vertices['y'], vertices['z']], axis=1)
+
+        # Parse features (DC and rest)
+        # Count f_dc features
+        num_f_dc = 0
+        while f'f_dc_{num_f_dc}' in vertices:
+            num_f_dc += 1
+
+        # Extract f_dc features
+        if num_f_dc > 0:
+            f_dc_features = np.stack([vertices[f'f_dc_{i}'] for i in range(num_f_dc)], axis=1)
+            # Reshape to (N, num_f_dc / 3, 3) format expected by the model
+            # For SH degree 0: 3 features (1 * 3) -> (N, 1, 3)
+            # For SH degree 2: 9 features (3 * 3) -> (N, 3, 3)
+            features_per_channel = num_f_dc // 3
+            f_dc_features = f_dc_features.reshape(-1, features_per_channel, 3)
+        else:
+            f_dc_features = np.zeros((positions.shape[0], 1, 3))
+
+        # Count f_rest features
+        num_f_rest = 0
+        while f'f_rest_{num_f_rest}' in vertices:
+            num_f_rest += 1
+
+        # Extract f_rest features
+        if num_f_rest > 0:
+            f_rest_features = np.stack([vertices[f'f_rest_{i}'] for i in range(num_f_rest)], axis=1)
+            features_per_channel = num_f_rest // 3
+            f_rest_features = f_rest_features.reshape(-1, features_per_channel, 3)
+        else:
+            # Empty tensor for max_sh_degree=0 case
+            f_rest_features = np.zeros((positions.shape[0], 0, 3))
+
+        # Parse opacity
+        opacities = vertices['opacity'][:, np.newaxis]
+
+        # Parse scale
+        scales = np.stack([vertices['scale_0'], vertices['scale_1'], vertices['scale_2']], axis=1)
+
+        # Parse rotation (quaternion)
+        rotations = np.stack([vertices['rot_0'], vertices['rot_1'], vertices['rot_2'], vertices['rot_3']], axis=1)
+
+        # Convert to torch tensors and move to device
+        self._xyz = torch.from_numpy(positions).float().to(self._device)
+        self._features_dc = torch.from_numpy(f_dc_features).float().to(self._device)
+        self._features_rest = torch.from_numpy(f_rest_features).float().to(self._device)
+
+        # Apply INVERSE activation functions to match internal representation
+        # opacity: PLY has sigmoid(x), we need x, so apply logit (inverse sigmoid)
+        self._opacity = torch.from_numpy(opacities).float().to(self._device)
+        self._opacity = self._inverse_sigmoid(torch.clamp(self._opacity, 0.001, 0.999))
+
+        # scaling: PLY has exp(x), we need x, so apply log
+        self._scaling = torch.from_numpy(scales).float().to(self._device)
+        self._scaling = torch.log(torch.clamp(self._scaling, min=1e-8))
+
+        # rotation: PLY has normalized quaternion, we store it as-is
+        self._rotation = torch.from_numpy(rotations).float().to(self._device)
+
+        # Initialize other tensors
+        num_points = self._xyz.shape[0]
+        self.max_radii2D = torch.zeros(num_points, device=self._device)
+        self.xyz_gradient_accum = torch.zeros((num_points, 1), device=self._device)
+        self.denom = torch.zeros((num_points, 1), device=self._device)
+
+        logger.debug(f"Loaded {num_points} gaussians from PLY")
+        logger.debug(f"  Features DC: {self._features_dc.shape}")
+        logger.debug(f"  Features rest: {self._features_rest.shape}")
+
     def capture(self):
         return (
             self.active_sh_degree,

@@ -25,14 +25,14 @@ class CLIPValidator:
     def __init__(
         self,
         device: str = "cuda",
-        threshold: float = 0.6,
+        threshold: float = 0.20,
         model_name: str = "ViT-L/14"
     ):
         """
         Args:
             device: CUDA device for inference
-            threshold: Minimum CLIP score to pass (network uses 0.6)
-            model_name: CLIP model variant (ViT-B/32 is fast and accurate)
+            threshold: Minimum CLIP score to pass (0.20 = safe cushion, raw CLIP scores range 0.15-0.35)
+            model_name: CLIP model variant (ViT-L/14 for validation)
         """
         self.device = device
         self.threshold = threshold
