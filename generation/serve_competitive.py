@@ -582,6 +582,43 @@ async def generate(prompt: str = Form()) -> Response:
         else:
             logger.info(f"  📊 Final stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB (CLIP validation disabled)")
 
+        # DIAGNOSTIC: Analyze PLY quality beyond just count
+        try:
+            from diagnostics.ply_analyzer import analyze_gaussian_quality, diagnose_ply_issues
+            from diagnostics.submission_tracker import get_tracker
+
+            ply_quality = analyze_gaussian_quality(ply_bytes)
+            issues = diagnose_ply_issues(ply_quality)
+
+            if ply_quality:
+                logger.info(f"  🔬 PLY Quality Analysis:")
+                logger.info(f"     Spatial variance: {ply_quality.get('spatial_variance', 0):.4f}")
+                logger.info(f"     Bbox volume: {ply_quality.get('bbox_volume', 0):.4f}")
+                logger.info(f"     Avg opacity: {ply_quality.get('avg_opacity', 0):.3f}")
+                logger.info(f"     Avg scale: {ply_quality.get('avg_scale', 0):.4f}")
+                logger.info(f"     Density variance: {ply_quality.get('density_variance', 0):.2f}")
+
+            if issues:
+                logger.warning(f"  ⚠️  Quality issues detected:")
+                for issue in issues:
+                    logger.warning(f"     {issue}")
+
+            # Log submission for correlation analysis
+            tracker = get_tracker()
+            submission_id = tracker.log_submission(
+                prompt=validation_prompt if app.state.clip_validator else text_prompt,
+                gaussian_count=timings['num_gaussians'],
+                file_size_mb=timings['file_size_mb'],
+                generation_time=t_total if 't_total' in locals() else (time.time() - t_start),
+                ply_quality_metrics=ply_quality,
+                clip_score_2d=flux_score if 'flux_score' in locals() else None,
+                clip_score_3d=score if 'score' in locals() else None,
+            )
+            logger.debug(f"  Logged submission: {submission_id}")
+
+        except Exception as e:
+            logger.error(f"  Diagnostic analysis failed: {e}")
+
         # Success!
         t_total = time.time() - t_start
 
