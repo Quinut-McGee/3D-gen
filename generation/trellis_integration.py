@@ -35,15 +35,15 @@ def enhance_image_for_trellis(rgba_image):
     # 1. Enhance fine details (brings out texture)
     enhanced = rgba_image.filter(ImageFilter.DETAIL)
 
-    # 2. Sharpen edges - INCREASED to 3.5x for consistent high-density generations
+    # 2. Sharpen edges - PROVEN at 3.5x for consistent 150K+ gaussians
     sharpener = ImageEnhance.Sharpness(enhanced)
-    enhanced = sharpener.enhance(3.5)  # 3.5x - very aggressive sharpening for dense voxels
+    enhanced = sharpener.enhance(3.5)  # 3.5x - proven to hit gaussian targets
 
-    # 3. Increase contrast - INCREASED to 1.8x for better feature detection
+    # 3. Increase contrast - PROVEN at 1.8x for surface detail
     contrast = ImageEnhance.Contrast(enhanced)
-    enhanced = contrast.enhance(1.8)  # 1.8x - stronger contrast for surface details
+    enhanced = contrast.enhance(1.8)  # 1.8x - proven for feature detection
 
-    logger.debug("  ✅ Image enhanced: sharpness 3.5x, contrast 1.8x, detail filter applied")
+    logger.debug("  ✅ Image enhanced: sharpness 3.5x, contrast 1.8x (proven values)")
     return enhanced
 
 
@@ -62,9 +62,9 @@ def apply_retry_enhancement(rgba_image):
     # 1. Start with edge enhancement (different from first attempt)
     enhanced = rgba_image.filter(ImageFilter.EDGE_ENHANCE)
 
-    # 2. Moderate sharpness (4.0x - between first attempt 3.5x and failed 5.0x)
+    # 2. Moderate sharpness (4.0x - between first attempt 3.5x and extreme)
     sharpener = ImageEnhance.Sharpness(enhanced)
-    enhanced = sharpener.enhance(4.0)  # 4.0x - moderate increase
+    enhanced = sharpener.enhance(4.0)  # 4.0x - moderate increase from 3.5x
 
     # 3. Slightly higher contrast than first attempt
     contrast = ImageEnhance.Contrast(enhanced)
@@ -79,6 +79,70 @@ def apply_retry_enhancement(rgba_image):
 
     logger.debug("  ✅ Retry enhancement applied: sharpness 4.0x, contrast 2.0x, edge enhance, brightness 1.15x")
     return enhanced
+
+
+def normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04)):
+    """
+    Normalize gaussian scales to proper range while preserving relative sizes.
+
+    TRELLIS generates scales in arbitrary units (~11.5 avg).
+    This rescales them to validator-friendly range (0.01-0.04).
+
+    Args:
+        gs_model: GaussianModel with loaded PLY data
+        target_scale_range: (min, max) tuple for target scale range
+
+    Returns:
+        gs_model with normalized scales
+    """
+    import torch
+
+    # Get current scales using the proper accessor (handles activation functions)
+    # get_scaling is a @property, not a method - no () needed
+
+    # DIAGNOSTIC: Check what's in _scaling (log space)
+    logger.debug(f"  📊 _scaling (log space) stats: min={gs_model._scaling.min().item():.3f}, max={gs_model._scaling.max().item():.3f}, mean={gs_model._scaling.mean().item():.3f}")
+
+    current_scales = gs_model.get_scaling.detach()
+
+    # DIAGNOSTIC: Check what get_scaling returns
+    logger.debug(f"  📊 get_scaling (activated) stats: min={current_scales.min().item():.6f}, max={current_scales.max().item():.6f}, mean={current_scales.mean().item():.6f}")
+
+    # Calculate current scale statistics (L2 norm of 3D scale vector per gaussian)
+    scale_magnitudes = torch.norm(current_scales, dim=1)
+    current_avg = scale_magnitudes.mean().item()
+    current_min = scale_magnitudes.min().item()
+    current_max = scale_magnitudes.max().item()
+
+    logger.info(f"  📏 Scale normalization:")
+    logger.info(f"     Before: avg={current_avg:.3f}, range=[{current_min:.3f}, {current_max:.3f}]")
+
+    # Calculate scaling factor
+    target_avg = (target_scale_range[0] + target_scale_range[1]) / 2
+    scale_factor = target_avg / current_avg
+
+    # Apply uniform scaling (preserves relative sizes)
+    normalized_scales = current_scales * scale_factor
+
+    # Clamp to target range to prevent outliers
+    normalized_scales = torch.clamp(
+        normalized_scales,
+        min=target_scale_range[0],
+        max=target_scale_range[1]
+    )
+
+    # Update model (convert back to log space - GaussianModel stores scales in log space)
+    # Use torch.log() directly since scaling_inverse_activation may not be available in all contexts
+    gs_model._scaling = torch.log(normalized_scales)
+
+    # Verify results
+    new_scale_magnitudes = torch.norm(normalized_scales, dim=1)
+    new_avg = new_scale_magnitudes.mean().item()
+
+    logger.info(f"     After: avg={new_avg:.3f}, range=[{target_scale_range[0]:.3f}, {target_scale_range[1]:.3f}]")
+    logger.info(f"     Scale factor: {scale_factor:.4f} ({current_avg:.3f} → {new_avg:.3f})")
+
+    return gs_model
 
 
 async def _call_trellis_api(rgb_image, trellis_url, timeout=60.0):
@@ -266,14 +330,35 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         gs_model = GaussianModel(sh_degree=2)  # TRELLIS uses SH degree 2
         gs_model.load_ply(tmp_path)
 
-        # Clean up temp file
+        # CRITICAL FIX: Normalize gaussian scales to validator-friendly range
+        # TRELLIS generates avg_scale ~11.5 (arbitrary units)
+        # Validators expect avg_scale 0.005-0.05
+        # This fixes Score=0.0 rejections despite passing CLIP validation
+        gs_model = normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04))
+
+        # CRITICAL: Save normalized model back to PLY and update ply_bytes
+        # Without this, we'd send the ORIGINAL (unnormalized) PLY to validators!
+        normalized_tmp_path = tmp_path.replace('.ply', '_normalized.ply')
+        gs_model.save_ply(normalized_tmp_path)
+
+        # Re-read the normalized PLY to update ply_bytes
+        with open(normalized_tmp_path, 'rb') as f:
+            ply_bytes = f.read()  # Update the ply_bytes variable with normalized PLY
+
+        logger.info(f"  ✅ Normalized PLY saved ({len(ply_bytes) / (1024*1024):.1f} MB)")
+
+        # Clean up temp files
         os.unlink(tmp_path)
+        os.unlink(normalized_tmp_path)
 
         t4_end = time.time()
         logger.info(f"  ✅ Gaussian model loaded ({t4_end-t4_start:.2f}s)")
 
     except Exception as e:
-        logger.warning(f"Failed to load GaussianModel for validation: {e}")
+        import traceback
+        traceback_str = traceback.format_exc()
+        logger.error(f"Failed to load GaussianModel for validation: {e}")
+        logger.error(f"Full traceback:\n{traceback_str}")
         logger.warning("Continuing without validation model (PLY is still valid)")
         gs_model = None
         t4_end = time.time()

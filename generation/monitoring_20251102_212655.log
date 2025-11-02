@@ -1,0 +1,1342 @@
+🚀 MONITORING STARTED: Sun Nov  2 09:26:55 PM UTC 2025
+Duration: 1 hour (3600s)
+Check interval: 60s
+Log file: /home/kobe/404-gen/v1/3D-gen/generation/monitoring_20251102_212655.log
+========================================
+
+[CHECK #1] Sun Nov  2 09:26:55 PM UTC 2025 - Remaining: 3600s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 17m    │ 7    │ online    │ 0%       │ 35.6gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 203.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:24:07.843 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=114, Completed=114, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3464, Queue=0/2
+2025-11-02 21:25:07.846 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=115, Completed=114, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3465, Queue=0/2
+2025-11-02 21:26:07.847 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=116, Completed=116, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3474, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:24:03.764[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.934, ELO=1140.1176073319039, Reward=3420.3528, Observations=3
+[34m2025-11-02 21:25:15.352[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.6071594953536987, AvgScore=0.888, ELO=1315.9556251485246, Reward=9211.6894, Observations=7
+[34m2025-11-02 21:25:41.933[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.929, ELO=1008.1142733300055, Reward=2016.2285, Observations=2
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7447MB / 24564MB (30%)
+
+[CHECK #2] Sun Nov  2 09:27:56 PM UTC 2025 - Remaining: 3539s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 18m    │ 7    │ online    │ 0%       │ 35.6gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 205.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:27:54.508 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 124,512 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 21:25:07.846 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=115, Completed=114, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3465, Queue=0/2
+2025-11-02 21:26:07.847 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=116, Completed=116, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3474, Queue=0/2
+2025-11-02 21:27:07.852 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=117, Completed=116, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3474, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:25:41.933[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.929, ELO=1008.1142733300055, Reward=2016.2285, Observations=2
+[34m2025-11-02 21:27:35.919[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1315.9556251485246, Reward=9211.6894, Observations=7
+[34m2025-11-02 21:27:54.967[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6971MB / 24564MB (28%)
+
+[CHECK #3] Sun Nov  2 09:28:57 PM UTC 2025 - Remaining: 3478s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 19m    │ 7    │ online    │ 0%       │ 35.6gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 205.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.5gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:27:54.508 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 124,512 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 21:26:07.847 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=116, Completed=116, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3474, Queue=0/2
+2025-11-02 21:27:07.852 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=117, Completed=116, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3474, Queue=0/2
+2025-11-02 21:28:07.854 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=572, PollCooldowns=3494, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:27:35.919[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1315.9556251485246, Reward=9211.6894, Observations=7
+[34m2025-11-02 21:27:54.967[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:28:05.971[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.898, ELO=1066.9690306640077, Reward=5334.8452, Observations=5
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6899MB / 24564MB (28%)
+
+[CHECK #4] Sun Nov  2 09:29:58 PM UTC 2025 - Remaining: 3417s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 20m    │ 7    │ online    │ 0%       │ 35.6gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 205.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.5gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:27:54.508 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 124,512 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 21:27:07.852 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=117, Completed=116, Failed=0, Validated=0, Rejected=56, DupesPrevented=570, PollCooldowns=3474, Queue=0/2
+2025-11-02 21:28:07.854 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=572, PollCooldowns=3494, Queue=0/2
+2025-11-02 21:29:07.858 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=574, PollCooldowns=3506, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:27:35.919[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1315.9556251485246, Reward=9211.6894, Observations=7
+[34m2025-11-02 21:27:54.967[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:28:05.971[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.898, ELO=1066.9690306640077, Reward=5334.8452, Observations=5
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6899MB / 24564MB (28%)
+
+[CHECK #5] Sun Nov  2 09:30:58 PM UTC 2025 - Remaining: 3357s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 21m    │ 7    │ online    │ 0%       │ 35.6gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 205.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.5gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:27:54.508 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 124,512 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 21:28:07.854 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=572, PollCooldowns=3494, Queue=0/2
+2025-11-02 21:29:07.858 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=574, PollCooldowns=3506, Queue=0/2
+2025-11-02 21:30:07.861 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=576, PollCooldowns=3516, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:27:35.919[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1315.9556251485246, Reward=9211.6894, Observations=7
+[34m2025-11-02 21:27:54.967[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:28:05.971[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.898, ELO=1066.9690306640077, Reward=5334.8452, Observations=5
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6899MB / 24564MB (28%)
+
+[CHECK #6] Sun Nov  2 09:31:59 PM UTC 2025 - Remaining: 3296s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 22m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 166.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.5gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:29:07.858 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=574, PollCooldowns=3506, Queue=0/2
+2025-11-02 21:30:07.861 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=576, PollCooldowns=3516, Queue=0/2
+2025-11-02 21:31:07.863 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=578, PollCooldowns=3526, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:27:54.967[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:28:05.971[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.898, ELO=1066.9690306640077, Reward=5334.8452, Observations=5
+[34m2025-11-02 21:31:50.985[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1101.981913073412, Reward=7713.8734, Observations=7
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7027MB / 24564MB (28%)
+
+[CHECK #7] Sun Nov  2 09:33:00 PM UTC 2025 - Remaining: 3235s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 23m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 166.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.5gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:30:07.861 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=576, PollCooldowns=3516, Queue=0/2
+2025-11-02 21:31:07.863 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=578, PollCooldowns=3526, Queue=0/2
+2025-11-02 21:32:07.866 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=120, Completed=120, Failed=0, Validated=0, Rejected=57, DupesPrevented=580, PollCooldowns=3541, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:27:54.967[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:28:05.971[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.898, ELO=1066.9690306640077, Reward=5334.8452, Observations=5
+[34m2025-11-02 21:31:50.985[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1101.981913073412, Reward=7713.8734, Observations=7
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7159MB / 24564MB (29%)
+
+[CHECK #8] Sun Nov  2 09:34:01 PM UTC 2025 - Remaining: 3174s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 24m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 197.4mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:31:07.863 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=119, Completed=119, Failed=0, Validated=0, Rejected=57, DupesPrevented=578, PollCooldowns=3526, Queue=0/2
+2025-11-02 21:32:07.866 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=120, Completed=120, Failed=0, Validated=0, Rejected=57, DupesPrevented=580, PollCooldowns=3541, Queue=0/2
+2025-11-02 21:33:07.869 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=120, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3551, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:28:05.971[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.898, ELO=1066.9690306640077, Reward=5334.8452, Observations=5
+[34m2025-11-02 21:31:50.985[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1101.981913073412, Reward=7713.8734, Observations=7
+[34m2025-11-02 21:33:19.237[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [128]: Score=0.7896580696105957, AvgScore=0.909, ELO=1098.8796486395042, Reward=5494.3982, Observations=5
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6961MB / 24564MB (28%)
+
+[CHECK #9] Sun Nov  2 09:35:02 PM UTC 2025 - Remaining: 3113s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 25m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 197.4mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:32:07.866 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=120, Completed=120, Failed=0, Validated=0, Rejected=57, DupesPrevented=580, PollCooldowns=3541, Queue=0/2
+2025-11-02 21:33:07.869 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=120, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3551, Queue=0/2
+2025-11-02 21:34:07.871 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3554, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:28:05.971[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.898, ELO=1066.9690306640077, Reward=5334.8452, Observations=5
+[34m2025-11-02 21:31:50.985[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1101.981913073412, Reward=7713.8734, Observations=7
+[34m2025-11-02 21:33:19.237[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [128]: Score=0.7896580696105957, AvgScore=0.909, ELO=1098.8796486395042, Reward=5494.3982, Observations=5
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6961MB / 24564MB (28%)
+
+[CHECK #10] Sun Nov  2 09:36:02 PM UTC 2025 - Remaining: 3053s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 26m    │ 7    │ online    │ 100%     │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 197.4mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:33:07.869 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=120, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3551, Queue=0/2
+2025-11-02 21:34:07.871 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3554, Queue=0/2
+2025-11-02 21:35:07.873 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3554, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:28:05.971[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.898, ELO=1066.9690306640077, Reward=5334.8452, Observations=5
+[34m2025-11-02 21:31:50.985[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1101.981913073412, Reward=7713.8734, Observations=7
+[34m2025-11-02 21:33:19.237[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [128]: Score=0.7896580696105957, AvgScore=0.909, ELO=1098.8796486395042, Reward=5494.3982, Observations=5
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7035MB / 24564MB (28%)
+
+[CHECK #11] Sun Nov  2 09:37:03 PM UTC 2025 - Remaining: 2992s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 27m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:34:07.871 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3554, Queue=0/2
+2025-11-02 21:35:07.873 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3554, Queue=0/2
+2025-11-02 21:36:07.875 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=122, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3555, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:31:50.985[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1101.981913073412, Reward=7713.8734, Observations=7
+[34m2025-11-02 21:33:19.237[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [128]: Score=0.7896580696105957, AvgScore=0.909, ELO=1098.8796486395042, Reward=5494.3982, Observations=5
+[34m2025-11-02 21:36:28.326[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [199]: Score=0.0, AvgScore=0.934, ELO=1251.7011279620806, Reward=2503.4023, Observations=2
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7011MB / 24564MB (28%)
+
+[CHECK #12] Sun Nov  2 09:38:04 PM UTC 2025 - Remaining: 2931s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 28m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:35:07.873 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=121, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3554, Queue=0/2
+2025-11-02 21:36:07.875 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=122, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3555, Queue=0/2
+2025-11-02 21:37:07.877 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=122, Completed=122, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3559, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:31:50.985[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1101.981913073412, Reward=7713.8734, Observations=7
+[34m2025-11-02 21:33:19.237[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [128]: Score=0.7896580696105957, AvgScore=0.909, ELO=1098.8796486395042, Reward=5494.3982, Observations=5
+[34m2025-11-02 21:36:28.326[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [199]: Score=0.0, AvgScore=0.934, ELO=1251.7011279620806, Reward=2503.4023, Observations=2
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7145MB / 24564MB (29%)
+
+[CHECK #13] Sun Nov  2 09:39:05 PM UTC 2025 - Remaining: 2870s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 29m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:36:07.875 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=122, Completed=121, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3555, Queue=0/2
+2025-11-02 21:37:07.877 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=122, Completed=122, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3559, Queue=0/2
+2025-11-02 21:38:07.879 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=123, Completed=122, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3561, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:36:28.326[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [199]: Score=0.0, AvgScore=0.934, ELO=1251.7011279620806, Reward=2503.4023, Observations=2
+[34m2025-11-02 21:38:21.058[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [128]: Score=0.0, AvgScore=0.909, ELO=1098.8796486395042, Reward=5494.3982, Observations=5
+[34m2025-11-02 21:38:57.085[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.934, ELO=1125.470936637914, Reward=3376.4128, Observations=3
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6805MB / 24564MB (27%)
+
+[CHECK #14] Sun Nov  2 09:40:05 PM UTC 2025 - Remaining: 2810s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 30m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.5gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:39:31.813 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.143 < 0.15
+  ⚠️  miner errors:
+2025-11-02 21:37:07.877 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=122, Completed=122, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3559, Queue=0/2
+2025-11-02 21:38:07.879 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=123, Completed=122, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3561, Queue=0/2
+2025-11-02 21:39:07.881 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=124, Completed=124, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3569, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:38:21.058[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [128]: Score=0.0, AvgScore=0.909, ELO=1098.8796486395042, Reward=5494.3982, Observations=5
+[34m2025-11-02 21:38:57.085[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.934, ELO=1125.470936637914, Reward=3376.4128, Observations=3
+[34m2025-11-02 21:39:32.241[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6877MB / 24564MB (27%)
+
+[CHECK #15] Sun Nov  2 09:41:06 PM UTC 2025 - Remaining: 2749s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 31m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:39:31.813 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.143 < 0.15
+  ⚠️  miner errors:
+2025-11-02 21:38:07.879 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=123, Completed=122, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3561, Queue=0/2
+2025-11-02 21:39:07.881 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=124, Completed=124, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3569, Queue=0/2
+2025-11-02 21:40:07.883 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=125, Completed=125, Failed=0, Validated=0, Rejected=58, DupesPrevented=582, PollCooldowns=3579, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:38:57.085[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.934, ELO=1125.470936637914, Reward=3376.4128, Observations=3
+[34m2025-11-02 21:39:32.241[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:40:49.770[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.929, ELO=991.4020945615525, Reward=1982.8042, Observations=2
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6843MB / 24564MB (27%)
+
+[CHECK #16] Sun Nov  2 09:42:07 PM UTC 2025 - Remaining: 2688s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 32m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:39:31.813 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.143 < 0.15
+  ⚠️  miner errors:
+2025-11-02 21:39:07.881 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=124, Completed=124, Failed=0, Validated=0, Rejected=57, DupesPrevented=581, PollCooldowns=3569, Queue=0/2
+2025-11-02 21:40:07.883 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=125, Completed=125, Failed=0, Validated=0, Rejected=58, DupesPrevented=582, PollCooldowns=3579, Queue=0/2
+2025-11-02 21:41:07.885 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=126, Completed=126, Failed=0, Validated=0, Rejected=58, DupesPrevented=584, PollCooldowns=3593, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:38:57.085[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.934, ELO=1125.470936637914, Reward=3376.4128, Observations=3
+[34m2025-11-02 21:39:32.241[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:40:49.770[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.929, ELO=991.4020945615525, Reward=1982.8042, Observations=2
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6843MB / 24564MB (27%)
+
+[CHECK #17] Sun Nov  2 09:43:07 PM UTC 2025 - Remaining: 2628s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 33m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:39:31.813 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.143 < 0.15
+  ⚠️  miner errors:
+2025-11-02 21:41:07.885 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=126, Completed=126, Failed=0, Validated=0, Rejected=58, DupesPrevented=584, PollCooldowns=3593, Queue=0/2
+2025-11-02 21:42:07.887 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=126, Completed=126, Failed=0, Validated=0, Rejected=58, DupesPrevented=586, PollCooldowns=3603, Queue=0/2
+2025-11-02 21:43:07.888 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=127, Completed=126, Failed=0, Validated=0, Rejected=58, DupesPrevented=588, PollCooldowns=3615, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:38:57.085[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.934, ELO=1125.470936637914, Reward=3376.4128, Observations=3
+[34m2025-11-02 21:39:32.241[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:40:49.770[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.929, ELO=991.4020945615525, Reward=1982.8042, Observations=2
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6843MB / 24564MB (27%)
+
+[CHECK #18] Sun Nov  2 09:44:08 PM UTC 2025 - Remaining: 2567s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 34m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 151.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:42:07.887 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=126, Completed=126, Failed=0, Validated=0, Rejected=58, DupesPrevented=586, PollCooldowns=3603, Queue=0/2
+2025-11-02 21:43:07.888 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=127, Completed=126, Failed=0, Validated=0, Rejected=58, DupesPrevented=588, PollCooldowns=3615, Queue=0/2
+2025-11-02 21:44:07.890 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=127, Completed=127, Failed=0, Validated=0, Rejected=58, DupesPrevented=590, PollCooldowns=3627, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:39:32.241[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:40:49.770[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.929, ELO=991.4020945615525, Reward=1982.8042, Observations=2
+[34m2025-11-02 21:43:19.751[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.6298375129699707, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7041MB / 24564MB (28%)
+
+[CHECK #19] Sun Nov  2 09:45:09 PM UTC 2025 - Remaining: 2506s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 35m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 153.3mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:43:07.888 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=127, Completed=126, Failed=0, Validated=0, Rejected=58, DupesPrevented=588, PollCooldowns=3615, Queue=0/2
+2025-11-02 21:44:07.890 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=127, Completed=127, Failed=0, Validated=0, Rejected=58, DupesPrevented=590, PollCooldowns=3627, Queue=0/2
+2025-11-02 21:45:07.893 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=128, Completed=127, Failed=0, Validated=0, Rejected=58, DupesPrevented=591, PollCooldowns=3637, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:39:32.241[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:40:49.770[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.929, ELO=991.4020945615525, Reward=1982.8042, Observations=2
+[34m2025-11-02 21:43:19.751[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.6298375129699707, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 8487MB / 24564MB (34%)
+
+[CHECK #20] Sun Nov  2 09:46:10 PM UTC 2025 - Remaining: 2445s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 36m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:44:07.890 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=127, Completed=127, Failed=0, Validated=0, Rejected=58, DupesPrevented=590, PollCooldowns=3627, Queue=0/2
+2025-11-02 21:45:07.893 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=128, Completed=127, Failed=0, Validated=0, Rejected=58, DupesPrevented=591, PollCooldowns=3637, Queue=0/2
+2025-11-02 21:46:07.895 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=128, Completed=128, Failed=0, Validated=0, Rejected=58, DupesPrevented=591, PollCooldowns=3639, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:40:49.770[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.929, ELO=991.4020945615525, Reward=1982.8042, Observations=2
+[34m2025-11-02 21:43:19.751[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.6298375129699707, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+[34m2025-11-02 21:45:14.016[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7027MB / 24564MB (28%)
+
+[CHECK #21] Sun Nov  2 09:47:11 PM UTC 2025 - Remaining: 2384s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 37m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:46:47.494 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 74,240 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 21:45:07.893 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=128, Completed=127, Failed=0, Validated=0, Rejected=58, DupesPrevented=591, PollCooldowns=3637, Queue=0/2
+2025-11-02 21:46:07.895 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=128, Completed=128, Failed=0, Validated=0, Rejected=58, DupesPrevented=591, PollCooldowns=3639, Queue=0/2
+2025-11-02 21:47:07.897 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=129, Completed=129, Failed=0, Validated=0, Rejected=59, DupesPrevented=592, PollCooldowns=3646, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:43:19.751[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.6298375129699707, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+[34m2025-11-02 21:45:14.016[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+[34m2025-11-02 21:46:47.989[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6823MB / 24564MB (27%)
+
+[CHECK #22] Sun Nov  2 09:48:11 PM UTC 2025 - Remaining: 2324s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 38m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 100%     │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:46:47.494 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 74,240 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 21:46:07.895 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=128, Completed=128, Failed=0, Validated=0, Rejected=58, DupesPrevented=591, PollCooldowns=3639, Queue=0/2
+2025-11-02 21:47:07.897 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=129, Completed=129, Failed=0, Validated=0, Rejected=59, DupesPrevented=592, PollCooldowns=3646, Queue=0/2
+2025-11-02 21:48:07.902 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=129, Failed=0, Validated=0, Rejected=59, DupesPrevented=594, PollCooldowns=3656, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:43:19.751[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.6298375129699707, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+[34m2025-11-02 21:45:14.016[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+[34m2025-11-02 21:46:47.989[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6893MB / 24564MB (28%)
+
+[CHECK #23] Sun Nov  2 09:49:12 PM UTC 2025 - Remaining: 2263s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 39m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:46:47.494 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 74,240 gaussians (minimum: 150,000, retry failed)
+2025-11-02 21:48:19.305 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.130 < 0.15
+  ⚠️  miner errors:
+2025-11-02 21:47:07.897 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=129, Completed=129, Failed=0, Validated=0, Rejected=59, DupesPrevented=592, PollCooldowns=3646, Queue=0/2
+2025-11-02 21:48:07.902 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=129, Failed=0, Validated=0, Rejected=59, DupesPrevented=594, PollCooldowns=3656, Queue=0/2
+2025-11-02 21:49:07.906 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=598, PollCooldowns=3676, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:45:14.016[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+[34m2025-11-02 21:46:47.989[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:48:19.702[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6951MB / 24564MB (28%)
+
+[CHECK #24] Sun Nov  2 09:50:13 PM UTC 2025 - Remaining: 2202s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 40m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:46:47.494 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 74,240 gaussians (minimum: 150,000, retry failed)
+2025-11-02 21:48:19.305 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.130 < 0.15
+  ⚠️  miner errors:
+2025-11-02 21:48:07.902 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=129, Failed=0, Validated=0, Rejected=59, DupesPrevented=594, PollCooldowns=3656, Queue=0/2
+2025-11-02 21:49:07.906 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=598, PollCooldowns=3676, Queue=0/2
+2025-11-02 21:50:07.908 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=602, PollCooldowns=3696, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:45:14.016[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+[34m2025-11-02 21:46:47.989[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:48:19.702[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6951MB / 24564MB (28%)
+
+[CHECK #25] Sun Nov  2 09:51:13 PM UTC 2025 - Remaining: 2142s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 41m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 211.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:46:47.494 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 74,240 gaussians (minimum: 150,000, retry failed)
+2025-11-02 21:48:19.305 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.130 < 0.15
+  ⚠️  miner errors:
+2025-11-02 21:49:07.906 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=598, PollCooldowns=3676, Queue=0/2
+2025-11-02 21:50:07.908 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=602, PollCooldowns=3696, Queue=0/2
+2025-11-02 21:51:07.912 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=131, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=606, PollCooldowns=3714, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:45:14.016[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+[34m2025-11-02 21:46:47.989[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:48:19.702[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6951MB / 24564MB (28%)
+
+[CHECK #26] Sun Nov  2 09:52:14 PM UTC 2025 - Remaining: 2081s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 42m    │ 7    │ online    │ 100%     │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 166.9mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 21:48:19.305 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.130 < 0.15
+  ⚠️  miner errors:
+2025-11-02 21:50:07.908 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=130, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=602, PollCooldowns=3696, Queue=0/2
+2025-11-02 21:51:07.912 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=131, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=606, PollCooldowns=3714, Queue=0/2
+2025-11-02 21:52:07.918 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=132, Completed=131, Failed=0, Validated=0, Rejected=60, DupesPrevented=609, PollCooldowns=3739, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:46:47.989[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:48:19.702[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:51:26.006[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [199]: Score=0.0, AvgScore=0.934, ELO=1218.769566014493, Reward=2437.5391, Observations=2
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7009MB / 24564MB (28%)
+
+[CHECK #27] Sun Nov  2 09:53:15 PM UTC 2025 - Remaining: 2020s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 43m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 179.6mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:51:07.912 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=131, Completed=130, Failed=0, Validated=0, Rejected=60, DupesPrevented=606, PollCooldowns=3714, Queue=0/2
+2025-11-02 21:52:07.918 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=132, Completed=131, Failed=0, Validated=0, Rejected=60, DupesPrevented=609, PollCooldowns=3739, Queue=0/2
+2025-11-02 21:53:07.921 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=133, Completed=132, Failed=0, Validated=0, Rejected=60, DupesPrevented=611, PollCooldowns=3756, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:48:19.702[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:51:26.006[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [199]: Score=0.0, AvgScore=0.934, ELO=1218.769566014493, Reward=2437.5391, Observations=2
+[34m2025-11-02 21:52:26.527[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1088.4064889663086, Reward=6530.4389, Observations=6
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6795MB / 24564MB (27%)
+
+[CHECK #28] Sun Nov  2 09:54:16 PM UTC 2025 - Remaining: 1959s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 44m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 189.3mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:52:07.918 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=132, Completed=131, Failed=0, Validated=0, Rejected=60, DupesPrevented=609, PollCooldowns=3739, Queue=0/2
+2025-11-02 21:53:07.921 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=133, Completed=132, Failed=0, Validated=0, Rejected=60, DupesPrevented=611, PollCooldowns=3756, Queue=0/2
+2025-11-02 21:54:07.924 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=135, Completed=134, Failed=0, Validated=0, Rejected=61, DupesPrevented=613, PollCooldowns=3781, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:52:26.527[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1088.4064889663086, Reward=6530.4389, Observations=6
+[34m2025-11-02 21:53:21.133[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:54:05.846[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.6710155606269836, AvgScore=0.920, ELO=1109.7259007791495, Reward=4438.9036, Observations=4
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7027MB / 24564MB (28%)
+
+[CHECK #29] Sun Nov  2 09:55:16 PM UTC 2025 - Remaining: 1899s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 45m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 167.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:53:07.921 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=133, Completed=132, Failed=0, Validated=0, Rejected=60, DupesPrevented=611, PollCooldowns=3756, Queue=0/2
+2025-11-02 21:54:07.924 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=135, Completed=134, Failed=0, Validated=0, Rejected=61, DupesPrevented=613, PollCooldowns=3781, Queue=0/2
+2025-11-02 21:55:07.928 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=135, Completed=135, Failed=0, Validated=0, Rejected=61, DupesPrevented=616, PollCooldowns=3795, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:53:21.133[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:54:05.846[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.6710155606269836, AvgScore=0.920, ELO=1109.7259007791495, Reward=4438.9036, Observations=4
+[34m2025-11-02 21:54:25.506[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7153MB / 24564MB (29%)
+
+[CHECK #30] Sun Nov  2 09:56:17 PM UTC 2025 - Remaining: 1838s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 46m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 167.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:54:07.924 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=135, Completed=134, Failed=0, Validated=0, Rejected=61, DupesPrevented=613, PollCooldowns=3781, Queue=0/2
+2025-11-02 21:55:07.928 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=135, Completed=135, Failed=0, Validated=0, Rejected=61, DupesPrevented=616, PollCooldowns=3795, Queue=0/2
+2025-11-02 21:56:07.931 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=136, Completed=136, Failed=0, Validated=0, Rejected=62, DupesPrevented=619, PollCooldowns=3811, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:54:05.846[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.6710155606269836, AvgScore=0.920, ELO=1109.7259007791495, Reward=4438.9036, Observations=4
+[34m2025-11-02 21:54:25.506[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+[34m2025-11-02 21:55:54.918[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6851MB / 24564MB (27%)
+
+[CHECK #31] Sun Nov  2 09:57:18 PM UTC 2025 - Remaining: 1777s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 47m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 151.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:55:07.928 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=135, Completed=135, Failed=0, Validated=0, Rejected=61, DupesPrevented=616, PollCooldowns=3795, Queue=0/2
+2025-11-02 21:56:07.931 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=136, Completed=136, Failed=0, Validated=0, Rejected=62, DupesPrevented=619, PollCooldowns=3811, Queue=0/2
+2025-11-02 21:57:07.935 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=137, Completed=136, Failed=0, Validated=0, Rejected=62, DupesPrevented=623, PollCooldowns=3832, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:54:25.506[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+[34m2025-11-02 21:55:54.918[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:57:15.440[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6973MB / 24564MB (28%)
+
+[CHECK #32] Sun Nov  2 09:58:18 PM UTC 2025 - Remaining: 1717s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 48m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 151.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:56:07.931 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=136, Completed=136, Failed=0, Validated=0, Rejected=62, DupesPrevented=619, PollCooldowns=3811, Queue=0/2
+2025-11-02 21:57:07.935 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=137, Completed=136, Failed=0, Validated=0, Rejected=62, DupesPrevented=623, PollCooldowns=3832, Queue=0/2
+2025-11-02 21:58:07.939 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=137, Completed=137, Failed=0, Validated=0, Rejected=62, DupesPrevented=627, PollCooldowns=3854, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:54:25.506[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.884, ELO=1046.1167104461617, Reward=6276.7003, Observations=6
+[34m2025-11-02 21:55:54.918[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:57:15.440[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6973MB / 24564MB (28%)
+
+[CHECK #33] Sun Nov  2 09:59:19 PM UTC 2025 - Remaining: 1656s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 49m    │ 7    │ online    │ 0%       │ 35.7gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 151.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:57:07.935 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=137, Completed=136, Failed=0, Validated=0, Rejected=62, DupesPrevented=623, PollCooldowns=3832, Queue=0/2
+2025-11-02 21:58:07.939 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=137, Completed=137, Failed=0, Validated=0, Rejected=62, DupesPrevented=627, PollCooldowns=3854, Queue=0/2
+2025-11-02 21:59:07.940 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=138, Failed=0, Validated=0, Rejected=63, DupesPrevented=630, PollCooldowns=3879, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:55:54.918[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:57:15.440[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+[34m2025-11-02 21:59:06.365[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7067MB / 24564MB (28%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #34] Sun Nov  2 10:00:20 PM UTC 2025 - Remaining: 1595s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 50m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 213.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:58:07.939 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=137, Completed=137, Failed=0, Validated=0, Rejected=62, DupesPrevented=627, PollCooldowns=3854, Queue=0/2
+2025-11-02 21:59:07.940 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=138, Failed=0, Validated=0, Rejected=63, DupesPrevented=630, PollCooldowns=3879, Queue=0/2
+2025-11-02 22:00:07.944 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=139, Failed=0, Validated=0, Rejected=63, DupesPrevented=633, PollCooldowns=3904, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:57:15.440[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+[34m2025-11-02 21:59:06.365[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:59:30.890[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1109.7259007791495, Reward=2219.4518, Observations=2
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6941MB / 24564MB (28%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #35] Sun Nov  2 10:01:20 PM UTC 2025 - Remaining: 1535s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 51m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 213.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 21:59:07.940 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=138, Failed=0, Validated=0, Rejected=63, DupesPrevented=630, PollCooldowns=3879, Queue=0/2
+2025-11-02 22:00:07.944 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=139, Failed=0, Validated=0, Rejected=63, DupesPrevented=633, PollCooldowns=3904, Queue=0/2
+2025-11-02 22:01:07.947 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=139, Failed=0, Validated=0, Rejected=63, DupesPrevented=637, PollCooldowns=3924, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:57:15.440[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1240.573193209688, Reward=8684.0124, Observations=7
+[34m2025-11-02 21:59:06.365[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:59:30.890[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1109.7259007791495, Reward=2219.4518, Observations=2
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6973MB / 24564MB (28%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #36] Sun Nov  2 10:02:21 PM UTC 2025 - Remaining: 1474s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 52m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 199.1mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:00:07.944 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=139, Failed=0, Validated=0, Rejected=63, DupesPrevented=633, PollCooldowns=3904, Queue=0/2
+2025-11-02 22:01:07.947 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=139, Failed=0, Validated=0, Rejected=63, DupesPrevented=637, PollCooldowns=3924, Queue=0/2
+2025-11-02 22:02:07.949 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=639, PollCooldowns=3939, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:59:06.365[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:59:30.890[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1109.7259007791495, Reward=2219.4518, Observations=2
+[34m2025-11-02 22:01:40.948[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.6690722703933716, AvgScore=0.916, ELO=980.7201944224312, Reward=1961.4404, Observations=2
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7251MB / 24564MB (29%)
+
+[CHECK #37] Sun Nov  2 10:03:22 PM UTC 2025 - Remaining: 1413s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 53m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 199.1mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:01:07.947 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=139, Completed=139, Failed=0, Validated=0, Rejected=63, DupesPrevented=637, PollCooldowns=3924, Queue=0/2
+2025-11-02 22:02:07.949 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=639, PollCooldowns=3939, Queue=0/2
+2025-11-02 22:03:07.953 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=641, PollCooldowns=3948, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:59:06.365[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:59:30.890[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1109.7259007791495, Reward=2219.4518, Observations=2
+[34m2025-11-02 22:01:40.948[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.6690722703933716, AvgScore=0.916, ELO=980.7201944224312, Reward=1961.4404, Observations=2
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7251MB / 24564MB (29%)
+
+[CHECK #38] Sun Nov  2 10:04:23 PM UTC 2025 - Remaining: 1352s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 54m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 199.1mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:02:07.949 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=639, PollCooldowns=3939, Queue=0/2
+2025-11-02 22:03:07.953 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=641, PollCooldowns=3948, Queue=0/2
+2025-11-02 22:04:07.957 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=643, PollCooldowns=3958, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:59:06.365[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 21:59:30.890[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1109.7259007791495, Reward=2219.4518, Observations=2
+[34m2025-11-02 22:01:40.948[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.6690722703933716, AvgScore=0.916, ELO=980.7201944224312, Reward=1961.4404, Observations=2
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7411MB / 24564MB (30%)
+
+[CHECK #39] Sun Nov  2 10:05:24 PM UTC 2025 - Remaining: 1291s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 55m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 199.1mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:03:07.953 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=641, PollCooldowns=3948, Queue=0/2
+2025-11-02 22:04:07.957 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=643, PollCooldowns=3958, Queue=0/2
+2025-11-02 22:05:07.960 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=141, Completed=141, Failed=0, Validated=0, Rejected=64, DupesPrevented=644, PollCooldowns=3968, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:59:30.890[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1109.7259007791495, Reward=2219.4518, Observations=2
+[34m2025-11-02 22:01:40.948[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.6690722703933716, AvgScore=0.916, ELO=980.7201944224312, Reward=1961.4404, Observations=2
+[34m2025-11-02 22:04:43.490[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7389MB / 24564MB (30%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #40] Sun Nov  2 10:06:24 PM UTC 2025 - Remaining: 1231s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 56m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 199.1mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:04:07.957 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=140, Completed=140, Failed=0, Validated=0, Rejected=63, DupesPrevented=643, PollCooldowns=3958, Queue=0/2
+2025-11-02 22:05:07.960 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=141, Completed=141, Failed=0, Validated=0, Rejected=64, DupesPrevented=644, PollCooldowns=3968, Queue=0/2
+2025-11-02 22:06:07.962 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=142, Completed=141, Failed=0, Validated=0, Rejected=64, DupesPrevented=646, PollCooldowns=3978, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 21:59:30.890[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1109.7259007791495, Reward=2219.4518, Observations=2
+[34m2025-11-02 22:01:40.948[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.6690722703933716, AvgScore=0.916, ELO=980.7201944224312, Reward=1961.4404, Observations=2
+[34m2025-11-02 22:04:43.490[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7109MB / 24564MB (28%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #41] Sun Nov  2 10:07:25 PM UTC 2025 - Remaining: 1170s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 57m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 151.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:07:21.410 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 144,192 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:05:07.960 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=141, Completed=141, Failed=0, Validated=0, Rejected=64, DupesPrevented=644, PollCooldowns=3968, Queue=0/2
+2025-11-02 22:06:07.962 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=142, Completed=141, Failed=0, Validated=0, Rejected=64, DupesPrevented=646, PollCooldowns=3978, Queue=0/2
+2025-11-02 22:07:07.966 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=144, Completed=143, Failed=0, Validated=0, Rejected=65, DupesPrevented=650, PollCooldowns=4007, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:06:29.220[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:06:51.299[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.6347008347511292, AvgScore=0.902, ELO=980.7201944224312, Reward=2942.1606, Observations=3
+[34m2025-11-02 22:07:21.850[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7105MB / 24564MB (28%)
+
+[CHECK #42] Sun Nov  2 10:08:25 PM UTC 2025 - Remaining: 1110s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 58m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 151.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:07:21.410 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 144,192 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:06:07.962 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=142, Completed=141, Failed=0, Validated=0, Rejected=64, DupesPrevented=646, PollCooldowns=3978, Queue=0/2
+2025-11-02 22:07:07.966 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=144, Completed=143, Failed=0, Validated=0, Rejected=65, DupesPrevented=650, PollCooldowns=4007, Queue=0/2
+2025-11-02 22:08:07.967 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=144, Completed=144, Failed=0, Validated=0, Rejected=66, DupesPrevented=656, PollCooldowns=4038, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:06:29.220[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:06:51.299[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.6347008347511292, AvgScore=0.902, ELO=980.7201944224312, Reward=2942.1606, Observations=3
+[34m2025-11-02 22:07:21.850[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7105MB / 24564MB (28%)
+
+[CHECK #43] Sun Nov  2 10:09:26 PM UTC 2025 - Remaining: 1049s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 59m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 151.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:07:21.410 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 144,192 gaussians (minimum: 150,000, retry failed)
+2025-11-02 22:09:08.682 | WARNING  | __main__:generate:600 -   ⚠️  VALIDATION FAILED: CLIP=0.150 < 0.15
+  ⚠️  miner errors:
+2025-11-02 22:07:07.966 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=144, Completed=143, Failed=0, Validated=0, Rejected=65, DupesPrevented=650, PollCooldowns=4007, Queue=0/2
+2025-11-02 22:08:07.967 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=144, Completed=144, Failed=0, Validated=0, Rejected=66, DupesPrevented=656, PollCooldowns=4038, Queue=0/2
+2025-11-02 22:09:07.971 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=146, Completed=144, Failed=0, Validated=0, Rejected=66, DupesPrevented=662, PollCooldowns=4069, Queue=1/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:06:51.299[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.6347008347511292, AvgScore=0.902, ELO=980.7201944224312, Reward=2942.1606, Observations=3
+[34m2025-11-02 22:07:21.850[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:09:08.862[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  2 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 15825MB / 24564MB (64%)
+
+[CHECK #44] Sun Nov  2 10:10:27 PM UTC 2025 - Remaining: 988s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 60m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 194.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:08:07.967 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=144, Completed=144, Failed=0, Validated=0, Rejected=66, DupesPrevented=656, PollCooldowns=4038, Queue=0/2
+2025-11-02 22:09:07.971 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=146, Completed=144, Failed=0, Validated=0, Rejected=66, DupesPrevented=662, PollCooldowns=4069, Queue=1/2
+2025-11-02 22:10:07.974 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=147, Completed=146, Failed=0, Validated=0, Rejected=67, DupesPrevented=669, PollCooldowns=4115, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:09:08.862[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:09:37.687[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.884, ELO=1031.0741230142426, Reward=6186.4447, Observations=6
+[34m2025-11-02 22:10:24.726[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7145MB / 24564MB (29%)
+
+[CHECK #45] Sun Nov  2 10:11:27 PM UTC 2025 - Remaining: 928s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 61m    │ 7    │ online    │ 0%       │ 35.8gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 194.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:09:07.971 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=146, Completed=144, Failed=0, Validated=0, Rejected=66, DupesPrevented=662, PollCooldowns=4069, Queue=1/2
+2025-11-02 22:10:07.974 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=147, Completed=146, Failed=0, Validated=0, Rejected=67, DupesPrevented=669, PollCooldowns=4115, Queue=0/2
+2025-11-02 22:11:07.976 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=147, Completed=147, Failed=0, Validated=0, Rejected=68, DupesPrevented=677, PollCooldowns=4151, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:09:08.862[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:09:37.687[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.884, ELO=1031.0741230142426, Reward=6186.4447, Observations=6
+[34m2025-11-02 22:10:24.726[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7177MB / 24564MB (29%)
+
+[CHECK #46] Sun Nov  2 10:12:28 PM UTC 2025 - Remaining: 867s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 62m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 212.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:10:07.974 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=147, Completed=146, Failed=0, Validated=0, Rejected=67, DupesPrevented=669, PollCooldowns=4115, Queue=0/2
+2025-11-02 22:11:07.976 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=147, Completed=147, Failed=0, Validated=0, Rejected=68, DupesPrevented=677, PollCooldowns=4151, Queue=0/2
+2025-11-02 22:12:07.977 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=149, Completed=148, Failed=0, Validated=0, Rejected=68, DupesPrevented=684, PollCooldowns=4196, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:10:24.726[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:11:49.642[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.902, ELO=980.7201944224312, Reward=2942.1606, Observations=3
+[34m2025-11-02 22:12:21.844[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [199]: Score=0.0, AvgScore=0.934, ELO=1159.248079163358, Reward=2318.4962, Observations=2
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7137MB / 24564MB (29%)
+
+[CHECK #47] Sun Nov  2 10:13:29 PM UTC 2025 - Remaining: 806s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 63m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 2h     │ 168… │ online    │ 0%       │ 212.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:11:07.976 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=147, Completed=147, Failed=0, Validated=0, Rejected=68, DupesPrevented=677, PollCooldowns=4151, Queue=0/2
+2025-11-02 22:12:07.977 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=149, Completed=148, Failed=0, Validated=0, Rejected=68, DupesPrevented=684, PollCooldowns=4196, Queue=0/2
+2025-11-02 22:13:07.980 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=150, Completed=149, Failed=0, Validated=0, Rejected=68, DupesPrevented=688, PollCooldowns=4227, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:11:49.642[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.902, ELO=980.7201944224312, Reward=2942.1606, Observations=3
+[34m2025-11-02 22:12:21.844[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [199]: Score=0.0, AvgScore=0.934, ELO=1159.248079163358, Reward=2318.4962, Observations=2
+[34m2025-11-02 22:13:12.880[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1078.2209642470687, Reward=6469.3258, Observations=6
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7287MB / 24564MB (29%)
+
+[CHECK #48] Sun Nov  2 10:14:30 PM UTC 2025 - Remaining: 745s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 64m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 212.8mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:12:07.977 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=149, Completed=148, Failed=0, Validated=0, Rejected=68, DupesPrevented=684, PollCooldowns=4196, Queue=0/2
+2025-11-02 22:13:07.980 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=150, Completed=149, Failed=0, Validated=0, Rejected=68, DupesPrevented=688, PollCooldowns=4227, Queue=0/2
+2025-11-02 22:14:07.982 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=151, Completed=150, Failed=0, Validated=0, Rejected=68, DupesPrevented=691, PollCooldowns=4248, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:11:49.642[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [81]: Score=0.0, AvgScore=0.902, ELO=980.7201944224312, Reward=2942.1606, Observations=3
+[34m2025-11-02 22:12:21.844[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [199]: Score=0.0, AvgScore=0.934, ELO=1159.248079163358, Reward=2318.4962, Observations=2
+[34m2025-11-02 22:13:12.880[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1078.2209642470687, Reward=6469.3258, Observations=6
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7209MB / 24564MB (29%)
+
+[CHECK #49] Sun Nov  2 10:15:30 PM UTC 2025 - Remaining: 685s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 65m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 2h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:13:07.980 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=150, Completed=149, Failed=0, Validated=0, Rejected=68, DupesPrevented=688, PollCooldowns=4227, Queue=0/2
+2025-11-02 22:14:07.982 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=151, Completed=150, Failed=0, Validated=0, Rejected=68, DupesPrevented=691, PollCooldowns=4248, Queue=0/2
+2025-11-02 22:15:07.984 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=152, Completed=152, Failed=0, Validated=0, Rejected=68, DupesPrevented=696, PollCooldowns=4278, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:13:12.880[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [212]: Score=0.0, AvgScore=0.881, ELO=1078.2209642470687, Reward=6469.3258, Observations=6
+[34m2025-11-02 22:14:55.929[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1223.0864832780499, Reward=8561.6054, Observations=7
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 7039MB / 24564MB (28%)
+
+[CHECK #50] Sun Nov  2 10:16:31 PM UTC 2025 - Remaining: 624s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 66m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:16:17.179 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 76,608 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:14:07.982 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=151, Completed=150, Failed=0, Validated=0, Rejected=68, DupesPrevented=691, PollCooldowns=4248, Queue=0/2
+2025-11-02 22:15:07.984 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=152, Completed=152, Failed=0, Validated=0, Rejected=68, DupesPrevented=696, PollCooldowns=4278, Queue=0/2
+2025-11-02 22:16:07.988 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=152, Failed=0, Validated=0, Rejected=68, DupesPrevented=697, PollCooldowns=4292, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:14:55.929[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1223.0864832780499, Reward=8561.6054, Observations=7
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6825MB / 24564MB (27%)
+
+[CHECK #51] Sun Nov  2 10:17:32 PM UTC 2025 - Remaining: 563s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 67m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:16:17.179 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 76,608 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:15:07.984 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=152, Completed=152, Failed=0, Validated=0, Rejected=68, DupesPrevented=696, PollCooldowns=4278, Queue=0/2
+2025-11-02 22:16:07.988 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=152, Failed=0, Validated=0, Rejected=68, DupesPrevented=697, PollCooldowns=4292, Queue=0/2
+2025-11-02 22:17:07.992 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=699, PollCooldowns=4302, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:14:55.929[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1223.0864832780499, Reward=8561.6054, Observations=7
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6825MB / 24564MB (27%)
+
+[CHECK #52] Sun Nov  2 10:18:32 PM UTC 2025 - Remaining: 503s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 68m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:16:17.179 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 76,608 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:16:07.988 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=152, Failed=0, Validated=0, Rejected=68, DupesPrevented=697, PollCooldowns=4292, Queue=0/2
+2025-11-02 22:17:07.992 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=699, PollCooldowns=4302, Queue=0/2
+2025-11-02 22:18:07.997 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=701, PollCooldowns=4312, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:14:55.929[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1223.0864832780499, Reward=8561.6054, Observations=7
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6825MB / 24564MB (27%)
+
+[CHECK #53] Sun Nov  2 10:19:33 PM UTC 2025 - Remaining: 442s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 69m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:16:17.179 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 76,608 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:17:07.992 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=699, PollCooldowns=4302, Queue=0/2
+2025-11-02 22:18:07.997 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=701, PollCooldowns=4312, Queue=0/2
+2025-11-02 22:19:07.998 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=703, PollCooldowns=4322, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:14:55.929[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1223.0864832780499, Reward=8561.6054, Observations=7
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6825MB / 24564MB (27%)
+
+[CHECK #54] Sun Nov  2 10:20:34 PM UTC 2025 - Remaining: 381s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 70m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:16:17.179 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 76,608 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:18:07.997 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=701, PollCooldowns=4312, Queue=0/2
+2025-11-02 22:19:07.998 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=703, PollCooldowns=4322, Queue=0/2
+2025-11-02 22:20:07.999 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=705, PollCooldowns=4332, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:14:55.929[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1223.0864832780499, Reward=8561.6054, Observations=7
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6825MB / 24564MB (27%)
+
+[CHECK #55] Sun Nov  2 10:21:35 PM UTC 2025 - Remaining: 320s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 71m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:16:17.179 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 76,608 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:19:07.998 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=703, PollCooldowns=4322, Queue=0/2
+2025-11-02 22:20:07.999 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=705, PollCooldowns=4332, Queue=0/2
+2025-11-02 22:21:08.005 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=707, PollCooldowns=4341, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:14:55.929[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [49]: Score=0.0, AvgScore=0.888, ELO=1223.0864832780499, Reward=8561.6054, Observations=7
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6837MB / 24564MB (27%)
+
+[CHECK #56] Sun Nov  2 10:22:35 PM UTC 2025 - Remaining: 260s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 72m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:16:17.179 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 76,608 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:20:07.999 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=705, PollCooldowns=4332, Queue=0/2
+2025-11-02 22:21:08.005 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=707, PollCooldowns=4341, Queue=0/2
+2025-11-02 22:22:08.009 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=708, PollCooldowns=4351, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:21:54.887[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6967MB / 24564MB (28%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #57] Sun Nov  2 10:23:36 PM UTC 2025 - Remaining: 199s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 73m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  gen-worker-1 errors:
+2025-11-02 22:16:17.179 | WARNING  | __main__:generate:471 -   Details: Insufficient gaussian density: 76,608 gaussians (minimum: 150,000, retry failed)
+  ⚠️  miner errors:
+2025-11-02 22:21:08.005 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=153, Completed=153, Failed=0, Validated=0, Rejected=69, DupesPrevented=707, PollCooldowns=4341, Queue=0/2
+2025-11-02 22:22:08.009 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=708, PollCooldowns=4351, Queue=0/2
+2025-11-02 22:23:08.013 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=710, PollCooldowns=4361, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:21:54.887[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 6967MB / 24564MB (28%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #58] Sun Nov  2 10:24:37 PM UTC 2025 - Remaining: 138s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 74m    │ 7    │ online    │ 100%     │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 185.0mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:22:08.009 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=708, PollCooldowns=4351, Queue=0/2
+2025-11-02 22:23:08.013 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=710, PollCooldowns=4361, Queue=0/2
+2025-11-02 22:24:08.016 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=712, PollCooldowns=4371, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:15:21.471[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [27]: Score=0.0, AvgScore=0.920, ELO=1097.1002871616465, Reward=1097.1003, Observations=1
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:21:54.887[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 9475MB / 24564MB (38%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #59] Sun Nov  2 10:25:38 PM UTC 2025 - Remaining: 77s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 75m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 210.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:23:08.013 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=710, PollCooldowns=4361, Queue=0/2
+2025-11-02 22:24:08.016 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=712, PollCooldowns=4371, Queue=0/2
+2025-11-02 22:25:08.023 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=155, Completed=155, Failed=0, Validated=0, Rejected=70, DupesPrevented=715, PollCooldowns=4389, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:21:54.887[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:24:42.950[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.884, ELO=1015.72319417003, Reward=6094.3392, Observations=6
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 8147MB / 24564MB (33%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+[CHECK #60] Sun Nov  2 10:26:39 PM UTC 2025 - Remaining: 16s
+  📊 Service Status:
+│ 8  │ gen-worker-1            │ default     │ N/A     │ fork    │ 2613272  │ 76m    │ 7    │ online    │ 0%       │ 36.0gb   │ kobe     │ disabled │
+│ 5  │ miner-sn17-mainnet      │ default     │ N/A     │ fork    │ 2188999  │ 3h     │ 168… │ online    │ 0%       │ 210.5mb  │ kobe     │ disabled │
+│ 0  │ trellis-microservice    │ default     │ N/A     │ fork    │ 2195483  │ 3h     │ 5    │ online    │ 0%       │ 1.6gb    │ kobe     │ disabled │
+  🔍 Checking for errors...
+  ⚠️  miner errors:
+2025-11-02 22:24:08.016 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=154, Completed=154, Failed=0, Validated=0, Rejected=70, DupesPrevented=712, PollCooldowns=4371, Queue=0/2
+2025-11-02 22:25:08.023 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=155, Completed=155, Failed=0, Validated=0, Rejected=70, DupesPrevented=715, PollCooldowns=4389, Queue=0/2
+2025-11-02 22:26:08.027 | INFO     | miner.async_task_manager:_stats_logger:413 - 📊 AsyncTaskManager stats: Pulled=155, Completed=155, Failed=0, Validated=0, Rejected=70, DupesPrevented=717, PollCooldowns=4400, Queue=0/2
+  💰 Recent validator scores (last 60s):
+[34m2025-11-02 22:16:17.674[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:21:54.887[39m | [1m[33m    WARNING     [39m[49m[0m | bittensor:competitive_workers.py:45 | Generation failed or too small (0 bytes), SKIPPING submission to avoid Score=0.0 penalty
+[34m2025-11-02 22:24:42.950[39m | [1m[37m      INFO      [39m[49m[0m | bittensor:competitive_workers.py:201 | Feedback from [142]: Score=0.0, AvgScore=0.884, ELO=1015.72319417003, Reward=6094.3392, Observations=6
+  ⚠️  3 Score=0.0 detected in last check
+  💾 Memory usage:
+    8: │
+    5: │
+    0: │
+  🎮 GPU memory: 8147MB / 24564MB (33%)
+  ⏱️  Timeout safety check triggered: 1 times
+
+
+========================================
+⏰ MONITORING COMPLETE: Sun Nov  2 10:27:39 PM UTC 2025
+Duration: 3644 seconds
+Total checks: 60
+Errors found: 85
+Restarts detected: 0
+Good scores: 22
+Bad scores (0.0): 158
+========================================
+
+Monitoring log saved to: /home/kobe/404-gen/v1/3D-gen/generation/monitoring_20251102_212655.log
