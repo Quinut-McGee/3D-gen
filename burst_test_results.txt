@@ -1,0 +1,59 @@
+==========================================
+BURST LOAD TEST
+==========================================
+Sending 10 rapid-fire requests (simulating validator burst)...
+Start time: Sun Nov  2 02:06:37 PM UTC 2025
+
+Request 1 started at 1762092397.189424425
+Request 8 started at 1762092397.190910246
+Request 2 started at 1762092397.190834466
+Request 3 started at 1762092397.191430374
+Request 6 started at 1762092397.191494329
+Request 4 started at 1762092397.191706948
+Request 5 started at 1762092397.191916411
+Request 7 started at 1762092397.192155085
+Request 10 started at 1762092397.192148186
+Request 9 started at 1762092397.192232309
+422
+422
+422
+Request 1 completed at 1762092397.246260570
+422
+422
+422
+422
+422
+422
+Request 8 completed at 1762092397.248835716
+422
+Request 6 completed at 1762092397.249312970
+Request 3 completed at 1762092397.250074697
+Request 4 completed at 1762092397.250892721
+Request 2 completed at 1762092397.251004840
+Request 7 completed at 1762092397.251487403
+Request 9 completed at 1762092397.252149898
+Request 5 completed at 1762092397.252484930
+Request 10 completed at 1762092397.252513759
+
+All requests completed. Checking results...
+
+  Request 1: ❌ Failed (size: 118 bytes)
+  Request 2: ❌ Failed (size: 118 bytes)
+  Request 3: ❌ Failed (size: 118 bytes)
+  Request 4: ❌ Failed (size: 118 bytes)
+  Request 5: ❌ Failed (size: 118 bytes)
+  Request 6: ❌ Failed (size: 118 bytes)
+  Request 7: ❌ Failed (size: 118 bytes)
+  Request 8: ❌ Failed (size: 118 bytes)
+  Request 9: ❌ Failed (size: 118 bytes)
+  Request 10: ❌ Failed (size: 119 bytes)
+
+Results:
+  Successful: 0/10
+  TRELLIS Restarts: │
+restarts → │
+restarts
+
+./burst_test.sh: line 54: [: │
+restarts: integer expression expected
+✅ TRELLIS remained stable during burst

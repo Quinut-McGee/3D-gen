@@ -1,0 +1,106 @@
+==========================================
+MEMORY LEAK TEST
+==========================================
+Monitoring memory usage over 20 generations...
+
+Generation 1/20:
+  GPU Memory before: 7531MB
+  GPU Memory after:  7113MB
+  ✅ Memory stable (delta: -418MB)
+
+Generation 2/20:
+  GPU Memory before: 7113MB
+  GPU Memory after:  8015MB
+  ⚠️  WARNING: Memory increased by 902MB
+
+Generation 3/20:
+  GPU Memory before: 8015MB
+  GPU Memory after:  8335MB
+  ✅ Memory stable (delta: 320MB)
+
+Generation 4/20:
+  GPU Memory before: 8335MB
+  GPU Memory after:  7587MB
+  ✅ Memory stable (delta: -748MB)
+
+Generation 5/20:
+  GPU Memory before: 7587MB
+  GPU Memory after:  7515MB
+  ✅ Memory stable (delta: -72MB)
+
+Generation 6/20:
+  GPU Memory before: 7515MB
+  GPU Memory after:  7375MB
+  ✅ Memory stable (delta: -140MB)
+
+Generation 7/20:
+  GPU Memory before: 7375MB
+  GPU Memory after:  7021MB
+  ✅ Memory stable (delta: -354MB)
+
+Generation 8/20:
+  GPU Memory before: 7021MB
+  GPU Memory after:  7353MB
+  ✅ Memory stable (delta: 332MB)
+
+Generation 9/20:
+  GPU Memory before: 7353MB
+  GPU Memory after:  7325MB
+  ✅ Memory stable (delta: -28MB)
+
+Generation 10/20:
+  GPU Memory before: 7325MB
+  GPU Memory after:  7225MB
+  ✅ Memory stable (delta: -100MB)
+
+Generation 11/20:
+  GPU Memory before: 7225MB
+  GPU Memory after:  7037MB
+  ✅ Memory stable (delta: -188MB)
+
+Generation 12/20:
+  GPU Memory before: 7037MB
+  GPU Memory after:  7655MB
+  ⚠️  WARNING: Memory increased by 618MB
+
+Generation 13/20:
+  GPU Memory before: 7655MB
+  GPU Memory after:  6823MB
+  ✅ Memory stable (delta: -832MB)
+
+Generation 14/20:
+  GPU Memory before: 6823MB
+  GPU Memory after:  6979MB
+  ✅ Memory stable (delta: 156MB)
+
+Generation 15/20:
+  GPU Memory before: 6979MB
+  GPU Memory after:  7679MB
+  ⚠️  WARNING: Memory increased by 700MB
+
+Generation 16/20:
+  GPU Memory before: 7679MB
+  GPU Memory after:  7929MB
+  ✅ Memory stable (delta: 250MB)
+
+Generation 17/20:
+  GPU Memory before: 7929MB
+  GPU Memory after:  7415MB
+  ✅ Memory stable (delta: -514MB)
+
+Generation 18/20:
+  GPU Memory before: 7415MB
+  GPU Memory after:  7589MB
+  ✅ Memory stable (delta: 174MB)
+
+Generation 19/20:
+  GPU Memory before: 7589MB
+  GPU Memory after:  8243MB
+  ⚠️  WARNING: Memory increased by 654MB
+
+Generation 20/20:
+  GPU Memory before: 8243MB
+  GPU Memory after:  8203MB
+  ✅ Memory stable (delta: -40MB)
+
+Memory leak test complete. Check if memory grew unbounded.

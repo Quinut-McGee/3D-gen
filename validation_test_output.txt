@@ -1,0 +1,258 @@
+==========================================
+TRELLIS VALIDATION TEST - 30 Generations
+==========================================
+Start time: Sun Nov  2 04:01:55 AM UTC 2025
+
+----------------------------------------
+Test 1/30: 'simple wooden cube'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 18.854115s
+  Size: 32083360 bytes
+  ✅ SUCCESS: 30.5MB
+----------------------------------------
+Test 2/30: 'smooth metal sphere'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 28.420822s
+  Size: 89216417 bytes
+  ✅ SUCCESS: 85.0MB
+----------------------------------------
+Test 3/30: 'clear glass bottle'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 25.692261s
+  Size: 36613792 bytes
+  ✅ SUCCESS: 34.9MB
+----------------------------------------
+Test 4/30: 'rough stone pillar'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 29.800682s
+  Size: 46192544 bytes
+  ✅ SUCCESS: 44.0MB
+----------------------------------------
+Test 5/30: 'red sports car'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 23.091428s
+  Size: 24550048 bytes
+  ✅ SUCCESS: 23.4MB
+----------------------------------------
+Test 6/30: 'blue office chair'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 27.172465s
+  Size: 32000672 bytes
+  ✅ SUCCESS: 30.5MB
+----------------------------------------
+Test 7/30: 'green dining table'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 21.353552s
+  Size: 26978464 bytes
+  ✅ SUCCESS: 25.7MB
+----------------------------------------
+Test 8/30: 'yellow desk lamp'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 21.366975s
+  Size: 12542880 bytes
+  ✅ SUCCESS: 11.9MB
+----------------------------------------
+Test 9/30: 'ornate golden crown'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 23.372999s
+  Size: 30847392 bytes
+  ✅ SUCCESS: 29.4MB
+----------------------------------------
+Test 10/30: 'simple silver ring'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 23.872467s
+  Size: 30625440 bytes
+  ✅ SUCCESS: 29.2MB
+----------------------------------------
+Test 11/30: 'rustic wooden barrel'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 22.300855s
+  Size: 30951840 bytes
+  ✅ SUCCESS: 29.5MB
+----------------------------------------
+Test 12/30: 'modern ceramic vase'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 22.162314s
+  Size: 20433056 bytes
+  ✅ SUCCESS: 19.4MB
+----------------------------------------
+Test 13/30: 'ancient stone statue'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 25.416032s
+  Size: 51700000 bytes
+  ✅ SUCCESS: 49.3MB
+----------------------------------------
+Test 14/30: 'sleek smartphone'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 21.022879s
+  Size: 17414944 bytes
+  ✅ SUCCESS: 16.6MB
+----------------------------------------
+Test 15/30: 'vintage film camera'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 27.225075s
+  Size: 33983008 bytes
+  ✅ SUCCESS: 32.4MB
+----------------------------------------
+Test 16/30: 'polished marble column'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 21.314077s
+  Size: 13404576 bytes
+  ✅ SUCCESS: 12.7MB
+----------------------------------------
+Test 17/30: 'weathered brick wall section'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 26.344554s
+  Size: 39211936 bytes
+  ✅ SUCCESS: 37.3MB
+----------------------------------------
+Test 18/30: 'shiny copper teapot'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 21.031034s
+  Size: 28029472 bytes
+  ✅ SUCCESS: 26.7MB
+----------------------------------------
+Test 19/30: 'frosted glass sphere'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 29.325730s
+  Size: 80588577 bytes
+  ✅ SUCCESS: 76.8MB
+----------------------------------------
+Test 20/30: 'carved wooden box'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 26.664547s
+  Size: 35652000 bytes
+  ✅ SUCCESS: 34.0MB
+----------------------------------------
+Test 21/30: 'metal industrial pipe'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 28.504870s
+  Size: 51271328 bytes
+  ✅ SUCCESS: 48.8MB
+----------------------------------------
+Test 22/30: 'ceramic coffee mug'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 26.857029s
+  Size: 38989984 bytes
+  ✅ SUCCESS: 37.1MB
+----------------------------------------
+Test 23/30: 'leather armchair'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 26.671771s
+  Size: 35351712 bytes
+  ✅ SUCCESS: 33.7MB
+----------------------------------------
+Test 24/30: 'chrome bicycle handlebar'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 27.131275s
+  Size: 14671008 bytes
+  ✅ SUCCESS: 13.9MB
+----------------------------------------
+Test 25/30: 'woven wicker basket'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 23.970028s
+  Size: 28314528 bytes
+  ✅ SUCCESS: 27.0MB
+----------------------------------------
+Test 26/30: 'painted wooden toy'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 25.363514s
+  Size: 23148704 bytes
+  ✅ SUCCESS: 22.0MB
+----------------------------------------
+Test 27/30: 'stainless steel pot'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 20.762431s
+  Size: 17042848 bytes
+  ✅ SUCCESS: 16.2MB
+----------------------------------------
+Test 28/30: 'terra cotta flower pot'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 23.342049s
+  Size: 21414432 bytes
+  ✅ SUCCESS: 20.4MB
+----------------------------------------
+Test 29/30: 'bronze small statue'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 27.003191s
+  Size: 32000672 bytes
+  ✅ SUCCESS: 30.5MB
+----------------------------------------
+Test 30/30: 'plastic storage container'
+----------------------------------------
+
+  HTTP Status: 200
+  Total time: 26.292937s
+  Size: 31913632 bytes
+  ✅ SUCCESS: 30.4MB
+
+==========================================
+TEST COMPLETE
+==========================================
+End time: Sun Nov  2 04:16:48 AM UTC 2025
+
+Results:
+  Total: 30
+  Successful: 30
+  Failed: 0
+  Success Rate: 100.0%
+
+Analyzing logs for detailed metrics...
