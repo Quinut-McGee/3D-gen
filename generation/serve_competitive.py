@@ -74,6 +74,36 @@ def get_args():
         default=False,
         help="Enable CLIP validation (recommended for competition)"
     )
+    parser.add_argument(
+        "--enable-scale-normalization",
+        action="store_true",
+        default=False,
+        help="Enable scale normalization correction (diagnostic mode: default OFF)"
+    )
+    parser.add_argument(
+        "--enable-prompt-enhancement",
+        action="store_true",
+        default=False,
+        help="Enable prompt enhancement with quality hints (diagnostic mode: default OFF)"
+    )
+    parser.add_argument(
+        "--enable-image-enhancement",
+        action="store_true",
+        default=False,
+        help="Enable image enhancement before TRELLIS (diagnostic mode: default OFF)"
+    )
+    parser.add_argument(
+        "--min-gaussian-count",
+        type=int,
+        default=0,
+        help="Minimum gaussian count threshold (0 = disabled, 150000 = strict quality gate)"
+    )
+    parser.add_argument(
+        "--background-threshold",
+        type=float,
+        default=0.5,
+        help="Background removal threshold (0.5 = rembg default, 0.3 = softer edges)"
+    )
     return parser.parse_args()
 
 
@@ -381,9 +411,16 @@ async def generate(prompt: str = Form()) -> Response:
                 # - 8B params with 3 text encoders (T5, CLIP-L, CLIP-G)
                 # - Better prompt adherence and depth perception
                 # - Expected CLIP scores: 0.60-0.75 (vs FLUX 0.24-0.27)
-                # Enhance prompt with detail hints for denser TRELLIS voxel generation
-                enhanced_prompt = enhance_prompt_for_detail(prompt)
-    
+
+                # DIAGNOSTIC MODE: Prompt enhancement is OPTIONAL
+                # By default (enable_prompt_enhancement=False), we use raw prompts (like official template)
+                if args.enable_prompt_enhancement:
+                    enhanced_prompt = enhance_prompt_for_detail(prompt)
+                    logger.debug(f"  📝 Prompt enhanced: '{prompt}' → '{enhanced_prompt}'")
+                else:
+                    enhanced_prompt = prompt
+                    logger.debug(f"  📝 Using raw prompt (no enhancement): '{prompt}'")
+
                 # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
                 image = app.state.flux_generator.generate(
                     prompt=enhanced_prompt,
@@ -406,13 +443,14 @@ async def generate(prompt: str = Form()) -> Response:
     
                 # Step 2: Background removal with rembg
                 logger.info("  [2/4] Removing background with rembg...")
-    
-                # Note: Background remover automatically moves to GPU and back to CPU
-                # Lower threshold (0.3 vs 0.5) for softer edges, reduces TRELLIS artifacts
+
+                # DIAGNOSTIC MODE: Threshold is configurable
+                # default=0.5 (rembg standard), can test 0.3 (softer edges) if needed
                 rgba_image = app.state.background_remover.remove_background(
                     image,
-                    threshold=0.3  # Optimization #6: Softer edges for better 3D conversion
+                    threshold=args.background_threshold
                 )
+                logger.debug(f"  Background removal threshold: {args.background_threshold}")
     
                 t3 = time.time()
                 logger.info(f"  ✅ Background removal done ({t3-t2:.2f}s)")
@@ -433,7 +471,10 @@ async def generate(prompt: str = Form()) -> Response:
                 ply_bytes, gs_model, timings = await generate_with_trellis(
                     rgba_image=rgba_image,
                     prompt=prompt,
-                    trellis_url="http://localhost:10008"
+                    trellis_url="http://localhost:10008",
+                    enable_scale_normalization=args.enable_scale_normalization,
+                    enable_image_enhancement=args.enable_image_enhancement,
+                    min_gaussians=args.min_gaussian_count
                 )
     
                 # Cache for validation
@@ -445,24 +486,9 @@ async def generate(prompt: str = Form()) -> Response:
                 logger.info(f"     Generated {len(ply_bytes)/1024:.1f} KB Gaussian Splat PLY")
                 logger.info(f"     📊 Generation stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB")
 
-                # TIMING SAFETY CHECK: Ensure we have time for validation before 30s deadline
-                total_time_so_far = t4 - t_start
-                VALIDATOR_TIMEOUT = 30.0  # Validators timeout at 30s
-                VALIDATION_BUFFER = 3.0   # Reserve 3s for validation (typically takes 1-2s)
-
-                if total_time_so_far > (VALIDATOR_TIMEOUT - VALIDATION_BUFFER):
-                    logger.warning(f"⏱️  Generation time {total_time_so_far:.1f}s exceeds safe limit ({VALIDATOR_TIMEOUT - VALIDATION_BUFFER:.0f}s)")
-                    logger.warning(f"   Skipping submission to avoid 30s validator timeout (automatic Score=0.0)")
-                    logger.warning(f"   Prompt: '{prompt[:100]}...'")
-                    cleanup_memory()
-                    # Return empty response to skip this task
-                    empty_buffer = BytesIO()
-                    return Response(
-                        empty_buffer.getvalue(),
-                        media_type="application/octet-stream",
-                        status_code=200,  # 200 but empty = skip this task
-                        headers={"X-Skip-Reason": "Timing safety check - would exceed 30s limit"}
-                    )
+                # REMOVED: Timeout safety check (diagnostic mode - submit all generations)
+                # Previously rejected generations >27s to avoid validator timeout
+                # Now submitting everything to gather diagnostic data
 
             except ValueError as e:
                 # Quality gate: Sparse generation detected
@@ -640,7 +666,7 @@ async def generate(prompt: str = Form()) -> Response:
                 # Log submission for correlation analysis
                 tracker = get_tracker()
                 submission_id = tracker.log_submission(
-                    prompt=validation_prompt if app.state.clip_validator else text_prompt,
+                    prompt=prompt,
                     gaussian_count=timings['num_gaussians'],
                     file_size_mb=timings['file_size_mb'],
                     generation_time=t_total if 't_total' in locals() else (time.time() - t_start),
@@ -716,7 +742,12 @@ async def health_check():
         "config": {
             "flux_steps": args.flux_steps,
             "validation_enabled": args.enable_validation,
-            "validation_threshold": args.validation_threshold if args.enable_validation else None
+            "validation_threshold": args.validation_threshold if args.enable_validation else None,
+            "scale_normalization_enabled": args.enable_scale_normalization,
+            "prompt_enhancement_enabled": args.enable_prompt_enhancement,
+            "image_enhancement_enabled": args.enable_image_enhancement,
+            "min_gaussian_count": args.min_gaussian_count,
+            "background_threshold": args.background_threshold
         }
     }
 

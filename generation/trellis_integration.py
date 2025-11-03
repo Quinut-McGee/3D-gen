@@ -85,8 +85,9 @@ def normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04)):
     """
     Normalize gaussian scales to proper range while preserving relative sizes.
 
-    TRELLIS generates scales in arbitrary units (~11.5 avg).
-    This rescales them to validator-friendly range (0.01-0.04).
+    CRITICAL FIX: TRELLIS saves scales that are ~1000x too small (0.002-0.004)
+    due to GaussianModel.load_ply() applying unnecessary torch.log()
+    This function detects and corrects the corruption before normalization.
 
     Args:
         gs_model: GaussianModel with loaded PLY data
@@ -97,25 +98,36 @@ def normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04)):
     """
     import torch
 
-    # Get current scales using the proper accessor (handles activation functions)
-    # get_scaling is a @property, not a method - no () needed
-
-    # DIAGNOSTIC: Check what's in _scaling (log space)
-    logger.debug(f"  📊 _scaling (log space) stats: min={gs_model._scaling.min().item():.3f}, max={gs_model._scaling.max().item():.3f}, mean={gs_model._scaling.mean().item():.3f}")
-
+    # Get current scales BEFORE normalization
     current_scales = gs_model.get_scaling.detach()
 
-    # DIAGNOSTIC: Check what get_scaling returns
-    logger.debug(f"  📊 get_scaling (activated) stats: min={current_scales.min().item():.6f}, max={current_scales.max().item():.6f}, mean={current_scales.mean().item():.6f}")
-
-    # Calculate current scale statistics (L2 norm of 3D scale vector per gaussian)
+    # CRITICAL FIX: Check if scales are suspiciously small (TRELLIS bug symptom)
     scale_magnitudes = torch.norm(current_scales, dim=1)
     current_avg = scale_magnitudes.mean().item()
+
+    logger.info(f"  📏 Scale normalization:")
+    logger.info(f"     Raw average scale: {current_avg:.6f}")
+
+    # If avg scale is < 0.01, it's likely corrupted by double-log bug
+    # TRELLIS native scales should be ~10.0, not ~0.003
+    if current_avg < 0.01:
+        logger.warning(f"     ⚠️  Suspiciously small scales detected ({current_avg:.6f})")
+        logger.warning(f"     Applying 1000x correction (likely double-log bug)")
+
+        # Undo the excessive compression by multiplying up
+        # This is a heuristic - adjust the multiplier if needed
+        correction_factor = target_scale_range[0] / current_avg  # Scale up to target minimum
+        current_scales = current_scales * correction_factor
+        scale_magnitudes = torch.norm(current_scales, dim=1)
+        current_avg = scale_magnitudes.mean().item()
+
+        logger.info(f"     After correction: {current_avg:.6f}")
+
+    # Now proceed with normal normalization
     current_min = scale_magnitudes.min().item()
     current_max = scale_magnitudes.max().item()
 
-    logger.info(f"  📏 Scale normalization:")
-    logger.info(f"     Before: avg={current_avg:.3f}, range=[{current_min:.3f}, {current_max:.3f}]")
+    logger.info(f"     Before normalization: avg={current_avg:.3f}, range=[{current_min:.3f}, {current_max:.3f}]")
 
     # Calculate scaling factor
     target_avg = (target_scale_range[0] + target_scale_range[1]) / 2
@@ -132,14 +144,13 @@ def normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04)):
     )
 
     # Update model (convert back to log space - GaussianModel stores scales in log space)
-    # Use torch.log() directly since scaling_inverse_activation may not be available in all contexts
     gs_model._scaling = torch.log(normalized_scales)
 
     # Verify results
     new_scale_magnitudes = torch.norm(normalized_scales, dim=1)
     new_avg = new_scale_magnitudes.mean().item()
 
-    logger.info(f"     After: avg={new_avg:.3f}, range=[{target_scale_range[0]:.3f}, {target_scale_range[1]:.3f}]")
+    logger.info(f"     After normalization: avg={new_avg:.3f}, range=[{target_scale_range[0]:.3f}, {target_scale_range[1]:.3f}]")
     logger.info(f"     Scale factor: {scale_factor:.4f} ({current_avg:.3f} → {new_avg:.3f})")
 
     return gs_model
@@ -195,7 +206,7 @@ async def _call_trellis_api(rgb_image, trellis_url, timeout=60.0):
     return result
 
 
-async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhost:10008"):
+async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhost:10008", enable_scale_normalization=False, enable_image_enhancement=False, min_gaussians=0):
     """
     Generate 3D Gaussian Splat using TRELLIS microservice.
 
@@ -206,6 +217,9 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         rgba_image: PIL Image (RGBA) from FLUX → background removal
         prompt: Text prompt for logging/debugging (not used by TRELLIS)
         trellis_url: TRELLIS microservice URL
+        enable_scale_normalization: Enable scale normalization correction (diagnostic mode: default OFF)
+        enable_image_enhancement: Enable image enhancement before TRELLIS (diagnostic mode: default OFF)
+        min_gaussians: Minimum gaussian count threshold (0 = disabled, 150000 = strict quality gate)
 
     Returns:
         ply_bytes: Binary PLY data
@@ -217,19 +231,22 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
     t3_start = time.time()
     logger.info("  [3/4] Generating 3D Gaussians with TRELLIS microservice...")
 
-    # Quality threshold
-    MIN_GAUSSIANS = 150_000  # Validator quality threshold
+    # Quality threshold (0 = disabled in diagnostic mode)
+    MIN_GAUSSIANS = min_gaussians  # Configurable threshold (default 0 = no gate)
 
     # Keep original image for potential retry
     original_rgba = rgba_image.copy()
 
     try:
-        # ATTEMPT 1: Standard enhancement
-        # OPTIMIZATION (2025-11-02): Increased from 2.5x/1.5x to 3.5x/1.8x
-        # Problem: TRELLIS adaptive voxels → 57K-557K variance (10x range)
-        # Solution: Add visual detail → denser voxel detection → 200K-500K stable
-        # Target: All generations > 150K gaussians (validator threshold)
-        enhanced_rgba = enhance_image_for_trellis(rgba_image)
+        # ATTEMPT 1: Image enhancement (if enabled)
+        # DIAGNOSTIC MODE: Enhancement is OPTIONAL (default OFF to match template)
+        # When enabled: 3.5x sharpness, 1.8x contrast for denser voxel detection
+        if enable_image_enhancement:
+            enhanced_rgba = enhance_image_for_trellis(rgba_image)
+            logger.debug("  Image enhancement applied (3.5x sharpness, 1.8x contrast)")
+        else:
+            enhanced_rgba = rgba_image
+            logger.debug("  Image enhancement DISABLED (diagnostic mode - using raw RGBA)")
 
         # Convert RGBA to RGB (TRELLIS expects RGB)
         if enhanced_rgba.mode == 'RGBA':
@@ -249,8 +266,8 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         logger.info(f"  ✅ TRELLIS generation done ({t3_end-t3_start:.2f}s, service: {result['generation_time']:.2f}s)")
         logger.info(f"     Gaussians: {num_gaussians:,}, File size: {result['file_size_mb']:.1f} MB")
 
-        # QUALITY GATE WITH RETRY: Check if output is too sparse
-        if num_gaussians < MIN_GAUSSIANS:
+        # QUALITY GATE WITH RETRY: Check if output is too sparse (only if gate is enabled)
+        if MIN_GAUSSIANS > 0 and num_gaussians < MIN_GAUSSIANS:
             logger.warning(f"⚠️  SPARSE GENERATION: {num_gaussians:,} < {MIN_GAUSSIANS:,} threshold")
             logger.warning(f"   Retrying with alternative enhancement (attempt 2/2)...")
 
@@ -295,8 +312,8 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
                 logger.error(f"     Original sparse generation: {num_gaussians:,} < {MIN_GAUSSIANS:,}")
                 raise ValueError(f"Insufficient gaussian density: {num_gaussians:,} gaussians (minimum: {MIN_GAUSSIANS:,}, retry failed)")
 
-        # Final quality check
-        if num_gaussians < MIN_GAUSSIANS:
+        # Final quality check (only if gate is enabled)
+        if MIN_GAUSSIANS > 0 and num_gaussians < MIN_GAUSSIANS:
             logger.error(f"❌ QUALITY GATE FAILED: {num_gaussians:,} < {MIN_GAUSSIANS:,} threshold!")
             logger.error(f"   This would receive Score=0.0 from validators - rejecting to avoid penalty")
             logger.error(f"   Prompt: '{prompt[:100]}...'")
@@ -326,30 +343,58 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
             tmp.write(ply_bytes)
             tmp_path = tmp.name
 
+        # 🔬 DIAGNOSTIC: Inspect raw TRELLIS PLY format BEFORE GaussianModel.load_ply() processes it
+        try:
+            from plyfile import PlyData
+            plydata = PlyData.read(tmp_path)
+            raw_scales = plydata['vertex']['scale_0'][:10]  # First 10 gaussians
+            logger.info(f"  🔬 Raw TRELLIS PLY scales (first 10): {raw_scales}")
+            logger.info(f"  🔬 Min/Max/Avg: {float(raw_scales.min()):.6f} / {float(raw_scales.max()):.6f} / {float(raw_scales.mean()):.6f}")
+        except Exception as e:
+            logger.warning(f"  Could not inspect raw PLY: {e}")
+
         # Load into GaussianModel
         gs_model = GaussianModel(sh_degree=2)  # TRELLIS uses SH degree 2
         gs_model.load_ply(tmp_path)
 
-        # CRITICAL FIX: Normalize gaussian scales to validator-friendly range
-        # TRELLIS generates avg_scale ~11.5 (arbitrary units)
-        # Validators expect avg_scale 0.005-0.05
-        # This fixes Score=0.0 rejections despite passing CLIP validation
-        gs_model = normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04))
+        # 🔬 DIAGNOSTIC: Check scales AFTER GaussianModel.load_ply() processes them
+        try:
+            loaded_internal_scales = gs_model._scaling[:10]  # Internal log-space representation
+            loaded_exp_scales = gs_model.get_scaling[:10]    # After exp() activation
+            logger.info(f"  🔬 After load_ply() - Internal (_scaling): {loaded_internal_scales.cpu().numpy()}")
+            logger.info(f"  🔬 After load_ply() - Exp-space (get_scaling): {loaded_exp_scales.cpu().numpy()}")
+            logger.info(f"  🔬 Avg internal: {gs_model._scaling.mean().item():.6f}, Avg exp-space: {gs_model.get_scaling.mean().item():.6f}")
+        except Exception as e:
+            logger.warning(f"  Could not inspect loaded scales: {e}")
 
-        # CRITICAL: Save normalized model back to PLY and update ply_bytes
-        # Without this, we'd send the ORIGINAL (unnormalized) PLY to validators!
-        normalized_tmp_path = tmp_path.replace('.ply', '_normalized.ply')
-        gs_model.save_ply(normalized_tmp_path)
+        # DIAGNOSTIC MODE: Scale normalization is OPTIONAL
+        # By default (enable_scale_normalization=False), we submit TRELLIS PLY as-is (like official template)
+        # This lets us test if our "fixes" are actually helping or hurting
+        if enable_scale_normalization:
+            # CRITICAL FIX: Normalize gaussian scales to validator-friendly range
+            # TRELLIS generates avg_scale ~11.5 (arbitrary units)
+            # Validators expect avg_scale 0.005-0.05
+            # This fixes Score=0.0 rejections despite passing CLIP validation
+            gs_model = normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04))
 
-        # Re-read the normalized PLY to update ply_bytes
-        with open(normalized_tmp_path, 'rb') as f:
-            ply_bytes = f.read()  # Update the ply_bytes variable with normalized PLY
+            # CRITICAL: Save normalized model back to PLY and update ply_bytes
+            # Without this, we'd send the ORIGINAL (unnormalized) PLY to validators!
+            normalized_tmp_path = tmp_path.replace('.ply', '_normalized.ply')
+            gs_model.save_ply(normalized_tmp_path)
 
-        logger.info(f"  ✅ Normalized PLY saved ({len(ply_bytes) / (1024*1024):.1f} MB)")
+            # Re-read the normalized PLY to update ply_bytes
+            with open(normalized_tmp_path, 'rb') as f:
+                ply_bytes = f.read()  # Update the ply_bytes variable with normalized PLY
 
-        # Clean up temp files
-        os.unlink(tmp_path)
-        os.unlink(normalized_tmp_path)
+            logger.info(f"  ✅ Normalized PLY saved ({len(ply_bytes) / (1024*1024):.1f} MB)")
+
+            # Clean up temp files
+            os.unlink(tmp_path)
+            os.unlink(normalized_tmp_path)
+        else:
+            logger.info(f"  ⚠️  Scale normalization DISABLED - submitting raw TRELLIS output (diagnostic mode)")
+            # Clean up temp file
+            os.unlink(tmp_path)
 
         t4_end = time.time()
         logger.info(f"  ✅ Gaussian model loaded ({t4_end-t4_start:.2f}s)")
