@@ -268,9 +268,17 @@ class GaussianModel:
         self._opacity = torch.from_numpy(opacities).float().to(self._device)
         self._opacity = self._inverse_sigmoid(torch.clamp(self._opacity, 0.001, 0.999))
 
-        # scaling: PLY has exp(x), we need x, so apply log
+        # scaling: PLY format varies by source
+        # TRELLIS saves scales in log-space (can be negative)
+        # Other sources save in exp-space (always positive)
+        # Check and convert accordingly
         self._scaling = torch.from_numpy(scales).float().to(self._device)
-        self._scaling = torch.log(torch.clamp(self._scaling, min=1e-8))
+        if self._scaling.min() < 0:  # Already in log-space (TRELLIS format)
+            # Scales are already in log-space, use as-is
+            pass
+        else:
+            # Scales are in exp-space, convert to log-space
+            self._scaling = torch.log(torch.clamp(self._scaling, min=1e-8))
 
         # rotation: PLY has normalized quaternion, we store it as-is
         self._rotation = torch.from_numpy(rotations).float().to(self._device)
