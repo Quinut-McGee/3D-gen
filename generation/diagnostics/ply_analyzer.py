@@ -172,8 +172,11 @@ def diagnose_ply_issues(metrics: Dict[str, float]) -> list:
     if metrics.get('avg_scale', 0) < 0.001:
         issues.append("⚠️ TOO SMALL: Average gaussian scale below visibility threshold")
 
-    if metrics.get('max_scale', 0) > 10.0:
-        issues.append("⚠️ TOO LARGE: Some gaussians are blob-sized")
+    # DISABLED: False positive - compares L2 norm of log-space scales to exp-space threshold
+    # The diagnostic calculated L2 norm of log-space 3D vectors (e.g., sqrt((-7)^2*3) = 12.12)
+    # and compared to 10.0, triggering false positives on normal-sized gaussians
+    # if metrics.get('max_scale', 0) > 10.0:
+    #     issues.append("⚠️ TOO LARGE: Some gaussians are blob-sized")
 
     if metrics.get('density_variance', 0) > metrics.get('density_max', 1) * 0.5:
         issues.append("⚠️ UNEVEN DENSITY: Gaussians heavily clustered in some regions")

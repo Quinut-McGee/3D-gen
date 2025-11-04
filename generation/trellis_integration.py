@@ -14,6 +14,9 @@ import os
 from loguru import logger
 from PIL import Image, ImageFilter, ImageEnhance
 
+# Import opacity corruption fixer
+from diagnostics.ply_fixer import fix_opacity_corruption
+
 
 def enhance_image_for_trellis(rgba_image):
     """
@@ -366,6 +369,27 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
             logger.info(f"  🔬 Avg internal: {gs_model._scaling.mean().item():.6f}, Avg exp-space: {gs_model.get_scaling.mean().item():.6f}")
         except Exception as e:
             logger.warning(f"  Could not inspect loaded scales: {e}")
+
+        # CRITICAL FIX: Fix opacity corruption (inf/NaN values from TRELLIS)
+        # 50% of TRELLIS generations have corrupted opacities → Score=0.0
+        # This fix corrects them before submission
+        logger.info("  🔧 Checking for opacity corruption...")
+        gs_model = fix_opacity_corruption(gs_model)
+
+        # Save the fixed model back to PLY and update ply_bytes
+        # This ensures we submit the FIXED PLY, not the corrupted original
+        fixed_tmp_path = tmp_path.replace('.ply', '_opacity_fixed.ply')
+        gs_model.save_ply(fixed_tmp_path)
+
+        # Re-read the fixed PLY to update ply_bytes
+        with open(fixed_tmp_path, 'rb') as f:
+            ply_bytes = f.read()  # Update ply_bytes with fixed PLY
+
+        logger.info(f"  ✅ Fixed PLY ready for submission ({len(ply_bytes) / (1024*1024):.1f} MB)")
+
+        # Clean up original temp file, keep using fixed version
+        os.unlink(tmp_path)
+        tmp_path = fixed_tmp_path  # Update path for subsequent operations
 
         # DIAGNOSTIC MODE: Scale normalization is OPTIONAL
         # By default (enable_scale_normalization=False), we submit TRELLIS PLY as-is (like official template)

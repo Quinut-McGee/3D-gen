@@ -16,6 +16,7 @@ sys.path.insert(0, '/home/kobe/404-gen/v1/3D-gen/TRELLIS')
 import time
 import base64
 import tempfile
+import gc
 from io import BytesIO
 from typing import Dict, Optional
 import argparse
@@ -127,12 +128,12 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             # Sparse structure: Detects voxels on object surface
             # SLAT: Fills voxels with gaussian details
             sparse_structure_sampler_params={
-                "steps": 30,  # Increased for denser voxel detection and higher gaussian counts
-                "cfg_strength": 11.0,  # REVERTED from 10.0 - testing showed 10.0 caused 100% CLIP failures (4/4), 11.0 baseline ~50-70% pass rate
+                "steps": 60,  # TEST 3: Maximum refinement
+                "cfg_strength": 5.0,  # TEST 3: Much lower guidance to eliminate blobs
             },
             slat_sampler_params={
-                "steps": 20,  # Keep at 20 - already good for texture detail
-                "cfg_strength": 4.5,  # Keep at 4.5 - good adherence to input
+                "steps": 50,  # TEST 3: Maximum SLAT refinement
+                "cfg_strength": 2.5,  # TEST 3: Minimal guidance for realistic scales
             },
         )
 
@@ -186,11 +187,24 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
         # Total: ~15-16GB (fits in 24GB GPU!)
         logger.info("✅ TRELLIS staying loaded (FLUX uses CPU offload, no VRAM conflict)")
 
-        # Just clear cache to free any temporary allocations
+        # MEMORY LEAK FIX: Explicitly delete GPU tensor objects before cache clear
+        # These objects contain large GPU tensors (128K-512K gaussians) that accumulate
+        # over time if not explicitly freed. Python GC is non-deterministic and may not
+        # run for 90+ minutes, causing VRAM to fill up and operations to slow down.
         import torch
+
+        # Delete objects holding GPU tensors
+        del gaussian_output  # Gaussian splat object with GPU tensors
+        del outputs          # Dict containing intermediate GPU tensors
+        del rgba_image       # Input image (CPU, but still good practice)
+
+        # Force immediate garbage collection to free GPU memory
+        gc.collect()
+
+        # Now clear CUDA cache to reclaim freed memory
         torch.cuda.empty_cache()
         torch.cuda.synchronize()
-        logger.debug("   Cleared CUDA cache (TRELLIS pipeline still loaded for fast next request)")
+        logger.debug("   Freed GPU tensors and cleared CUDA cache (TRELLIS pipeline still loaded)")
 
         return GenerateResponse(
             ply_base64=ply_base64,
