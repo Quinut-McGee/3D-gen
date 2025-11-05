@@ -127,18 +127,13 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             # OPTIMIZED PARAMETERS for dense voxel generation + quality
             # Sparse structure: Detects voxels on object surface
             # SLAT: Fills voxels with gaussian details
-            #
-            # Post-Mortem Optimization (Nov 5, 2025):
-            # Increased sampling steps to improve baseline quality across ALL validators
-            # Trade-off: +3-4s generation time, +50-100K gaussians, +10-15% success rate
-            # CFG kept at proven values (9.0/4.0) - earlier testing showed these work best
             sparse_structure_sampler_params={
-                "steps": 60,  # Phase 4: Increased from 50 (+20% more sampling for better geometry)
-                "cfg_strength": 9.0,  # Phase 3 optimal value (tested better than 5.0)
+                "steps": 60,  # TEST 3: Maximum refinement
+                "cfg_strength": 5.0,  # TEST 3: Much lower guidance to eliminate blobs
             },
             slat_sampler_params={
-                "steps": 50,  # Phase 4: Increased from 35 (+43% more sampling for detail)
-                "cfg_strength": 4.0,  # Phase 3 optimal value (balanced quality)
+                "steps": 50,  # TEST 3: Maximum SLAT refinement
+                "cfg_strength": 2.5,  # TEST 3: Minimal guidance for realistic scales
             },
         )
 

@@ -10,8 +10,6 @@ from common import owner
 # Add UIDs discovered from network monitoring
 BLACKLISTED_VALIDATORS = [
     180,  # UID 180 is mentioned as WC in Discord FAQ
-    81,   # Low success rate (41.2%), high rejection of good outputs - Phase 1 blacklist
-    199,  # Low success rate (41.5%), high rejection of good outputs - Phase 1 blacklist
     # Add more as discovered
 ]
 

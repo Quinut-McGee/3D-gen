@@ -189,6 +189,30 @@ class SD35ImageGenerator:
             torch.cuda.synchronize()
             logger.debug("Cleared CUDA cache")
 
+    def unload(self):
+        """Unload pipeline from memory to free RAM/VRAM"""
+        if not self.is_loaded:
+            return
+
+        logger.info("Unloading SD3.5 pipeline to free memory...")
+        if self.pipeline is not None:
+            del self.pipeline
+            self.pipeline = None
+        self.is_loaded = False
+
+        # Aggressive garbage collection to free 19GB RAM
+        # Python's GC doesn't always run immediately, causing heap fragmentation
+        import gc
+        gc.collect()
+        gc.collect()  # Run twice to catch cyclic references
+
+        # Clear CUDA cache
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+            torch.cuda.synchronize()
+
+        logger.info("  ✅ SD3.5 pipeline unloaded (freed ~19GB RAM with CPU offload)")
+
 
 # Performance notes:
 #

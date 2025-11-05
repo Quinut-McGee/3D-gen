@@ -31,7 +31,7 @@ from models.background_remover import SOTABackgroundRemover
 from validators.clip_validator import CLIPValidator
 
 # TRELLIS Native Gaussian Generation - PRODUCTION PIPELINE!
-# 256K gaussians, 5s generation, 16.6 MB files
+# 256K gaussians, 16.6 MB files, 71% success rate (with opacity fix)
 from trellis_integration import generate_with_trellis
 import httpx  # For calling TRELLIS microservice
 
@@ -90,7 +90,7 @@ def get_args():
         "--enable-image-enhancement",
         action="store_true",
         default=False,
-        help="Enable image enhancement before TRELLIS (diagnostic mode: default OFF)"
+        help="Enable image enhancement before TRELLIS (baseline: default OFF)"
     )
     parser.add_argument(
         "--min-gaussian-count",
@@ -107,26 +107,7 @@ def get_args():
     return parser.parse_args()
 
 
-# Fix for uvicorn import: conditional args parsing
-# When uvicorn imports this module, it passes its own args, causing argparse to fail.
-# Solution: Only parse args when running directly, use defaults when imported.
-if __name__ == "__main__":
-    args = get_args()
-else:
-    # Uvicorn import path - use default config
-    class Args:
-        port = 10010
-        config = "configs/text_mv_fast.yaml"
-        flux_steps = 4
-        validation_threshold = 0.20
-        enable_validation = False
-        enable_scale_normalization = False
-        enable_prompt_enhancement = False
-        enable_image_enhancement = False
-        min_gaussian_count = 150000  # Phase 2: Conservative quality gate
-        background_threshold = 0.3  # OPTIMIZATION #6: Softer edges
-    args = Args()
-
+args = get_args()
 app = FastAPI(title="404-GEN Competitive Miner")
 
 
@@ -455,13 +436,11 @@ async def generate(prompt: str = Form()) -> Response:
                 debug_timestamp = int(time.time())
                 image.save(f"/tmp/debug_1_sd35_{debug_timestamp}.png")
                 logger.debug(f"  Saved debug image: /tmp/debug_1_sd35_{debug_timestamp}.png")
-
-                # CRITICAL: Unload SD3.5 to free 19GB RAM (CPU offload mode)
-                # Without this, RAM accumulates from 840MB -> 20GB -> 32GB+ and PM2 kills the worker
-                app.state.flux_generator.unload()
-                cleanup_memory()
-                logger.debug(f"  SD3.5 unloaded, GPU cache cleared")
-
+    
+                # SD3.5 stays on GPU - no offloading needed with TRELLIS microservice!
+                cleanup_memory()  # Just clear cache
+                logger.debug(f"  GPU cache cleared after SD3.5 generation")
+    
                 # Step 2: Background removal with rembg
                 logger.info("  [2/4] Removing background with rembg...")
 
@@ -714,18 +693,7 @@ async def generate(prompt: str = Form()) -> Response:
                 logger.info(f"   CLIP Score: {score:.3f}")
             logger.info(f"   File size: {len(ply_bytes)/1024:.1f} KB")
             logger.info("=" * 60)
-
-            # CRITICAL: Delete large objects before returning to prevent 32GB memory accumulation
-            # Without this, each generation leaves 30MB PLY + model objects in memory until GC runs
-            if 'gs_model' in locals():
-                del gs_model
-            if 'rgba_image' in locals():
-                del rgba_image
-            if 'image' in locals():
-                del image
-            cleanup_memory()
-            logger.debug("  🧹 Cleaned up large objects before response")
-
+    
             return Response(
                 ply_bytes,
                 media_type="application/octet-stream",

@@ -30,18 +30,23 @@ module.exports = {
     {
       name: 'gen-worker-1',
       script: '/home/kobe/miniconda3/envs/three-gen-mining/bin/python',
-      args: '-m uvicorn serve_competitive:app --host 0.0.0.0 --port 10010 --workers 1',
+      args: '-m uvicorn serve_competitive:app --host 0.0.0.0 --port 10010 --workers 1 --timeout-keep-alive 120 --timeout-graceful-shutdown 120',
       cwd: '/home/kobe/404-gen/v1/3D-gen/generation',
       interpreter: 'none',
 
       autorestart: true,
       max_restarts: 10,
       min_uptime: '30s',
-      max_memory_restart: '6G',      // Workers use ~2-3GB normally
+      max_memory_restart: '34G',     // Test showed 31.27GB peak after 6 gens. Python heap doesn't shrink even with GC. Set to 34GB (system has 62GB)
 
       error_file: '/home/kobe/.pm2/logs/gen-worker-1-error.log',
       out_file: '/home/kobe/.pm2/logs/gen-worker-1-out.log',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z'
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+
+      // Environment
+      env: {
+        CUDA_VISIBLE_DEVICES: '0'  // Use GPU 0 (RTX 4090, 24GB) - enough VRAM for both SD3.5 + TRELLIS
+      }
     },
     {
       name: 'gen-worker-2',

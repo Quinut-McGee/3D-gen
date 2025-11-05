@@ -184,8 +184,12 @@ class LGMGaussianGenerator:
             logger.info(f"     Generated {num_gaussians:,} gaussians ({file_size_mb:.1f} MB)")
 
             timings = {
-                "lgm": elapsed,
-                "total_3d": elapsed
+                "trellis": elapsed,  # Use 'trellis' key for compatibility with serve_competitive.py
+                "model_load": 0.0,   # LGM doesn't separate model load time (included in first-gen overhead)
+                "total_3d": elapsed,
+                "lgm": elapsed,      # Keep LGM-specific timing for logging
+                "num_gaussians": num_gaussians,
+                "file_size_mb": file_size_mb
             }
 
             # Create GaussianModel for rendering validation
@@ -263,19 +267,46 @@ class LGMGaussianGenerator:
             return None
 
 
+# Global LGM generator (lazy initialization)
+_lgm_generator = None
+
+def _get_lgm_generator():
+    """Lazy initialization of LGM generator (singleton pattern)"""
+    global _lgm_generator
+    if _lgm_generator is None:
+        logger.info("Initializing LGM generator (first-time setup)...")
+        _lgm_generator = LGMGaussianGenerator(device="cuda")
+        logger.info("✅ LGM generator ready")
+    return _lgm_generator
+
+
 async def generate_with_lgm(
     rgba_image: Image.Image,
     prompt: str,
-    lgm_generator: LGMGaussianGenerator,
-    guidance_scale: float = 5.0
+    guidance_scale: float = 5.0,
+    num_inference_steps: int = 30,
+    **kwargs  # Accept but ignore extra params for compatibility
 ):
     """
-    Wrapper function matching expected interface
+    Wrapper function matching TRELLIS interface
 
-    Drop-in replacement for InstantMesh in serve_competitive.py
+    Drop-in replacement for generate_with_trellis() in serve_competitive.py
+
+    Args:
+        rgba_image: PIL Image (RGBA) from FLUX → background removal
+        prompt: Text prompt for logging/debugging
+        guidance_scale: CFG strength (default: 5.0)
+        num_inference_steps: Diffusion steps (default: 30)
+
+    Returns:
+        ply_bytes: Binary PLY data
+        gs_model: GaussianModel for validation
+        timings: Dict of timing info
     """
-    return await lgm_generator.generate_gaussian_splat(
+    lgm_gen = _get_lgm_generator()
+    return await lgm_gen.generate_gaussian_splat(
         rgba_image=rgba_image,
         prompt=prompt,
-        guidance_scale=guidance_scale
+        guidance_scale=guidance_scale,
+        num_inference_steps=num_inference_steps
     )

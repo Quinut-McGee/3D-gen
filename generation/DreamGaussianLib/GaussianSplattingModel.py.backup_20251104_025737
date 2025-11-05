@@ -266,10 +266,7 @@ class GaussianModel:
         # Apply INVERSE activation functions to match internal representation
         # opacity: PLY has sigmoid(x), we need x, so apply logit (inverse sigmoid)
         self._opacity = torch.from_numpy(opacities).float().to(self._device)
-        # OPACITY FIX: Widen clamp range to preserve variation from TRELLIS
-        # Old range [0.001, 0.999] was too tight, crushing all opacities to -6.907
-        # New range [0.0001, 0.9999] preserves healthy opacity distribution
-        self._opacity = self._inverse_sigmoid(torch.clamp(self._opacity, min=0.0001, max=0.9999))
+        self._opacity = self._inverse_sigmoid(torch.clamp(self._opacity, 0.001, 0.999))
 
         # scaling: PLY format varies by source
         # TRELLIS saves scales in log-space (can be negative)
