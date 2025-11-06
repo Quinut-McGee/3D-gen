@@ -59,18 +59,20 @@ class SD35ImageGenerator:
         logger.info("  Model: stabilityai/stable-diffusion-3.5-large-turbo")
 
         try:
+            # Load SD3.5 Medium - fits on GPU 1 (2.5B params, ~8-10GB VRAM)
+            # Large Turbo (8B params, 16GB) doesn't fit on GPU 1 (15.47GB capacity)
+            logger.info(f"  Loading SD3.5 Medium with FP16...")
+            logger.info(f"  Model: stabilityai/stable-diffusion-3.5-medium")
+
             self.pipeline = StableDiffusion3Pipeline.from_pretrained(
-                "stabilityai/stable-diffusion-3.5-large-turbo",
+                "stabilityai/stable-diffusion-3.5-medium",  # Medium instead of Large
                 torch_dtype=torch.float16,
+                variant="fp16"  # Use fp16 variant (smaller download, less VRAM)
             )
 
-            if self.enable_cpu_offload:
-                logger.info("  Enabling sequential CPU offload...")
-                self.pipeline.enable_sequential_cpu_offload()
-                logger.info("  ✅ CPU offload enabled (slower but saves VRAM)")
-            else:
-                self.pipeline = self.pipeline.to(self.device)
-                logger.info(f"  ✅ Pipeline loaded to {self.device}")
+            # Move to target device
+            self.pipeline = self.pipeline.to(self.device)
+            logger.info(f"  ✅ SD3.5 loaded to {self.device}")
 
             # Enable memory optimizations
             try:

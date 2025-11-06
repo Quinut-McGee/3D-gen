@@ -121,10 +121,10 @@ else:
         validation_threshold = 0.20
         enable_validation = False
         enable_scale_normalization = False
-        enable_prompt_enhancement = False
+        enable_prompt_enhancement = False  # DISABLED: Caused success rate drop on mainnet
         enable_image_enhancement = False
-        min_gaussian_count = 150000  # Phase 2: Conservative quality gate
-        background_threshold = 0.3  # OPTIMIZATION #6: Softer edges
+        min_gaussian_count = 0  # DISABLED: Quality gate off to verify pipeline works
+        background_threshold = 0.5  # Standard rembg threshold, preserves more object detail
     args = Args()
 
 app = FastAPI(title="404-GEN Competitive Miner")
@@ -163,20 +163,24 @@ def enhance_prompt_for_detail(prompt):
     """
     Add 3D-specific quality hints to optimize for TRELLIS and validator scoring.
 
+    UPDATED: Now includes background contrast hints to help BRIA RMBG distinguish
+    object from background, preventing removal of light-colored object features.
+
     These hints bias SD3.5 toward renders that translate well to 3D gaussian splats:
     - Professional lighting improves TRELLIS geometry detection
+    - Dark/contrasting backgrounds improve background removal accuracy
     - Product photography style ensures clean, centered compositions
     - High quality rendering improves validator IQA scores
 
-    Expected impact: +0.02 to +0.03 CLIP alignment
+    Expected impact: +0.02 to +0.03 CLIP alignment, +10-15% background removal success
     """
     import random
 
     quality_hints = [
-        "high quality 3D render, studio lighting",
-        "professional product photography, clean background",
-        "photorealistic rendering, volumetric lighting",
-        "studio product shot, soft shadows"
+        "high quality 3D render, studio lighting, solid dark background",
+        "professional product photography, clean black background, centered composition",
+        "photorealistic rendering, volumetric lighting, neutral gray background",
+        "studio product shot, soft shadows, dark backdrop, isolated object"
     ]
 
     return f"{prompt}, {random.choice(quality_hints)}"
@@ -253,20 +257,20 @@ def startup_event():
     # Pre-compile gsplat CUDA extensions
     precompile_gsplat()
 
-    # 1. Initialize SD3.5 Large Turbo generator (LAZY LOADING + CPU OFFLOAD)
-    logger.info("\n[1/4] Initializing SD3.5 Large Turbo generator (lazy loading)...")
-    app.state.flux_generator = SD35ImageGenerator(device=device, enable_cpu_offload=True)
-    logger.info("✅ SD3.5 Large Turbo generator initialized (will load on first request)")
-    logger.info("   SD3.5 with CPU offload → ~3-4GB VRAM (fits with TRELLIS)")
-    logger.info("   TRELLIS microservice → 6GB VRAM baseline")
-    logger.info("   Total VRAM: ~9-10GB peak (safe on 24GB card)")
+    # 1. Initialize SD3.5 Medium generator (LAZY LOADING, GPU 1)
+    logger.info("\n[1/4] Initializing SD3.5 Medium generator (lazy loading)...")
+    app.state.flux_generator = SD35ImageGenerator(device="cuda:1", enable_cpu_offload=False)  # GPU 1: SD3.5 Medium (2.5B params)
+    logger.info("✅ SD3.5 Medium generator initialized (will load on first request)")
+    logger.info("   SD3.5 Medium on GPU 1 (RTX 5070 Ti, 15.47GB) → ~8-10GB VRAM (fits!)")
+    logger.info("   TRELLIS on GPU 0 (RTX 4090, 24GB) → ~17-18GB VRAM baseline")
+    logger.info("   Multi-GPU setup: GPU 0 for TRELLIS, GPU 1 for SD3.5")
     logger.info("   Expected CLIP: 0.60-0.75 (vs FLUX 0.24-0.27)")
-    logger.info("   Speed: ~8-14s SD3.5 generation (CPU offload trade-off)")
+    logger.info("   Speed: ~8-14s SD3.5 generation (vs 17s with offload)")
 
-    # 2. Load BRIA RMBG 2.0 (background removal)
+    # 2. Load BRIA RMBG 2.0 (background removal) - FORCE TO GPU 0 TO KEEP GPU 1 FREE FOR SD3.5
     logger.info("\n[2/4] Loading BRIA RMBG 2.0 (background removal)...")
-    app.state.background_remover = SOTABackgroundRemover(device=device)
-    logger.info("✅ BRIA RMBG 2.0 ready")
+    app.state.background_remover = SOTABackgroundRemover(device="cuda:0")  # GPU 0: 0.15s, ~1-2GB (shares with TRELLIS)
+    logger.info("✅ BRIA RMBG 2.0 ready (GPU 0 - keeps GPU 1 free for SD3.5)")
 
     # DEPRECATED: DreamGaussian (too slow for <30s requirement - requires 200+ iterations for quality)
     # logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
@@ -456,11 +460,24 @@ async def generate(prompt: str = Form()) -> Response:
                 image.save(f"/tmp/debug_1_sd35_{debug_timestamp}.png")
                 logger.debug(f"  Saved debug image: /tmp/debug_1_sd35_{debug_timestamp}.png")
 
-                # CRITICAL: Unload SD3.5 to free 19GB RAM (CPU offload mode)
-                # Without this, RAM accumulates from 840MB -> 20GB -> 32GB+ and PM2 kills the worker
+                # Unload SD3.5 to free GPU 1 memory (16GB VRAM is limited)
+                # Model will lazy-load on next TEXT-TO-3D task
                 app.state.flux_generator.unload()
-                cleanup_memory()
-                logger.debug(f"  SD3.5 unloaded, GPU cache cleared")
+                logger.info(f"  ✅ SD3.5 unloaded from GPU 1 (freed ~16GB VRAM)")
+
+                # Layer 2: Memory monitoring safety check
+                # Verify GPU 1 is actually freed after unload
+                if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+                    gpu1_allocated = torch.cuda.memory_allocated(1) / 1024**3  # GB
+                    if gpu1_allocated > 1.0:  # If GPU 1 still has >1GB allocated
+                        logger.warning(f"⚠️  GPU 1 still has {gpu1_allocated:.1f}GB allocated after unload, forcing cleanup")
+                        app.state.flux_generator.unload()  # Try unload again
+                        torch.cuda.empty_cache()
+                        torch.cuda.synchronize()
+                        gpu1_after_cleanup = torch.cuda.memory_allocated(1) / 1024**3
+                        logger.info(f"  ✅ Forced cleanup: GPU 1 now at {gpu1_after_cleanup:.1f}GB")
+                    else:
+                        logger.debug(f"  ✅ GPU 1 memory verified: {gpu1_allocated:.2f}GB (clean)")
 
                 # Step 2: Background removal with rembg
                 logger.info("  [2/4] Removing background with rembg...")

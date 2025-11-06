@@ -37,7 +37,7 @@ module.exports = {
       autorestart: true,
       max_restarts: 10,
       min_uptime: '30s',
-      max_memory_restart: '34G',     // Test showed 31.27GB peak after 6 gens. Python heap doesn't shrink even with GC. Set to 34GB (system has 62GB)
+      max_memory_restart: '30G',     // Layer 3: Lower threshold for extra safety - triggers restart before memory pressure builds
 
       error_file: '/home/kobe/.pm2/logs/gen-worker-1-error.log',
       out_file: '/home/kobe/.pm2/logs/gen-worker-1-out.log',
@@ -45,7 +45,7 @@ module.exports = {
 
       // Environment
       env: {
-        CUDA_VISIBLE_DEVICES: '0'  // Use GPU 0 (RTX 4090, 24GB) - enough VRAM for both SD3.5 + TRELLIS
+        CUDA_VISIBLE_DEVICES: '0,1'  // Both GPUs visible - SD3.5 on GPU 1 (INT8), TRELLIS on GPU 0
       }
     },
     {
