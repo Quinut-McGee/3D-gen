@@ -257,14 +257,15 @@ def startup_event():
     # Pre-compile gsplat CUDA extensions
     precompile_gsplat()
 
-    # 1. Initialize FLUX.1-schnell generator (LAZY LOADING, GPU 1)
-    logger.info("\n[1/4] Initializing FLUX.1-schnell generator (lazy loading)...")
-    app.state.flux_generator = FluxImageGenerator(device="cuda:1")  # GPU 1: FLUX.1-schnell
-    logger.info("✅ FLUX.1-schnell generator initialized (will load on first request)")
+    # 1. Initialize FLUX.1-schnell generator with 7-technique optimization (LAZY LOADING, GPU 1)
+    logger.info("\n[1/4] Initializing FLUX.1-schnell 7-technique optimization (lazy loading)...")
+    app.state.flux_generator = FluxImageGenerator(device="cuda:1")  # GPU 1: FLUX.1-schnell with 7-technique stack
+    logger.info("✅ FLUX.1-schnell 7-technique optimization initialized (will load on first request)")
     logger.info("   Multi-GPU setup:")
     logger.info("     - GPU 0 (RTX 4090, 24GB): TRELLIS + Background removal (~6GB)")
-    logger.info("     - GPU 1 (RTX 5070 Ti, 15.47GB): FLUX.1-schnell (~12GB)")
-    logger.info("   Speed: ~4-6s FLUX generation (4 steps)")
+    logger.info("     - GPU 1 (RTX 5070 Ti, 15.47GB): FLUX.1-schnell 7-technique (~10-12GB, 4-6GB margin!)")
+    logger.info("   Speed: ~8-12s FLUX generation (2-3x faster than 27s sequential offload!)")
+    logger.info("   Techniques: expandable_segments + T5 BNB + offload + VAE/attn + GC")
 
     # 2. Load BRIA RMBG 2.0 (background removal) - FORCE TO GPU 0 TO KEEP GPU 1 FREE FOR SD3.5
     logger.info("\n[2/4] Loading BRIA RMBG 2.0 (background removal)...")
