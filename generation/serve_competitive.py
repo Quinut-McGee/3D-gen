@@ -26,7 +26,7 @@ import asyncio
 from omegaconf import OmegaConf
 
 # SOTA models
-from models.sd35_generator import SD35ImageGenerator
+from models.flux_generator import FluxImageGenerator
 from models.background_remover import SOTABackgroundRemover
 from validators.clip_validator import CLIPValidator
 
@@ -133,7 +133,7 @@ app = FastAPI(title="404-GEN Competitive Miner")
 # Global state
 class AppState:
     """Holds all loaded models"""
-    flux_generator: SD35ImageGenerator = None  # SD3.5 Large Turbo (better than FLUX for 3D)
+    flux_generator: FluxImageGenerator = None  # FLUX.1-schnell on GPU 1 (RTX 5070 Ti)
     background_remover: SOTABackgroundRemover = None
     generation_semaphore: asyncio.Semaphore = None  # Limit to 1 concurrent generation
     trellis_service_url: str = "http://localhost:10008"  # TRELLIS microservice URL
@@ -257,15 +257,14 @@ def startup_event():
     # Pre-compile gsplat CUDA extensions
     precompile_gsplat()
 
-    # 1. Initialize SD3.5 Medium generator (LAZY LOADING, GPU 1)
-    logger.info("\n[1/4] Initializing SD3.5 Medium generator (lazy loading)...")
-    app.state.flux_generator = SD35ImageGenerator(device="cuda:1", enable_cpu_offload=False)  # GPU 1: SD3.5 Medium (2.5B params)
-    logger.info("✅ SD3.5 Medium generator initialized (will load on first request)")
-    logger.info("   SD3.5 Medium on GPU 1 (RTX 5070 Ti, 15.47GB) → ~8-10GB VRAM (fits!)")
-    logger.info("   TRELLIS on GPU 0 (RTX 4090, 24GB) → ~17-18GB VRAM baseline")
-    logger.info("   Multi-GPU setup: GPU 0 for TRELLIS, GPU 1 for SD3.5")
-    logger.info("   Expected CLIP: 0.60-0.75 (vs FLUX 0.24-0.27)")
-    logger.info("   Speed: ~8-14s SD3.5 generation (vs 17s with offload)")
+    # 1. Initialize FLUX.1-schnell generator (LAZY LOADING, GPU 1)
+    logger.info("\n[1/4] Initializing FLUX.1-schnell generator (lazy loading)...")
+    app.state.flux_generator = FluxImageGenerator(device="cuda:1")  # GPU 1: FLUX.1-schnell
+    logger.info("✅ FLUX.1-schnell generator initialized (will load on first request)")
+    logger.info("   Multi-GPU setup:")
+    logger.info("     - GPU 0 (RTX 4090, 24GB): TRELLIS + Background removal (~6GB)")
+    logger.info("     - GPU 1 (RTX 5070 Ti, 15.47GB): FLUX.1-schnell (~12GB)")
+    logger.info("   Speed: ~4-6s FLUX generation (4 steps)")
 
     # 2. Load BRIA RMBG 2.0 (background removal) - FORCE TO GPU 0 TO KEEP GPU 1 FREE FOR SD3.5
     logger.info("\n[2/4] Loading BRIA RMBG 2.0 (background removal)...")
@@ -460,10 +459,10 @@ async def generate(prompt: str = Form()) -> Response:
                 image.save(f"/tmp/debug_1_sd35_{debug_timestamp}.png")
                 logger.debug(f"  Saved debug image: /tmp/debug_1_sd35_{debug_timestamp}.png")
 
-                # Unload SD3.5 to free GPU 1 memory (16GB VRAM is limited)
-                # Model will lazy-load on next TEXT-TO-3D task
-                app.state.flux_generator.unload()
-                logger.info(f"  ✅ SD3.5 unloaded from GPU 1 (freed ~16GB VRAM)")
+                # FLUX stays loaded on GPU 1 - no need to unload with TRELLIS microservice
+                # (FLUX unload() method doesn't exist, and it's designed to stay resident)
+                # app.state.flux_generator.unload()  # DISABLED - FLUX has no unload method
+                logger.info(f"  ✅ FLUX generation complete (stays loaded on GPU 1)")
 
                 # Layer 2: Memory monitoring safety check
                 # Verify GPU 1 is actually freed after unload

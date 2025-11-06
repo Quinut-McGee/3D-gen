@@ -37,7 +37,8 @@ module.exports = {
       autorestart: true,
       max_restarts: 10,
       min_uptime: '30s',
-      max_memory_restart: '30G',     // Layer 3: Lower threshold for extra safety - triggers restart before memory pressure builds
+      // max_memory_restart disabled - FLUX + TRELLIS generation can spike >30GB transiently
+      // Generations complete successfully; PM2 was killing service unnecessarily
 
       error_file: '/home/kobe/.pm2/logs/gen-worker-1-error.log',
       out_file: '/home/kobe/.pm2/logs/gen-worker-1-out.log',
