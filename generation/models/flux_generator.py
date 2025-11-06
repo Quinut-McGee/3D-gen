@@ -43,8 +43,8 @@ class FluxImageGenerator:
         self.pipe = None
         self.is_loaded = False
 
-        logger.info(f"FLUX.1-schnell configured for full-GPU loading (no CPU offload)")
-        logger.info("✅ FLUX will be loaded once and kept on GPU for fast generation")
+        logger.info(f"FLUX.1-schnell will use sequential CPU offload on {device}")
+        logger.info("✅ Memory-efficient mode: ~2-3GB VRAM (lazy loading)")
 
     def _load_pipeline(self):
         """Load FLUX.1-schnell pipeline to GPU"""
@@ -67,8 +67,10 @@ class FluxImageGenerator:
         )
 
         # Use sequential CPU offload (slow but memory-efficient)
-        self.pipe.enable_sequential_cpu_offload()
-        logger.info(f"✅ FLUX.1-schnell loaded with CPU offload")
+        # Extract GPU ID from device string (e.g., "cuda:1" -> 1)
+        gpu_id = int(self.device.split(":")[-1]) if ":" in self.device else 0
+        self.pipe.enable_sequential_cpu_offload(gpu_id=gpu_id)
+        logger.info(f"✅ FLUX.1-schnell loaded with CPU offload on GPU {gpu_id}")
         logger.info("   VRAM usage: ~2-3GB (offload mode)")
         logger.info("   Generation time: ~21s (slow but avoids OOM)")
         logger.info("   Total pipeline: ~28s (FLUX 21s + TRELLIS 6s + other 1s)")

@@ -459,24 +459,9 @@ async def generate(prompt: str = Form()) -> Response:
                 image.save(f"/tmp/debug_1_sd35_{debug_timestamp}.png")
                 logger.debug(f"  Saved debug image: /tmp/debug_1_sd35_{debug_timestamp}.png")
 
-                # FLUX stays loaded on GPU 1 - no need to unload with TRELLIS microservice
-                # (FLUX unload() method doesn't exist, and it's designed to stay resident)
-                # app.state.flux_generator.unload()  # DISABLED - FLUX has no unload method
+                # FLUX stays loaded on GPU 1 permanently with NF4 quantization (~6-7GB)
+                # No unloading needed - TRELLIS runs on separate GPU 0 via microservice
                 logger.info(f"  ✅ FLUX generation complete (stays loaded on GPU 1)")
-
-                # Layer 2: Memory monitoring safety check
-                # Verify GPU 1 is actually freed after unload
-                if torch.cuda.is_available() and torch.cuda.device_count() > 1:
-                    gpu1_allocated = torch.cuda.memory_allocated(1) / 1024**3  # GB
-                    if gpu1_allocated > 1.0:  # If GPU 1 still has >1GB allocated
-                        logger.warning(f"⚠️  GPU 1 still has {gpu1_allocated:.1f}GB allocated after unload, forcing cleanup")
-                        app.state.flux_generator.unload()  # Try unload again
-                        torch.cuda.empty_cache()
-                        torch.cuda.synchronize()
-                        gpu1_after_cleanup = torch.cuda.memory_allocated(1) / 1024**3
-                        logger.info(f"  ✅ Forced cleanup: GPU 1 now at {gpu1_after_cleanup:.1f}GB")
-                    else:
-                        logger.debug(f"  ✅ GPU 1 memory verified: {gpu1_allocated:.2f}GB (clean)")
 
                 # Step 2: Background removal with rembg
                 logger.info("  [2/4] Removing background with rembg...")
