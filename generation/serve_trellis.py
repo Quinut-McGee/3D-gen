@@ -132,12 +132,17 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             # Increased sampling steps to improve baseline quality across ALL validators
             # Trade-off: +3-4s generation time, +50-100K gaussians, +10-15% success rate
             # CFG kept at proven values (9.0/4.0) - earlier testing showed these work best
+            #
+            # Phase 5 Optimization (Nov 6, 2025):
+            # Further increased sampling to boost gaussian density for validator acceptance
+            # Combined with bbox normalization fix for comprehensive rejection prevention
+            # Expected: 398K → 500-600K gaussians, +15-20% success rate
             sparse_structure_sampler_params={
-                "steps": 60,  # Phase 4: Increased from 50 (+20% more sampling for better geometry)
+                "steps": 80,  # Phase 5: Increased from 60 (+33% for denser geometry)
                 "cfg_strength": 9.0,  # Phase 3 optimal value (tested better than 5.0)
             },
             slat_sampler_params={
-                "steps": 50,  # Phase 4: Increased from 35 (+43% more sampling for detail)
+                "steps": 60,  # Phase 5: Increased from 50 (+20% for finer detail)
                 "cfg_strength": 4.0,  # Phase 3 optimal value (balanced quality)
             },
         )

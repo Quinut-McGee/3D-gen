@@ -14,8 +14,8 @@ import os
 from loguru import logger
 from PIL import Image, ImageFilter, ImageEnhance
 
-# Import opacity corruption fixer
-from diagnostics.ply_fixer import fix_opacity_corruption
+# Import PLY fixes: bbox normalization and opacity corruption
+from diagnostics.ply_fixer import fix_opacity_corruption, normalize_bounding_box
 
 
 def enhance_image_for_trellis(rgba_image):
@@ -370,7 +370,13 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         except Exception as e:
             logger.warning(f"  Could not inspect loaded scales: {e}")
 
-        # CRITICAL FIX: Fix opacity corruption (inf/NaN values from TRELLIS)
+        # CRITICAL FIX #1: Normalize oversized bounding boxes (30-40% of rejections)
+        # Validators have ZERO tolerance for bbox dimensions > 1.0
+        # This fix scales models to fit within 0.98 unit cube while preserving aspect ratio
+        logger.info("  🔧 Checking bounding box dimensions...")
+        gs_model = normalize_bounding_box(gs_model)
+
+        # CRITICAL FIX #2: Fix opacity corruption (inf/NaN values from TRELLIS)
         # 50% of TRELLIS generations have corrupted opacities → Score=0.0
         # This fix corrects them before submission
         logger.info("  🔧 Checking for opacity corruption...")

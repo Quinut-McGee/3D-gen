@@ -224,7 +224,8 @@ class CascadeImageGenerator:
         )
 
         # Extract embeddings before unloading
-        embeddings = prior_output.image_embeddings.clone()  # Clone to CPU-safe tensor
+        # CRITICAL: Move to CPU to prevent corruption during model swap
+        embeddings = prior_output.image_embeddings.cpu().clone()
         del prior_output
 
         # Unload Prior to free 8.5GB before loading Decoder
@@ -237,6 +238,9 @@ class CascadeImageGenerator:
 
         logger.debug("  [5/4] Decoder generating final image...")
         decoder_steps = max(10, num_inference_steps * 2)
+
+        # Move embeddings back to GPU for Decoder
+        embeddings = embeddings.to(self.device)
 
         result = self.decoder(
             image_embeddings=embeddings,

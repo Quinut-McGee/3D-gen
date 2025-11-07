@@ -26,7 +26,7 @@ import asyncio
 from omegaconf import OmegaConf
 
 # SOTA models
-from models.cascade_generator import CascadeImageGenerator
+from models.sdxl_turbo_generator import SDXLTurboGenerator
 from models.background_remover import SOTABackgroundRemover
 from validators.clip_validator import CLIPValidator
 
@@ -121,7 +121,7 @@ else:
         validation_threshold = 0.20
         enable_validation = False
         enable_scale_normalization = False
-        enable_prompt_enhancement = False  # DISABLED: Caused success rate drop on mainnet
+        enable_prompt_enhancement = True  # ENABLED: New sparse-prompt enhancement to boost gaussian density
         enable_image_enhancement = False
         min_gaussian_count = 0  # DISABLED: Quality gate off to verify pipeline works
         background_threshold = 0.5  # Standard rembg threshold, preserves more object detail
@@ -133,7 +133,7 @@ app = FastAPI(title="404-GEN Competitive Miner")
 # Global state
 class AppState:
     """Holds all loaded models"""
-    flux_generator: CascadeImageGenerator = None  # Stable Cascade on GPU 1 (RTX 5070 Ti)
+    flux_generator: SDXLTurboGenerator = None  # SDXL-Turbo on GPU 1 (RTX 5070 Ti)  # Stable Cascade on GPU 1 (RTX 5070 Ti)
     background_remover: SOTABackgroundRemover = None
     generation_semaphore: asyncio.Semaphore = None  # Limit to 1 concurrent generation
     trellis_service_url: str = "http://localhost:10008"  # TRELLIS microservice URL
@@ -161,29 +161,64 @@ def cleanup_memory():
 
 def enhance_prompt_for_detail(prompt):
     """
-    Add 3D-specific quality hints to optimize for TRELLIS and validator scoring.
+    Enhance prompts to increase SDXL-Turbo image complexity and TRELLIS gaussian density.
 
-    UPDATED: Now includes background contrast hints to help BRIA RMBG distinguish
-    object from background, preventing removal of light-colored object features.
+    Strategy:
+    1. Detect sparse prompts (short, simple)
+    2. Add volumetric/detail hints to bias SDXL toward complex rendering
+    3. Add material/texture hints to increase surface complexity
+    4. Add lighting hints to increase depth cues
 
-    These hints bias SD3.5 toward renders that translate well to 3D gaussian splats:
-    - Professional lighting improves TRELLIS geometry detection
-    - Dark/contrasting backgrounds improve background removal accuracy
-    - Product photography style ensures clean, centered compositions
-    - High quality rendering improves validator IQA scores
+    Theory: More detailed prompts → More complex images → More gaussians → Higher success rate
 
-    Expected impact: +0.02 to +0.03 CLIP alignment, +10-15% background removal success
+    Target: Push sparse prompts from 150-250K gaussians → 400K+ gaussians (86% success tier)
+    Expected impact: +20-25% overall success rate (60% → 80-85%)
     """
     import random
 
-    quality_hints = [
-        "high quality 3D render, studio lighting, solid dark background",
-        "professional product photography, clean black background, centered composition",
-        "photorealistic rendering, volumetric lighting, neutral gray background",
-        "studio product shot, soft shadows, dark backdrop, isolated object"
+    # Detect sparse prompts (word count < 8 = likely to generate <250K gaussians)
+    word_count = len(prompt.split())
+
+    # Enhancement hint libraries
+    detail_hints = [
+        "intricate details, complex geometry, volumetric forms",
+        "elaborate design, rich surface detail, dimensional depth",
+        "fine craftsmanship, textured surfaces, layered complexity",
+        "detailed construction, ornate features, multi-part assembly"
     ]
 
-    return f"{prompt}, {random.choice(quality_hints)}"
+    material_hints = [
+        "high-quality materials, varied textures, surface variation",
+        "premium finish, tactile details, material complexity",
+        "refined surfaces, texture contrast, material depth",
+        "quality craftsmanship, surface richness, textural detail"
+    ]
+
+    lighting_hints = [
+        "professional studio lighting, volumetric shadows, depth definition",
+        "dramatic lighting, dimensional shadows, form-revealing illumination",
+        "sculptural lighting, shadow detail, 3D depth emphasis",
+        "gallery lighting, form-defining shadows, volumetric depth"
+    ]
+
+    background_hints = [
+        "solid dark background, clean backdrop, isolated composition",
+        "black studio background, centered focus, negative space",
+        "neutral gray backdrop, professional product shot, clean separation",
+        "dark studio setting, focused composition, clear silhouette"
+    ]
+
+    # Apply enhancement based on sparsity
+    if word_count < 8:
+        # AGGRESSIVE ENHANCEMENT for sparse prompts (high rejection risk)
+        enhancement = f"{random.choice(detail_hints)}, {random.choice(material_hints)}, {random.choice(lighting_hints)}, {random.choice(background_hints)}"
+        logger.debug(f"  🎯 SPARSE PROMPT DETECTED ({word_count} words) - applying aggressive enhancement")
+    else:
+        # LIGHT ENHANCEMENT for complex prompts (already likely to generate high density)
+        enhancement = f"{random.choice(detail_hints)}, {random.choice(background_hints)}"
+        logger.debug(f"  ✓ Complex prompt ({word_count} words) - applying light enhancement")
+
+    return f"{prompt}, {enhancement}"
 
 
 def precompile_gsplat():
@@ -258,13 +293,13 @@ def startup_event():
     precompile_gsplat()
 
     # 1. Initialize Stable Cascade generator (LAZY LOADING, GPU 1)
-    logger.info("\n[1/4] Initializing Stable Cascade two-stage generator (lazy loading)...")
-    app.state.flux_generator = CascadeImageGenerator(device="cuda:1")  # GPU 1: Stable Cascade
-    logger.info("✅ Stable Cascade initialized (will load on first request)")
+    logger.info("\n[1/4] Initializing SDXL-Turbo (lazy loading)...")
+    app.state.flux_generator = SDXLTurboGenerator(device="cuda:1")  # GPU 1: Stable Cascade
+    logger.info("✅ SDXL-Turbo initialized (will load on first request)")
     logger.info("   Multi-GPU setup:")
     logger.info("     - GPU 0 (RTX 4090, 24GB): TRELLIS + Background removal (~6GB)")
-    logger.info("     - GPU 1 (RTX 5070 Ti, 15.47GB): Stable Cascade (~6.6GB, 9GB free!)")
-    logger.info("   Speed: ~3-4s image generation (85-90% FLUX quality)")
+    logger.info("     - GPU 1 (RTX 5070 Ti, 15.47GB): SDXL-Turbo (~4-5GB, 11GB free!)")
+    logger.info("   Speed: ~1-2s image generation (13x faster than FLUX!)")
     logger.info("   Architecture: Prior (5.1GB) + Decoder (1.5GB)")
 
     # 2. Load BRIA RMBG 2.0 (background removal) - FORCE TO GPU 0 TO KEEP GPU 1 FREE FOR SD3.5
@@ -318,15 +353,15 @@ def startup_event():
         app.state.clip_validator = None
 
     logger.info("\n" + "=" * 60)
-    logger.info("🚀 COMPETITIVE MINER READY - STABLE CASCADE + TRELLIS")
+    logger.info("🚀 COMPETITIVE MINER READY - SDXL-TURBO + TRELLIS")
     logger.info("=" * 60)
     logger.info(f"Config: {args.config}")
-    logger.info(f"Image Generator: Stable Cascade (Prior 20 + Decoder 10 steps)")
-    logger.info(f"Image Generator Quality: 85-90% of FLUX, better than SDXL")
+    logger.info(f"Image Generator: SDXL-Turbo (1-4 steps)")
+    logger.info(f"Image Generator Quality: 80-85% of FLUX, proven and stable")
     logger.info(f"3D Engine: TRELLIS (native gaussian splat generation)")
     logger.info(f"Validation: {'ON' if args.enable_validation else 'OFF'}")
-    logger.info(f"Expected speed: 18-22 seconds per generation")
-    logger.info(f"Expected CLIP: 0.60-0.75 (Cascade optimized for 3D)")
+    logger.info(f"Expected speed: 13-17 seconds per generation")
+    logger.info(f"Expected CLIP: 0.55-0.70 (SDXL-Turbo for mining speed)")
     logger.info("=" * 60 + "\n")
 
 
@@ -395,7 +430,11 @@ async def generate(prompt: str = Form()) -> Response:
     
                     # Set generic prompt for validation
                     validation_prompt = "a 3D object"
-    
+
+                    # Set prompt stats for image-to-3D mode (no text prompt to enhance)
+                    original_words = 0
+                    enhanced_words = 0
+
                     logger.info(f"  ⏭️  Skipped FLUX + background removal (image provided, {t2-t1:.2f}s)")
     
                 except Exception as e:
@@ -415,7 +454,7 @@ async def generate(prompt: str = Form()) -> Response:
     
                 # Step 1: Text-to-image with Stable Diffusion 1.5
                 t1 = time.time()
-                logger.info("  [1/4] Generating image with Stable Diffusion 1.5...")
+                logger.info("  [1/4] Generating image with SDXL-Turbo...")
     
                 # SKIP: Keep DreamGaussian on GPU (RTX 4090 has 24GB VRAM)
                 # Note: Moving models between CPU/GPU causes tensor device mismatches
@@ -445,6 +484,12 @@ async def generate(prompt: str = Form()) -> Response:
                     enhanced_prompt = prompt
                     logger.debug(f"  📝 Using raw prompt (no enhancement): '{prompt}'")
 
+                # MEASUREMENT: Track prompt stats for density correlation analysis
+                original_words = len(prompt.split())
+                enhanced_words = len(enhanced_prompt.split())
+                was_enhanced = args.enable_prompt_enhancement
+                logger.info(f"  📏 PROMPT STATS: {original_words}w → {enhanced_words}w (enhanced={was_enhanced})")
+
                 # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
                 image = app.state.flux_generator.generate(
                     prompt=enhanced_prompt,
@@ -454,7 +499,7 @@ async def generate(prompt: str = Form()) -> Response:
                 )
     
                 t2 = time.time()
-                logger.info(f"  ✅ SD3.5 Large Turbo done ({t2-t1:.2f}s)")
+                logger.info(f"  ✅ SDXL-Turbo done ({t2-t1:.2f}s)")
     
                 # DEBUG: Save SD3.5 output for quality inspection
                 debug_timestamp = int(time.time())
@@ -463,7 +508,7 @@ async def generate(prompt: str = Form()) -> Response:
 
                 # FLUX stays loaded on GPU 1 permanently with NF4 quantization (~6-7GB)
                 # No unloading needed - TRELLIS runs on separate GPU 0 via microservice
-                logger.info(f"  ✅ FLUX generation complete (stays loaded on GPU 1)")
+                logger.info(f"  ✅ SDXL-Turbo generation complete (stays loaded on GPU 1)")
 
                 # Step 2: Background removal with rembg
                 logger.info("  [2/4] Removing background with rembg...")
@@ -509,6 +554,10 @@ async def generate(prompt: str = Form()) -> Response:
                 logger.info(f"     TRELLIS: {timings['trellis']:.2f}s, Model Load: {timings['model_load']:.2f}s")
                 logger.info(f"     Generated {len(ply_bytes)/1024:.1f} KB Gaussian Splat PLY")
                 logger.info(f"     📊 Generation stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB")
+
+                # MEASUREMENT: Track prompt-to-density correlation
+                density_tier = "HIGH" if timings['num_gaussians'] >= 400000 else ("MED" if timings['num_gaussians'] >= 150000 else "LOW")
+                logger.info(f"     📈 DENSITY CORRELATION: {original_words}w → {enhanced_words}w → {timings['num_gaussians']:,}g [{density_tier}]")
 
                 # REMOVED: Timeout safety check (diagnostic mode - submit all generations)
                 # Previously rejected generations >27s to avoid validator timeout
@@ -709,7 +758,7 @@ async def generate(prompt: str = Form()) -> Response:
             logger.info("=" * 60)
             logger.info(f"✅ GENERATION COMPLETE")
             logger.info(f"   Total time: {t_total:.2f}s")
-            logger.info(f"   FLUX (4-step): {t2-t1:.2f}s")
+            logger.info(f"   SDXL-Turbo (4-step): {t2-t1:.2f}s")
             logger.info(f"   Background: {t3-t2:.2f}s")
             logger.info(f"   3D (TRELLIS): {t4-t3_start:.2f}s")
             if app.state.clip_validator:
