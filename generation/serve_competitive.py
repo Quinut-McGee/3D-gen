@@ -122,7 +122,7 @@ else:
         enable_validation = False
         enable_scale_normalization = False
         enable_prompt_enhancement = False  # DISABLED: Phase 1A - prompt enhancement reduces density by 5.7%
-        enable_image_enhancement = False
+        enable_image_enhancement = True   # ENABLED: Phase 6 - improve TRELLIS surface detection for complex subjects
         min_gaussian_count = 150000  # ENABLED: Phase 2A - filter LOW density models (<150K = 50% acceptance)
         background_threshold = 0.5  # Standard rembg threshold, preserves more object detail
     args = Args()

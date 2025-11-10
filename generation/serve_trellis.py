@@ -28,6 +28,9 @@ from PIL import Image
 import uvicorn
 from loguru import logger
 
+# Custom PLY writer to prevent TRELLIS save_ply() corruption
+from clean_ply_writer import save_clean_ply
+
 # Configure logging
 logger.remove()
 logger.add(sys.stdout, level="INFO")
@@ -207,14 +210,47 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
                             median_opacity = torch.tensor(6.5)  # Fallback to healthy value
                         opacities_clamped[~valid_mask] = median_opacity
 
-                    # STEP 3: Shift to healthy mean if needed (accounts for save_ply ~2.2 drop)
-                    current_mean = opacities_clamped.mean()
-                    if current_mean < 7.0:
-                        target_mean = 8.5  # Target 8.5 so after save_ply drop (~2.2) → final mean ~6.3
-                        opacities_shifted = opacities_clamped + (target_mean - current_mean)
-                        # Final safety clamp after shift
-                        opacities_fixed = torch.clamp(opacities_shifted, -9.21, 12.15)
+                    # STEP 3: Smart Adaptive Normalization - Respect TRELLIS's Natural Healthy Range
+                    #
+                    # TRELLIS naturally generates opacity in different ranges:
+                    # - Healthy: 2.0-6.0 (gives 88%-98% actual opacity after sigmoid)
+                    # - Broken: < 2.0 (too transparent) or > 6.0 (too opaque)
+                    #
+                    # Strategy: Only normalize if OUTSIDE healthy range, otherwise preserve TRELLIS output
+                    current_mean = opacities_clamped.mean().item()
+
+                    # Define TRELLIS's natural healthy range (empirically determined)
+                    HEALTHY_MIN = 2.0   # Below this = too transparent (invisible gaussians)
+                    HEALTHY_MAX = 6.0   # Above this = too opaque (solid blob, no blending)
+                    TARGET_OPTIMAL = 4.0  # Sweet spot (gives ~98% opacity - natural TRELLIS output)
+
+                    logger.info(f"🔬 SMART NORMALIZATION:")
+                    logger.info(f"   Current opacity mean: {current_mean:.3f}")
+                    logger.info(f"   Healthy range: [{HEALTHY_MIN}, {HEALTHY_MAX}]")
+
+                    if current_mean < HEALTHY_MIN:
+                        # TOO TRANSPARENT: Raise to optimal
+                        target_mean = TARGET_OPTIMAL
+                        logger.warning(f"   ⚠️ TOO TRANSPARENT (mean={current_mean:.3f} < {HEALTHY_MIN})")
+                        logger.info(f"   Normalizing to target: {target_mean:.1f}")
+                    elif current_mean > HEALTHY_MAX:
+                        # TOO OPAQUE: Lower to optimal
+                        target_mean = TARGET_OPTIMAL
+                        logger.warning(f"   ⚠️ TOO OPAQUE (mean={current_mean:.3f} > {HEALTHY_MAX})")
+                        logger.info(f"   Normalizing to target: {target_mean:.1f}")
                     else:
+                        # ALREADY HEALTHY: Don't touch! TRELLIS knows what it's doing
+                        target_mean = None
+                        logger.info(f"   ✅ Opacity HEALTHY (in range [{HEALTHY_MIN}, {HEALTHY_MAX}]) - preserving TRELLIS output")
+
+                    if target_mean is not None:
+                        # Apply normalization shift
+                        shift_amount = target_mean - current_mean
+                        opacities_shifted = opacities_clamped + shift_amount
+                        opacities_fixed = torch.clamp(opacities_shifted, -9.21, 12.15)
+                        logger.info(f"   Applied shift: {shift_amount:+.3f} (final mean: {opacities_fixed.mean().item():.3f})")
+                    else:
+                        # Keep TRELLIS's natural output
                         opacities_fixed = opacities_clamped
 
                     # Update the gaussian output
@@ -232,32 +268,15 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             logger.error(f"🔧 Opacity normalization failed: {e}")
             # Continue anyway - downstream ply_fixer.py will catch any remaining issues
 
-        # Save to PLY
-        logger.info("💾 Saving PLY file...")
+        # Save to PLY using CLEAN writer (bypasses TRELLIS corruption)
+        logger.info("💾 Saving PLY file with clean writer...")
         with tempfile.NamedTemporaryFile(suffix='.ply', delete=False) as tmp:
             tmp_path = tmp.name
 
         try:
-            gaussian_output.save_ply(tmp_path)
-
-            # 🔬 PHASE 3 DIAGNOSTIC: Log opacity AFTER save_ply (re-read from PLY)
-            try:
-                from plyfile import PlyData
-                plydata = PlyData.read(tmp_path)
-                if 'opacity' in plydata['vertex'].data.dtype.names:
-                    saved_opacities = plydata['vertex']['opacity']
-                    logger.info(f"🔬 SAVED PLY OPACITY (after save_ply):")
-                    logger.info(f"   mean: {saved_opacities.mean():.4f}, std: {saved_opacities.std():.4f}")
-                    logger.info(f"   min: {saved_opacities.min():.4f}, max: {saved_opacities.max():.4f}")
-                    if 'raw_opacities' in locals():
-                        corruption_delta = abs(saved_opacities.mean() - raw_opacities.mean())
-                        logger.info(f"   corruption_delta: {corruption_delta:.4f}")
-                        if corruption_delta > 1.0:
-                            logger.warning(f"   ⚠️ CORRUPTION DETECTED: opacity changed by {corruption_delta:.4f} during save!")
-                else:
-                    logger.warning(f"   No opacity field in saved PLY!")
-            except Exception as e:
-                logger.warning(f"   Could not inspect saved PLY opacities: {e}")
+            # Use our custom writer instead of gaussian_output.save_ply()
+            # This prevents the inverse_sigmoid/log corruption that was causing rejections
+            save_clean_ply(gaussian_output, tmp_path)
 
             # Read PLY bytes
             with open(tmp_path, 'rb') as f:
