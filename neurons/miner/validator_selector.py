@@ -12,6 +12,7 @@ BLACKLISTED_VALIDATORS = [
     180,  # UID 180 is mentioned as WC in Discord FAQ
     81,   # Low success rate (41.2%), high rejection of good outputs - Phase 1 blacklist
     199,  # Low success rate (41.5%), high rejection of good outputs - Phase 1 blacklist
+    128,  # Phase 1D - 47.2% acceptance vs 70% for Validator 49 (23% penalty)
     # Add more as discovered
 ]
 

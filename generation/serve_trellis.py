@@ -153,6 +153,85 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
         # Extract gaussian output
         gaussian_output = outputs['gaussian'][0]
 
+        # 🔬 PHASE 3 DIAGNOSTIC: Log raw TRELLIS opacity BEFORE normalization
+        try:
+            import torch
+            import numpy as np
+            if hasattr(gaussian_output, '_opacity'):
+                raw_opacities = gaussian_output._opacity.detach().cpu().numpy().flatten()
+                logger.info(f"🔬 RAW TRELLIS OPACITY (before normalization):")
+                logger.info(f"   mean: {raw_opacities.mean():.4f}, std: {raw_opacities.std():.4f}")
+                logger.info(f"   min: {raw_opacities.min():.4f}, max: {raw_opacities.max():.4f}")
+                logger.info(f"   num_inf: {np.isinf(raw_opacities).sum()}, num_nan: {np.isnan(raw_opacities).sum()}")
+            else:
+                logger.warning(f"   No _opacity attribute found in gaussian_output")
+        except Exception as e:
+            logger.warning(f"   Could not inspect raw TRELLIS opacities: {e}")
+
+        # 🔧 PHASE 3 FIX: Pre-save opacity normalization to prevent corruption
+        # Diagnostic analysis showed TRELLIS generates extreme outliers (±15) that corrupt save_ply()
+        # This 3-step normalization prevents corruption while preserving relative opacity structure
+        try:
+            import torch
+            if hasattr(gaussian_output, '_opacity'):
+                opacities = gaussian_output._opacity
+
+                # Get current statistics
+                opacity_mean = opacities.mean().item()
+                opacity_std = opacities.std().item()
+                opacity_min = opacities.min().item()
+                opacity_max = opacities.max().item()
+
+                # Check if normalization is needed
+                needs_fix = (
+                    opacity_mean < 7.0 or  # Unhealthy mean (raised from 4.0 to account for save_ply drop)
+                    opacity_min < -10.0 or  # Extreme negative outlier
+                    opacity_max > 15.0 or   # Extreme positive outlier
+                    torch.isinf(opacities).any() or
+                    torch.isnan(opacities).any()
+                )
+
+                if needs_fix:
+                    logger.warning(f"🔧 Opacity corruption risk detected, applying normalization")
+                    logger.warning(f"   Before: mean={opacity_mean:.3f}, range=[{opacity_min:.3f}, {opacity_max:.3f}]")
+
+                    # STEP 1: Clamp extreme outliers (prevents save_ply inf/nan corruption)
+                    opacities_clamped = torch.clamp(opacities, -9.21, 12.15)  # TRELLIS natural range from analysis
+
+                    # STEP 2: Replace inf/nan with median (safety check)
+                    if torch.isinf(opacities_clamped).any() or torch.isnan(opacities_clamped).any():
+                        valid_mask = torch.isfinite(opacities_clamped)
+                        if valid_mask.any():
+                            median_opacity = torch.median(opacities_clamped[valid_mask])
+                        else:
+                            median_opacity = torch.tensor(6.5)  # Fallback to healthy value
+                        opacities_clamped[~valid_mask] = median_opacity
+
+                    # STEP 3: Shift to healthy mean if needed (accounts for save_ply ~2.2 drop)
+                    current_mean = opacities_clamped.mean()
+                    if current_mean < 7.0:
+                        target_mean = 8.5  # Target 8.5 so after save_ply drop (~2.2) → final mean ~6.3
+                        opacities_shifted = opacities_clamped + (target_mean - current_mean)
+                        # Final safety clamp after shift
+                        opacities_fixed = torch.clamp(opacities_shifted, -9.21, 12.15)
+                    else:
+                        opacities_fixed = opacities_clamped
+
+                    # Update the gaussian output
+                    gaussian_output._opacity = opacities_fixed
+
+                    # Log results
+                    new_mean = opacities_fixed.mean().item()
+                    new_min = opacities_fixed.min().item()
+                    new_max = opacities_fixed.max().item()
+                    logger.info(f"   After: mean={new_mean:.3f}, range=[{new_min:.3f}, {new_max:.3f}]")
+                else:
+                    logger.debug(f"   Opacity healthy, no normalization needed (mean={opacity_mean:.3f})")
+
+        except Exception as e:
+            logger.error(f"🔧 Opacity normalization failed: {e}")
+            # Continue anyway - downstream ply_fixer.py will catch any remaining issues
+
         # Save to PLY
         logger.info("💾 Saving PLY file...")
         with tempfile.NamedTemporaryFile(suffix='.ply', delete=False) as tmp:
@@ -160,6 +239,25 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
 
         try:
             gaussian_output.save_ply(tmp_path)
+
+            # 🔬 PHASE 3 DIAGNOSTIC: Log opacity AFTER save_ply (re-read from PLY)
+            try:
+                from plyfile import PlyData
+                plydata = PlyData.read(tmp_path)
+                if 'opacity' in plydata['vertex'].data.dtype.names:
+                    saved_opacities = plydata['vertex']['opacity']
+                    logger.info(f"🔬 SAVED PLY OPACITY (after save_ply):")
+                    logger.info(f"   mean: {saved_opacities.mean():.4f}, std: {saved_opacities.std():.4f}")
+                    logger.info(f"   min: {saved_opacities.min():.4f}, max: {saved_opacities.max():.4f}")
+                    if 'raw_opacities' in locals():
+                        corruption_delta = abs(saved_opacities.mean() - raw_opacities.mean())
+                        logger.info(f"   corruption_delta: {corruption_delta:.4f}")
+                        if corruption_delta > 1.0:
+                            logger.warning(f"   ⚠️ CORRUPTION DETECTED: opacity changed by {corruption_delta:.4f} during save!")
+                else:
+                    logger.warning(f"   No opacity field in saved PLY!")
+            except Exception as e:
+                logger.warning(f"   Could not inspect saved PLY opacities: {e}")
 
             # Read PLY bytes
             with open(tmp_path, 'rb') as f:

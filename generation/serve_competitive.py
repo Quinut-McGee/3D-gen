@@ -121,9 +121,9 @@ else:
         validation_threshold = 0.20
         enable_validation = False
         enable_scale_normalization = False
-        enable_prompt_enhancement = True  # ENABLED: New sparse-prompt enhancement to boost gaussian density
+        enable_prompt_enhancement = False  # DISABLED: Phase 1A - prompt enhancement reduces density by 5.7%
         enable_image_enhancement = False
-        min_gaussian_count = 0  # DISABLED: Quality gate off to verify pipeline works
+        min_gaussian_count = 150000  # ENABLED: Phase 2A - filter LOW density models (<150K = 50% acceptance)
         background_threshold = 0.5  # Standard rembg threshold, preserves more object detail
     args = Args()
 
@@ -559,9 +559,23 @@ async def generate(prompt: str = Form()) -> Response:
                 density_tier = "HIGH" if timings['num_gaussians'] >= 400000 else ("MED" if timings['num_gaussians'] >= 150000 else "LOW")
                 logger.info(f"     📈 DENSITY CORRELATION: {original_words}w → {enhanced_words}w → {timings['num_gaussians']:,}g [{density_tier}]")
 
-                # REMOVED: Timeout safety check (diagnostic mode - submit all generations)
-                # Previously rejected generations >27s to avoid validator timeout
-                # Now submitting everything to gather diagnostic data
+                # Phase 1C: Timeout risk filter (35s threshold)
+                # Tasks >30s have 9.3% lower acceptance rate (44.9% vs 54.2%)
+                # Use 35s as conservative cutoff to avoid validator timeouts
+                total_time_so_far = time.time() - t_start
+                if total_time_so_far > 35.0:
+                    logger.warning(f"  ⚠️ TIMEOUT RISK: Generation took {total_time_so_far:.1f}s > 35s threshold")
+                    logger.warning(f"     Tasks >30s have 9.3% lower acceptance (44.9% vs 54.2%)")
+                    logger.warning(f"     Filtering to avoid validator timeout penalty")
+                    cleanup_memory()
+                    # Return empty response to skip this task
+                    empty_buffer = BytesIO()
+                    return Response(
+                        empty_buffer.getvalue(),
+                        media_type="application/octet-stream",
+                        status_code=200,  # 200 but empty = skip this task
+                        headers={"X-Skip-Reason": "Timeout risk - generation >35s"}
+                    )
 
             except ValueError as e:
                 # Quality gate: Sparse generation detected
@@ -783,6 +797,8 @@ async def generate(prompt: str = Form()) -> Response:
                 media_type="application/octet-stream",
                 headers={
                     "X-Generation-Time": str(t_total),
+                    "X-Gaussian-Count": str(timings['num_gaussians']),
+                    "X-File-Size-MB": str(timings['file_size_mb']),
                     "X-CLIP-Score": str(score) if app.state.clip_validator else "N/A"
                 }
             )
