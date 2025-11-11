@@ -60,3 +60,5 @@ cuda_*
 LGM/
 TRELLIS/
 .env
+logs/
+*.log
