@@ -136,17 +136,20 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             # Trade-off: +3-4s generation time, +50-100K gaussians, +10-15% success rate
             # CFG kept at proven values (9.0/4.0) - earlier testing showed these work best
             #
-            # Phase 5 Optimization (Nov 6, 2025):
-            # Further increased sampling to boost gaussian density for validator acceptance
-            # Combined with bbox normalization fix for comprehensive rejection prevention
-            # Expected: 398K → 500-600K gaussians, +15-20% success rate
+            # Phase 7 SPEED OPTIMIZATION (Nov 11, 2025):
+            # REDUCED steps 80→40, 60→30 based on Tier 1 data analysis
+            # Analysis shows: Failures had HIGHER quality than successes (394K vs 384K gaussians)
+            # Validator rejections are RANDOM (same PLY: V49 Score=0.642, V128 Score=0.0)
+            # Strategy: Trade quality for SPEED → more generations = more rewards
+            # Still 2x baseline (20/15), quality remains above minimum thresholds
+            # Expected: -5-6s per generation (~30% faster), gaussian count may drop 10-15% but still >150K
             sparse_structure_sampler_params={
-                "steps": 80,  # Phase 5: Increased from 60 (+33% for denser geometry)
-                "cfg_strength": 9.0,  # Phase 3 optimal value (tested better than 5.0)
+                "steps": 40,  # SPEED: 80→40 (still 2x baseline, saves ~3-4s)
+                "cfg_strength": 9.0,  # Keep optimal CFG (proven effective)
             },
             slat_sampler_params={
-                "steps": 60,  # Phase 5: Increased from 50 (+20% for finer detail)
-                "cfg_strength": 4.0,  # Phase 3 optimal value (balanced quality)
+                "steps": 30,  # SPEED: 60→30 (still 2x baseline, saves ~2-3s)
+                "cfg_strength": 4.0,  # Keep optimal CFG (proven effective)
             },
         )
 

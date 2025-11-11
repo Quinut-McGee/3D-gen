@@ -1,5 +1,6 @@
 import time
 import weakref
+import random
 
 import bittensor as bt
 from common import owner
@@ -12,6 +13,19 @@ BLACKLISTED_VALIDATORS = [
     180,  # UID 180 is mentioned as WC in Discord FAQ - confirmed non-rewarding
     199,  # Re-blacklisted - gave Score=0.0 on first submission (Gen #11)
 ]
+
+# PHASE 7 SPEED OPTIMIZATION: Validator Reliability Weighting (Nov 11, 2025)
+# Based on Tier 1 data analysis (17 generations, 02:49-03:30)
+# Strategy: Bias selection toward reliable validators to reduce failure rate 18% → 12-15%
+# This is NOT a blacklist - unreliable validators still get tasks, just less frequently
+VALIDATOR_RELIABILITY_SCORES = {
+    27:  1.00,  # 0% failure rate (4/4 success) - RELIABLE ✅
+    142: 1.00,  # 0% failure rate (3/3 success) - RELIABLE ✅
+    49:  0.75,  # 25% failure rate (3/4 success) - UNPREDICTABLE ⚠️
+    81:  0.67,  # 33% failure rate (2/3 success) - UNPREDICTABLE ⚠️
+    128: 0.67,  # 33% failure rate (2/3 success) - UNPREDICTABLE ⚠️
+    # Default for unknown validators: 0.5 (neutral, no bias)
+}
 
 
 class ValidatorSelector:
@@ -47,46 +61,37 @@ class ValidatorSelector:
             bt.logging.debug("Querying task from the subnet owner")
             return self._owner_uid
 
-        start_uid = self._next_uid
-        checked_validators = 0
-        while True:
-            # Check blacklist first
-            if self._next_uid in self._blacklist:
-                bt.logging.debug(f"Validator [{self._next_uid}] is blacklisted (WC validator)")
-                self._next_uid = 0 if self._next_uid + 1 == metagraph.n else self._next_uid + 1
-                checked_validators += 1
-                if start_uid == self._next_uid:
-                    bt.logging.info(f"No available validators to pull the task. Checked {checked_validators} validators. Min stake required: {self._min_stake}")
-                    return None
+        # PHASE 7 SPEED OPTIMIZATION: Weighted Random Selection
+        # Collect all eligible validators
+        eligible_validators = []
+        for uid in range(metagraph.n):
+            # Skip blacklisted
+            if uid in self._blacklist:
                 continue
 
-            is_serving = metagraph.axons[self._next_uid].is_serving
-            stake = metagraph.S[self._next_uid]
-            cooldown = self._cooldowns.get(self._next_uid, 0)
+            # Check eligibility
+            is_serving = metagraph.axons[uid].is_serving
+            stake = metagraph.S[uid]
+            cooldown = self._cooldowns.get(uid, 0)
 
-            if (
-                is_serving
-                and stake >= self._min_stake
-                and cooldown < current_time
-            ):
-                bt.logging.debug(f"Querying task from [{self._next_uid}]. Stake: {stake}")
-                return self._next_uid
+            if is_serving and stake >= self._min_stake and cooldown < current_time:
+                eligible_validators.append(uid)
 
-            # Log why validator was skipped (only log first full cycle)
-            if checked_validators < metagraph.n:
-                if not is_serving:
-                    bt.logging.debug(f"Validator [{self._next_uid}] not serving")
-                elif stake < self._min_stake:
-                    bt.logging.debug(f"Validator [{self._next_uid}] stake {stake} < min {self._min_stake}")
-                elif cooldown >= current_time:
-                    bt.logging.debug(f"Validator [{self._next_uid}] on cooldown until {cooldown}")
+        # If no eligible validators, return None
+        if not eligible_validators:
+            bt.logging.info(f"No available validators to pull the task. Min stake required: {self._min_stake}")
+            return None
 
-            self._next_uid = 0 if self._next_uid + 1 == metagraph.n else self._next_uid + 1
-            checked_validators += 1
+        # Apply reliability weighting
+        weights = [VALIDATOR_RELIABILITY_SCORES.get(uid, 0.5) for uid in eligible_validators]
 
-            if start_uid == self._next_uid:
-                bt.logging.info(f"No available validators to pull the task. Checked {checked_validators} validators. Min stake required: {self._min_stake}")
-                return None
+        # Weighted random selection (biases toward reliable validators)
+        selected_uid = random.choices(eligible_validators, weights=weights)[0]
+
+        reliability = VALIDATOR_RELIABILITY_SCORES.get(selected_uid, 0.5)
+        bt.logging.debug(f"Selected validator [{selected_uid}] (reliability: {reliability:.2f}, stake: {metagraph.S[selected_uid]:.1f})")
+
+        return selected_uid
 
     def set_cooldown(self, validator_uid: int, cooldown_until: int) -> None:
         self._cooldowns[validator_uid] = cooldown_until

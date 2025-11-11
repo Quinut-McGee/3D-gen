@@ -83,18 +83,20 @@ class SDXLTurboGenerator:
         num_inference_steps: int = 4,
         height: int = 512,
         width: int = 512,
-        seed: Optional[int] = None
+        seed: Optional[int] = None,
+        negative_prompt: str = ""
     ) -> Image.Image:
         """
         Generate image from text prompt.
-        
+
         Args:
             prompt: Text description
             num_inference_steps: Denoising steps (1-4 recommended for Turbo)
             height: Output height (512 recommended)
             width: Output width (512 recommended)
             seed: Random seed (optional)
-        
+            negative_prompt: Negative prompt to guide generation away from unwanted elements
+
         Returns:
             PIL Image
         """
@@ -114,6 +116,7 @@ class SDXLTurboGenerator:
             # SDXL-Turbo: No guidance scale (baked into model)
             result = self.pipe(
                 prompt=prompt,
+                negative_prompt=negative_prompt if negative_prompt else None,
                 num_inference_steps=num_inference_steps,
                 height=height,
                 width=width,
