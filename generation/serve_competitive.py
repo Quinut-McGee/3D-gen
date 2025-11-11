@@ -28,6 +28,7 @@ from omegaconf import OmegaConf
 # SOTA models
 from models.sdxl_turbo_generator import SDXLTurboGenerator
 from models.background_remover import SOTABackgroundRemover
+from models.depth_estimator import DepthEstimator
 from validators.clip_validator import CLIPValidator
 
 # TRELLIS Native Gaussian Generation - PRODUCTION PIPELINE!
@@ -104,6 +105,12 @@ def get_args():
         default=0.5,
         help="Background removal threshold (0.5 = rembg default, 0.3 = softer edges)"
     )
+    parser.add_argument(
+        "--enable-depth-estimation",
+        action="store_true",
+        default=False,
+        help="Enable depth estimation preprocessing (improves flat/ambiguous objects)"
+    )
     return parser.parse_args()
 
 
@@ -125,6 +132,7 @@ else:
         enable_image_enhancement = True   # ENABLED: Phase 6 - improve TRELLIS surface detection for complex subjects
         min_gaussian_count = 150000  # ENABLED: Phase 2A - filter LOW density models (<150K = 50% acceptance)
         background_threshold = 0.5  # Standard rembg threshold, preserves more object detail
+        enable_depth_estimation = True  # ENABLED for Phase 5 testing (depth preprocessing)
     args = Args()
 
 app = FastAPI(title="404-GEN Competitive Miner")
@@ -135,6 +143,7 @@ class AppState:
     """Holds all loaded models"""
     flux_generator: SDXLTurboGenerator = None  # SDXL-Turbo on GPU 1 (RTX 5070 Ti)  # Stable Cascade on GPU 1 (RTX 5070 Ti)
     background_remover: SOTABackgroundRemover = None
+    depth_estimator: DepthEstimator = None  # Depth estimation on GPU 0 (sequential with BG removal)
     generation_semaphore: asyncio.Semaphore = None  # Limit to 1 concurrent generation
     trellis_service_url: str = "http://localhost:10008"  # TRELLIS microservice URL
     # DEPRECATED: InstantMesh + Mesh-to-Gaussian (50K gaussians insufficient for mainnet)
@@ -293,19 +302,26 @@ def startup_event():
     precompile_gsplat()
 
     # 1. Initialize Stable Cascade generator (LAZY LOADING, GPU 1)
-    logger.info("\n[1/4] Initializing SDXL-Turbo (lazy loading)...")
+    logger.info("\n[1/5] Initializing SDXL-Turbo (lazy loading)...")
     app.state.flux_generator = SDXLTurboGenerator(device="cuda:1")  # GPU 1: Stable Cascade
     logger.info("✅ SDXL-Turbo initialized (will load on first request)")
     logger.info("   Multi-GPU setup:")
-    logger.info("     - GPU 0 (RTX 4090, 24GB): TRELLIS + Background removal (~6GB)")
-    logger.info("     - GPU 1 (RTX 5070 Ti, 15.47GB): SDXL-Turbo (~4-5GB, 11GB free!)")
+    logger.info("     - GPU 0 (RTX 4090, 24GB): TRELLIS (~6GB) + BG removal (~0.5GB) + Depth (~2GB sequential)")
+    logger.info("     - GPU 1 (RTX 5070 Ti, 16GB): SDXL-Turbo (~7GB)")
+    logger.info("   Peak GPU 0: ~8GB (plenty of headroom!)")
     logger.info("   Speed: ~1-2s image generation (13x faster than FLUX!)")
     logger.info("   Architecture: Prior (5.1GB) + Decoder (1.5GB)")
 
-    # 2. Load BRIA RMBG 2.0 (background removal) - FORCE TO GPU 0 TO KEEP GPU 1 FREE FOR SD3.5
-    logger.info("\n[2/4] Loading BRIA RMBG 2.0 (background removal)...")
-    app.state.background_remover = SOTABackgroundRemover(device="cuda:0")  # GPU 0: 0.15s, ~1-2GB (shares with TRELLIS)
-    logger.info("✅ BRIA RMBG 2.0 ready (GPU 0 - keeps GPU 1 free for SD3.5)")
+    # 2. Load BRIA RMBG 2.0 (background removal) - GPU 0
+    logger.info("\n[2/5] Loading BRIA RMBG 2.0 (background removal)...")
+    app.state.background_remover = SOTABackgroundRemover(device="cuda:0")  # GPU 0: Shares with TRELLIS
+    logger.info("✅ BRIA RMBG 2.0 ready (GPU 0 - runs sequentially with depth)")
+
+    # 2.5. Initialize Depth Estimator (GPU 0, ~2GB) - NEW
+    logger.info("\n[2.5/5] Initializing Depth Estimator (MiDaS)...")
+    app.state.depth_estimator = DepthEstimator(model_type="midas", device="cuda:0")  # GPU 0: Sequential with BG removal
+    logger.info("✅ Depth estimator ready (GPU 0, lazy loading, ~2GB)")
+    logger.info("   Sequential pipeline: BG removal (0.5GB) → clear → Depth (2GB) → clear → TRELLIS (6GB)")
 
     # DEPRECATED: DreamGaussian (too slow for <30s requirement - requires 200+ iterations for quality)
     # logger.info("\n[3/4] Loading DreamGaussian (3D generation)...")
@@ -342,14 +358,14 @@ def startup_event():
 
     # 4. Load CLIP validator (if enabled)
     if args.enable_validation:
-        logger.info("\n[4/4] Loading CLIP validator...")
+        logger.info("\n[4/5] Loading CLIP validator...")
         app.state.clip_validator = CLIPValidator(
             device=device,
             threshold=args.validation_threshold
         )
         logger.info(f"✅ CLIP validator ready (threshold={args.validation_threshold})")
     else:
-        logger.warning("\n[4/4] CLIP validation DISABLED (not recommended)")
+        logger.warning("\n[4/5] CLIP validation DISABLED (not recommended)")
         app.state.clip_validator = None
 
     logger.info("\n" + "=" * 60)
@@ -532,7 +548,38 @@ async def generate(prompt: str = Form()) -> Response:
                 del image
             cleanup_memory()
             logger.debug(f"  GPU memory freed after background removal")
-    
+
+            # Step 2.5: Depth estimation (GPU 0) - NEW (IMAGE-TO-3D only)
+            if args.enable_depth_estimation and is_base64_image:
+                t2_5_start = time.time()
+                logger.info("  [2.5/4] Estimating depth map (IMAGE-TO-3D)...")
+
+                # Estimate depth from RGB image
+                rgb_for_depth = rgba_image.convert('RGB')
+                depth_map = app.state.depth_estimator.estimate_depth(rgb_for_depth)
+
+                # Save depth visualization for debugging
+                debug_timestamp = int(time.time())
+                depth_viz_path = f"/tmp/debug_2.5_depth_{debug_timestamp}.png"
+                app.state.depth_estimator.visualize_depth(depth_map, depth_viz_path)
+                logger.debug(f"  Saved depth visualization: {depth_viz_path}")
+
+                t2_5_end = time.time()
+                logger.info(f"  ✅ Depth estimation done ({t2_5_end-t2_5_start:.2f}s)")
+                logger.info(f"     Depth range: [{depth_map.min():.3f}, {depth_map.max():.3f}]")
+                logger.info(f"     Depth mean: {depth_map.mean():.3f} (0=near, 1=far)")
+
+                # CRITICAL: Free depth estimation VRAM before TRELLIS
+                del rgb_for_depth
+                cleanup_memory()
+                logger.debug(f"  GPU memory freed after depth estimation")
+            else:
+                depth_map = None
+                if not args.enable_depth_estimation:
+                    logger.debug("  Depth estimation DISABLED (feature disabled)")
+                elif not is_base64_image:
+                    logger.debug("  Depth estimation SKIPPED (TEXT-TO-3D - depth only applies to IMAGE-TO-3D)")
+
             # Step 3: Native Gaussian generation with TRELLIS (5s, 256K gaussians)
             t3_start = time.time()
             try:
@@ -543,7 +590,8 @@ async def generate(prompt: str = Form()) -> Response:
                     trellis_url="http://localhost:10008",
                     enable_scale_normalization=args.enable_scale_normalization,
                     enable_image_enhancement=args.enable_image_enhancement,
-                    min_gaussians=args.min_gaussian_count
+                    min_gaussians=args.min_gaussian_count,
+                    depth_map=depth_map  # NEW: Pass depth map to TRELLIS
                 )
     
                 # Cache for validation

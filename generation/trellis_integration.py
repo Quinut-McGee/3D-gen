@@ -11,6 +11,7 @@ import httpx
 import time
 import tempfile
 import os
+import numpy as np
 from loguru import logger
 from PIL import Image, ImageFilter, ImageEnhance
 
@@ -82,6 +83,67 @@ def apply_retry_enhancement(rgba_image):
 
     logger.debug("  ✅ Retry enhancement applied: sharpness 4.0x, contrast 2.0x, edge enhance, brightness 1.15x")
     return enhanced
+
+
+def apply_depth_conditioning(rgba_image: Image.Image, depth_map: np.ndarray) -> Image.Image:
+    """
+    Apply depth-aware preprocessing to guide TRELLIS reconstruction.
+
+    Strategy: Use depth map to enhance edges at depth boundaries,
+    making it easier for TRELLIS to detect 3D structure.
+
+    This solves three failure modes:
+    1. Flat/thin objects (pruning shears with y=0.14)
+    2. Ambiguous IMAGE-TO-3D tasks (z=0.09)
+    3. Complex multi-object scenes (fruit salad occlusions)
+
+    Args:
+        rgba_image: PIL Image (RGBA)
+        depth_map: Numpy array (H, W) with depth [0, 1]
+
+    Returns:
+        Enhanced PIL Image (RGBA) with depth cues
+    """
+    from scipy.ndimage import sobel
+
+    logger.debug("  🎯 Applying depth-conditioned preprocessing...")
+
+    # 1. Compute depth edges (where depth changes rapidly)
+    depth_edges_x = sobel(depth_map, axis=1)
+    depth_edges_y = sobel(depth_map, axis=0)
+    depth_edges = np.hypot(depth_edges_x, depth_edges_y)
+
+    # Normalize edges to [0, 1]
+    if depth_edges.max() > 0:
+        depth_edges = depth_edges / depth_edges.max()
+
+    # 2. Enhance RGB edges at depth boundaries
+    # Convert RGBA to numpy
+    rgba_array = np.array(rgba_image).astype(np.float32) / 255.0
+
+    # Apply subtle edge enhancement (1.5x at depth boundaries)
+    enhancement_map = 1.0 + 0.5 * depth_edges
+    for c in range(3):  # RGB channels
+        rgba_array[:, :, c] = np.clip(
+            rgba_array[:, :, c] * enhancement_map,
+            0.0, 1.0
+        )
+
+    # 3. Modulate alpha channel by depth (optional)
+    # Objects closer (depth=0) get slightly higher alpha
+    # This helps TRELLIS prioritize foreground geometry
+    depth_alpha_boost = 1.0 + 0.2 * (1.0 - depth_map)
+    rgba_array[:, :, 3] = np.clip(
+        rgba_array[:, :, 3] * depth_alpha_boost,
+        0.0, 1.0
+    )
+
+    # Convert back to PIL
+    rgba_enhanced = (rgba_array * 255).astype(np.uint8)
+    enhanced_image = Image.fromarray(rgba_enhanced, mode='RGBA')
+
+    logger.debug("  ✅ Depth conditioning applied (edge enhancement + alpha modulation)")
+    return enhanced_image
 
 
 def normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04)):
@@ -209,7 +271,7 @@ async def _call_trellis_api(rgb_image, trellis_url, timeout=60.0):
     return result
 
 
-async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhost:10008", enable_scale_normalization=False, enable_image_enhancement=False, min_gaussians=0):
+async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhost:10008", enable_scale_normalization=False, enable_image_enhancement=False, min_gaussians=0, depth_map=None):
     """
     Generate 3D Gaussian Splat using TRELLIS microservice.
 
@@ -223,6 +285,8 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         enable_scale_normalization: Enable scale normalization correction (diagnostic mode: default OFF)
         enable_image_enhancement: Enable image enhancement before TRELLIS (diagnostic mode: default OFF)
         min_gaussians: Minimum gaussian count threshold (0 = disabled, 150000 = strict quality gate)
+        depth_map: Optional numpy array (H, W) with depth values [0, 1]
+                  If provided, will be used to guide 3D reconstruction
 
     Returns:
         ply_bytes: Binary PLY data
@@ -241,6 +305,11 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
     original_rgba = rgba_image.copy()
 
     try:
+        # DEPTH CONDITIONING: Apply depth-aware preprocessing if depth map provided
+        if depth_map is not None:
+            rgba_image = apply_depth_conditioning(rgba_image, depth_map)
+            logger.info("  🎯 Depth conditioning applied (edge enhancement at depth boundaries)")
+
         # ATTEMPT 1: Image enhancement (if enabled)
         # DIAGNOSTIC MODE: Enhancement is OPTIONAL (default OFF to match template)
         # When enabled: 3.5x sharpness, 1.8x contrast for denser voxel detection

@@ -45,24 +45,22 @@ def save_clean_ply(gaussian_output, path: str):
     # Position: denormalize from AABB
     xyz = (_xyz * aabb[None, 3:] + aabb[None, :3]).detach().cpu().numpy()
 
-    # Opacity: apply sigmoid to get [0,1] range, then inverse_sigmoid for PLY storage
-    # IMPORTANT: We do sigmoid(_opacity + bias) to get actual opacity,
-    # then inverse_sigmoid to store in PLY format (expected by 3DGS renderers)
+    # Opacity: apply sigmoid to get [0,1] range for PLY storage
+    # CRITICAL FIX: Store opacity in SIGMOID SPACE [0, 1], not logit space!
+    # GaussianModel.load_ply() expects [0, 1] and will apply inverse_sigmoid internally
+    # Previous bug: We were applying inverse_sigmoid here, causing double transformation
     actual_opacity = torch.sigmoid(_opacity + opacity_bias)
 
-    # Log opacity BEFORE inverse_sigmoid for verification
+    # Log opacity for verification
     opacity_before = actual_opacity.detach().cpu().numpy()
-    logger.info(f"🔬 CLEAN PLY WRITER - Opacity before write:")
+    logger.info(f"🔬 CLEAN PLY WRITER - Opacity (sigmoid space [0,1]):")
     logger.info(f"   mean: {opacity_before.mean():.4f}, std: {opacity_before.std():.4f}")
     logger.info(f"   min: {opacity_before.min():.4f}, max: {opacity_before.max():.4f}")
 
-    # Convert to PLY storage format (inverse_sigmoid for opacity)
-    # This is the standard 3DGS format that renderers expect
-    def inverse_sigmoid(x, eps=1e-8):
-        x = torch.clamp(x, eps, 1 - eps)
-        return torch.log(x / (1 - x))
-
-    opacities_ply = inverse_sigmoid(actual_opacity).detach().cpu().numpy()
+    # CRITICAL FIX: Write opacity in SIGMOID SPACE [0, 1]
+    # DO NOT apply inverse_sigmoid here! GaussianModel.load_ply() will handle that.
+    # Previous bug: Applying inverse_sigmoid here + load_ply() applying it again = double transformation
+    opacities_ply = actual_opacity.detach().cpu().numpy()
 
     # Scaling: apply activation to get actual scale, then log for PLY
     scales = torch.exp(_scaling + scale_bias)
@@ -119,8 +117,9 @@ def save_clean_ply(gaussian_output, path: str):
         plydata = PlyData.read(path)
         saved_opacities = plydata['vertex']['opacity']
 
-        # Convert back to [0,1] range to compare with actual_opacity
-        saved_actual = 1.0 / (1.0 + np.exp(-saved_opacities))
+        # CRITICAL FIX: Opacity is now stored in SIGMOID SPACE [0, 1]
+        # No need to apply sigmoid transformation - just read directly
+        saved_actual = saved_opacities
 
         logger.info(f"🔬 CLEAN PLY WRITER - Opacity after write (re-read from disk):")
         logger.info(f"   mean: {saved_actual.mean():.4f}, std: {saved_actual.std():.4f}")
