@@ -45,14 +45,22 @@ class SDXLTurboGenerator:
             return
         
         logger.info("Loading SDXL-Turbo pipeline...")
-        
+
         # Load with memory optimization
+        # Note: Load on CPU first to avoid CUDA tensor->numpy conversion issues in scheduler init
+        import os
+        os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
+
         self.pipe = AutoPipelineForText2Image.from_pretrained(
             "stabilityai/sdxl-turbo",
             torch_dtype=torch.float16,
             variant="fp16",
-            use_safetensors=True
-        ).to(self.device)
+            use_safetensors=True,
+            device_map=None  # Load on CPU first, then move to GPU
+        )
+
+        # Move to GPU after initialization
+        self.pipe = self.pipe.to(self.device)
         
         # Enable memory optimizations
         self.pipe.enable_attention_slicing(1)

@@ -30,7 +30,7 @@ module.exports = {
     {
       name: 'gen-worker-1',
       script: '/home/kobe/miniconda3/envs/three-gen-mining/bin/python',
-      args: '-m uvicorn serve_competitive:app --host 0.0.0.0 --port 10010 --workers 1 --timeout-keep-alive 120 --timeout-graceful-shutdown 120',
+      args: 'serve_competitive.py --port 10010 --enable-validation --validation-threshold 0.15 --enable-prompt-enhancement --flux-steps 6',
       cwd: '/home/kobe/404-gen/v1/3D-gen/generation',
       interpreter: 'none',
 

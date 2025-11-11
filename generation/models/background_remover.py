@@ -30,27 +30,77 @@ class SOTABackgroundRemover:
     def __init__(
         self,
         device: str = "cuda",
-        model_name: str = "u2net"  # Changed from BRIA to u2net (better than default)
+        model_type: str = "birefnet"  # "birefnet", "bria", or "u2net"
     ):
         """
-        Initialize U2-Net background remover (via rembg).
+        Initialize background remover with specified model.
 
-        BRIA RMBG 2.0 is gated and requires HuggingFace access.
-        Using U2-Net instead which is open and competitive quality.
+        BiRefNet: Superior for thin structures (boots, swords, chairs)
+        BRIA: Gated, requires HuggingFace access
+        U2-Net: Fallback, decent quality
 
         Args:
             device: CUDA device
-            model_name: Model for rembg (u2net, u2netp, u2net_human_seg, silueta)
+            model_type: "birefnet" (recommended), "bria", or "u2net"
         """
         self.device = device
         self.is_on_gpu = False
-        self.model_name = model_name  # Store for rembg
+        self.model_type = model_type
 
-        logger.info(f"Using U2-Net background remover (via rembg)...")
-        logger.info("Note: BRIA RMBG 2.0 is gated - using U2-Net instead")
+        if model_type == "birefnet":
+            self._init_birefnet()
+        elif model_type == "bria":
+            self._init_bria()
+        else:
+            # U2-Net fallback
+            logger.info(f"Using U2-Net background remover (via rembg)...")
+            self.model = None  # Triggers rembg fallback
+            self.model_name = "u2net"
 
-        # Set model to None to trigger rembg fallback with specified model
-        self.model = None
+    def _init_birefnet(self):
+        """Initialize BiRefNet model for superior thin structure detection"""
+        try:
+            logger.info("Loading BiRefNet model...")
+            logger.info("  Superior thin structure detection vs U2-Net")
+            logger.info("  Addresses boots/sword/chair failures from bypass test")
+
+            self.model = AutoModelForImageSegmentation.from_pretrained(
+                "ZhengPeng7/BiRefNet",
+                trust_remote_code=True
+            )
+            self.model.to(self.device)
+            self.model.eval()
+            self.is_on_gpu = True
+
+            logger.info(f"✅ BiRefNet loaded on {self.device}")
+            logger.info("  Expected: +30-50% thin structure quality improvement")
+
+        except Exception as e:
+            logger.error(f"BiRefNet failed to load: {e}")
+            logger.warning("Falling back to U2-Net via rembg")
+            self.model = None
+            self.model_name = "u2net"
+            self.model_type = "u2net"
+
+    def _init_bria(self):
+        """Initialize BRIA RMBG 2.0 (if accessible)"""
+        try:
+            logger.info("Loading BRIA RMBG 2.0...")
+            self.model = AutoModelForImageSegmentation.from_pretrained(
+                "briaai/RMBG-2.0",
+                trust_remote_code=True
+            )
+            self.model.to(self.device)
+            self.model.eval()
+            self.is_on_gpu = True
+            logger.info(f"✅ BRIA RMBG 2.0 loaded on {self.device}")
+
+        except Exception as e:
+            logger.error(f"BRIA failed to load (likely gated): {e}")
+            logger.warning("Falling back to U2-Net via rembg")
+            self.model = None
+            self.model_name = "u2net"
+            self.model_type = "u2net"
 
     @torch.no_grad()
     def remove_background(
@@ -75,11 +125,11 @@ class SOTABackgroundRemover:
             >>> rgba_image = remover.remove_background(rgb_image)
         """
         if self.model is None:
-            # Fallback to rembg if BRIA failed to load
-            logger.warning("Using fallback background removal")
+            # Fallback to rembg (U2-Net)
             return self._fallback_remove_background(image)
 
         try:
+            # BiRefNet and BRIA use similar processing
             # Move model to GPU before inference
             self.to_gpu()
 
@@ -91,14 +141,23 @@ class SOTABackgroundRemover:
 
             # Post-process mask
             pred = preds[0].squeeze()
-            mask = (pred.numpy() > threshold) * 255
-            mask = mask.astype(np.uint8)
+
+            # Resize mask back to original image size
+            mask_image = Image.fromarray((pred.numpy() * 255).astype(np.uint8))
+            mask_resized = mask_image.resize(image.size, Image.LANCZOS)
+            mask = np.array(mask_resized)
+
+            # Apply threshold
+            mask = (mask > threshold * 255).astype(np.uint8) * 255
 
             # Create RGBA image
             rgba = image.convert("RGB")
             rgba.putalpha(Image.fromarray(mask))
 
-            logger.debug(f"Background removed (threshold={threshold})")
+            # Apply alpha edge smoothing for TRELLIS
+            rgba = self._smooth_alpha_edges(rgba)
+
+            logger.debug(f"Background removed with {self.model_type} (threshold={threshold})")
 
             # Move model back to CPU to free GPU memory
             self.to_cpu()
@@ -106,12 +165,8 @@ class SOTABackgroundRemover:
             return rgba
 
         except Exception as e:
-            logger.error(f"Background removal failed: {e}")
-            # Return original with full alpha as fallback
-            rgba = image.convert("RGB")
-            alpha = Image.new('L', image.size, 255)
-            rgba.putalpha(alpha)
-            return rgba
+            logger.error(f"{self.model_type} removal failed: {e}, falling back to U2-Net")
+            return self._fallback_remove_background(image)
 
     def _preprocess(self, image: Image.Image) -> torch.Tensor:
         """
