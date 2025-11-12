@@ -282,8 +282,8 @@ else:
     class Args:
         port = 10010
         config = "configs/text_mv_fast.yaml"
-        flux_steps = 8  # QUALITY IMPROVEMENT: 8 steps for optimal CLIP scores (+15-20% quality vs 6 steps)
-        validation_threshold = 0.15  # QUALITY GATE: CLIP validation threshold (0.15 = permissive baseline)
+        flux_steps = 6  # QUALITY-SPEED BALANCE: 6 steps for good CLIP scores (research-backed compromise)
+        validation_threshold = 0.20  # Aligned with validator rejection threshold (validators reject CLIP <0.20)
         enable_validation = True  # ENABLED: Phase 1 - filter low-quality outputs before submission
         enable_scale_normalization = False
         enable_prompt_enhancement = True  # ENABLED: Phase 1 - add quality keywords to prompts
@@ -774,7 +774,16 @@ async def generate(prompt: str = Form()) -> Response:
                 modifications = enhancement_data['modifications']
 
                 # Merge negative prompts (LLM baseline + Tier 1 specific additions)
-                negative_prompt = llm_negative_prompt  # Use LLM's comprehensive baseline
+                if tier1_negative_prompt:
+                    # Combine both, removing duplicates
+                    llm_negatives = set(llm_negative_prompt.split(", "))
+                    tier1_negatives = set(tier1_negative_prompt.split(", "))
+                    all_negatives = llm_negatives | tier1_negatives  # Union (no duplicates)
+                    negative_prompt = ", ".join(sorted(all_negatives))
+                    logger.debug(f"  ✅ Merged negative prompts: LLM ({len(llm_negatives)}) + Tier1 ({len(tier1_negatives)}) = {len(all_negatives)} keywords")
+                else:
+                    negative_prompt = llm_negative_prompt
+                    logger.debug(f"  ℹ️  Using LLM baseline negative prompts only ({len(llm_negative_prompt.split(', '))} keywords)")
 
                 # TELEMETRY: Log Tier 1 enhancement details
                 if risk_level != "LOW":

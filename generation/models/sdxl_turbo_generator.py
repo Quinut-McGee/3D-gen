@@ -47,19 +47,27 @@ class SDXLTurboGenerator:
         logger.info("Loading SDXL-Turbo pipeline...")
 
         # Load with memory optimization
-        # Note: Load on CPU first to avoid CUDA tensor->numpy conversion issues in scheduler init
+        # Note: Temporarily set default device to CPU during initialization
         import os
         os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 
-        self.pipe = AutoPipelineForText2Image.from_pretrained(
-            "stabilityai/sdxl-turbo",
-            torch_dtype=torch.float16,
-            variant="fp16",
-            use_safetensors=True,
-            device_map=None  # Load on CPU first, then move to GPU
-        )
+        # CRITICAL FIX: Force CPU initialization to avoid CUDA tensor->numpy bug
+        # Save current default device and switch to CPU for model loading
+        old_default = torch.get_default_device()
+        torch.set_default_device("cpu")
 
-        # Move to GPU after initialization
+        try:
+            self.pipe = AutoPipelineForText2Image.from_pretrained(
+                "stabilityai/sdxl-turbo",
+                torch_dtype=torch.float16,
+                variant="fp16",
+                use_safetensors=True
+            )
+        finally:
+            # Restore original default device
+            torch.set_default_device(old_default)
+
+        # Move all components to target GPU after initialization completes on CPU
         self.pipe = self.pipe.to(self.device)
         
         # Enable memory optimizations

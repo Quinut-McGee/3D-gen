@@ -143,13 +143,51 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             # Strategy: Trade quality for SPEED → more generations = more rewards
             # Still 2x baseline (20/15), quality remains above minimum thresholds
             # Expected: -5-6s per generation (~30% faster), gaussian count may drop 10-15% but still >150K
+            #
+            # QUALITY RESTORATION (Nov 11, 2025 - Evening):
+            # REVERTED Phase 7 partially: 40→60, 30→45 steps based on critical failure analysis
+            # Root cause identified: LOW GAUSSIAN COUNT (<400k) = 100% failure rate (3/3 failures)
+            # All failures: 183k, 288k, 370k gaussians → Score=0.0
+            # All successes: 641k-930k gaussians → Score=0.6+
+            # Phase 7 speed optimization dropped gaussian count TOO LOW (280k avg → below 400k threshold)
+            # Strategy: Restore halfway to balance quality + speed
+            # Expected: +40-60% gaussian count (280k→400-450k avg), +2-3s generation time, 85-95% success rate
+            #
+            # CFG FIX (Nov 11, 2025 - 21:50):
+            # Initial deployment used cfg_strength 10.0/4.5 - TOO HIGH, caused CLIP collapse
+            # Evidence: 529k gaussians achieved (steps working!), but CLIP dropped to 0.13-0.19 (75% filtered)
+            # Root cause: High CFG over-constrains generation → dense geometry but poor visual quality
+            # Fix: Restore CFG to original 9.0/4.0 (proven effective), keep increased steps
+            # Expected: Maintain 400k+ gaussians, restore CLIP to 0.22-0.27 range (80%+ pass rate)
+            #
+            # STEPS OPTIMIZATION (Nov 11, 2025 - 21:56):
+            # Steps 60/45 caused TIMEOUT FAILURES: 1.17M gaussians, 25.9s TRELLIS time, 35.9s total (>30s timeout)
+            # Root cause: 60/45 too aggressive for complex prompts (foliage) → 3x over-density → timeout filtered
+            # Evidence: Simple prompts (329k) OK, complex prompts (1,174k) timeout
+            # Fix: Moderate increase 50/40 (Goldilocks zone - not too sparse, not too dense)
+            # Expected: 350-500k gaussians, 6-7s TRELLIS time, <20s total, handles both simple & complex prompts
+            #
+            # ROLLBACK (Nov 11, 2025 - 22:18):
+            # Data analysis showed 50/40 steps DEGRADED CLIP scores by 20-25%:
+            # - Baseline (40/30): CLIP median 0.28, top scores 0.27-0.33
+            # - After 50/40: CLIP median 0.22, top scores 0.22-0.24
+            # This correlated with validator scores 23-24% below average (0.67 vs 0.89 avg)
+            # Root cause: Increased steps introduce cumulative noise/artifacts that CLIP penalizes
+            # Decision: QUALITY > QUANTITY - accept lower gaussian counts for higher CLIP scores
+            # Expected: Restore CLIP to 0.27-0.28 median, validator scores to 0.85+ range
+            #
+            # CFG REDUCTION TEST (Nov 11, 2025 - 22:23):
+            # Testing lower CFG strength to reduce over-constraint and potentially improve quality
+            # Hypothesis: Lower CFG = less rigid guidance = more natural/organic outputs = higher CLIP
+            # Previous: 9.0/4.0 (standard), New: 7.5/3.0 (reduced ~17-25%)
+            # Expected: More creative/natural geometry, potentially higher CLIP scores
             sparse_structure_sampler_params={
-                "steps": 40,  # SPEED: 80→40 (still 2x baseline, saves ~3-4s)
-                "cfg_strength": 9.0,  # Keep optimal CFG (proven effective)
+                "steps": 40,  # RESTORED to proven baseline (CLIP 0.27-0.28 median)
+                "cfg_strength": 7.5,  # REDUCED from 9.0 - less constraint, more natural outputs
             },
             slat_sampler_params={
-                "steps": 30,  # SPEED: 60→30 (still 2x baseline, saves ~2-3s)
-                "cfg_strength": 4.0,  # Keep optimal CFG (proven effective)
+                "steps": 30,  # RESTORED to proven baseline
+                "cfg_strength": 3.0,  # REDUCED from 4.0 - less constraint, more natural outputs
             },
         )
 
