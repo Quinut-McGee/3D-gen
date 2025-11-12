@@ -180,14 +180,23 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             # Testing lower CFG strength to reduce over-constraint and potentially improve quality
             # Hypothesis: Lower CFG = less rigid guidance = more natural/organic outputs = higher CLIP
             # Previous: 9.0/4.0 (standard), New: 7.5/3.0 (reduced ~17-25%)
-            # Expected: More creative/natural geometry, potentially higher CLIP scores
+            # RESULT: Mixed - higher floor (no CLIP <0.20) but lower ceiling (0.294 vs 0.331)
+            #
+            # CONFIGURATION A - OFFICIAL MICROSOFT DEFAULTS (Nov 12, 2025 - 01:56):
+            # Root cause analysis: We're OVER-SAMPLING by 3.3x Microsoft's official defaults
+            # Official TRELLIS defaults: 12/12 steps, CFG 7.5/3.0
+            # Our progression: 40/30 (best), 50/40 (degraded), 60/45 (collapsed)
+            # Pattern: Every step increase degraded quality - need to go DOWN not up
+            # Hypothesis: Official 12/12 eliminates over-sampling artifacts, maximizes CLIP ceiling
+            # Expected: CLIP median 0.30+, ceiling 0.35+, gaussian counts 200-300k (quality > quantity)
+            # Validator target: 0.80+ scores (vs current 0.67-0.68, network avg 0.887)
             sparse_structure_sampler_params={
-                "steps": 40,  # RESTORED to proven baseline (CLIP 0.27-0.28 median)
-                "cfg_strength": 7.5,  # REDUCED from 9.0 - less constraint, more natural outputs
+                "steps": 40,  # ROLLBACK: 12/12 caused catastrophic quality collapse (CLIP 0.14-0.19)
+                "cfg_strength": 9.0,  # Proven optimal for high-quality outputs
             },
             slat_sampler_params={
-                "steps": 30,  # RESTORED to proven baseline
-                "cfg_strength": 3.0,  # REDUCED from 4.0 - less constraint, more natural outputs
+                "steps": 30,  # ROLLBACK: Baseline 40/30 produced CLIP 0.23-0.28
+                "cfg_strength": 4.0,  # Proven optimal for gaussian quality
             },
         )
 
