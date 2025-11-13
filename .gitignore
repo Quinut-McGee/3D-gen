@@ -62,3 +62,7 @@ TRELLIS/
 .env
 logs/
 *.log
+data/
+*.jsonl
+data/images/
+data/*.json

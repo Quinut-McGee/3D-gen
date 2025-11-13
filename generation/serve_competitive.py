@@ -986,6 +986,13 @@ async def generate(prompt: str = Form()) -> Response:
                 enhanced_words = len(enhanced_prompt.split())
                 logger.info(f"  📏 PROMPT STATS: {original_words}w → {enhanced_words}w (LLM→Tier1, risk={risk_level})")
 
+                # Log enhanced prompt to data logger
+                if log_id and hasattr(app.state, 'data_logger') and app.state.data_logger:
+                    try:
+                        app.state.data_logger.log_enhanced_prompt(log_id, enhanced_prompt, llm_negative_prompt)
+                    except Exception as e:
+                        logger.debug(f"Data logger enhanced_prompt error (non-fatal): {e}")
+
                 # Use 512x512 for better CLIP scores (CLIP prefers higher resolution)
                 # NOTE: No negative_prompt parameter - SDXL-Turbo ignores it at CFG=1.0
                 image = app.state.flux_generator.generate(
@@ -1233,6 +1240,37 @@ async def generate(prompt: str = Form()) -> Response:
                             validation_image = rendered_views[best_view_idx]
                             logger.info(f"  📊 Multi-view CLIP scores: {[f'{s:.3f}' for s in view_scores]}")
                             logger.info(f"  ✅ Selected view {best_view_idx+1}/{len(rendered_views)} (score={view_scores[best_view_idx]:.3f})")
+
+                            # CRITICAL: Check view consistency (prevent inconsistent geometry submission)
+                            view_variance = max(view_scores) - min(view_scores)
+                            min_view_score = min(view_scores)
+                            max_view_score = max(view_scores)
+
+                            logger.info(f"  📊 View consistency: variance={view_variance:.3f}, min={min_view_score:.3f}, max={max_view_score:.3f}")
+
+                            # Quality gate: Reject if ANY view is poor (validators render from random angles)
+                            VARIANCE_THRESHOLD = 0.08  # Models with >0.08 variance get Score=0.0
+                            MIN_ACCEPTABLE_VIEW = 0.20  # Even worst view must be above this
+
+                            # Track if variance check failed (prevent validation from overwriting)
+                            variance_check_failed = False
+
+                            if view_variance > VARIANCE_THRESHOLD:
+                                logger.warning(f"  ⚠️  INCONSISTENT GEOMETRY DETECTED")
+                                logger.warning(f"     Variance {view_variance:.3f} > {VARIANCE_THRESHOLD} threshold")
+                                logger.warning(f"     Model quality varies {view_variance*100:.0f}% across camera angles")
+                                logger.warning(f"     Validators see random angles → will give Score=0.0")
+                                passes = False
+                                score = min_view_score  # Report worst view as the score
+                                variance_check_failed = True
+
+                            if min_view_score < MIN_ACCEPTABLE_VIEW:
+                                logger.warning(f"  ⚠️  WORST VIEW TOO LOW")
+                                logger.warning(f"     Min view CLIP {min_view_score:.3f} < {MIN_ACCEPTABLE_VIEW}")
+                                logger.warning(f"     At least one angle looks terrible")
+                                passes = False
+                                score = min_view_score
+                                variance_check_failed = True
                         else:
                             # Fallback to 2D image if rendering fails
                             logger.warning("  3D rendering failed, falling back to 2D image")
@@ -1269,16 +1307,22 @@ async def generate(prompt: str = Form()) -> Response:
     
                 # Validate with CLIP
                 app.state.clip_validator.to_gpu()
-    
+
                 # DIAGNOSTIC: Test both 2D FLUX and 3D render
                 flux_2d_image = rgba_image.convert("RGB")
                 _, flux_score = app.state.clip_validator.validate_image(flux_2d_image, validation_prompt)
                 logger.info(f"  📊 DIAGNOSTIC - 2D FLUX CLIP score: {flux_score:.3f}")
-    
-                passes, score = app.state.clip_validator.validate_image(
-                    validation_image,
-                    validation_prompt
-                )
+
+                # Only run final validation if variance check passed
+                # (prevents overwriting passes=False from variance check)
+                if 'variance_check_failed' in locals() and variance_check_failed:
+                    logger.info(f"  ⚠️  Skipping final validation (variance check failed)")
+                    logger.info(f"  📊 Using worst-view score: {score:.3f}")
+                else:
+                    passes, score = app.state.clip_validator.validate_image(
+                        validation_image,
+                        validation_prompt
+                    )
                 app.state.clip_validator.to_cpu()
     
                 t6 = time.time()
