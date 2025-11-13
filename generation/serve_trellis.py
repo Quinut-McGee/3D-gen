@@ -182,20 +182,26 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
             # Previous: 9.0/4.0 (standard), New: 7.5/3.0 (reduced ~17-25%)
             # RESULT: Mixed - higher floor (no CLIP <0.20) but lower ceiling (0.294 vs 0.331)
             #
-            # CONFIGURATION A - OFFICIAL MICROSOFT DEFAULTS (Nov 12, 2025 - 01:56):
-            # Root cause analysis: We're OVER-SAMPLING by 3.3x Microsoft's official defaults
-            # Official TRELLIS defaults: 12/12 steps, CFG 7.5/3.0
-            # Our progression: 40/30 (best), 50/40 (degraded), 60/45 (collapsed)
-            # Pattern: Every step increase degraded quality - need to go DOWN not up
-            # Hypothesis: Official 12/12 eliminates over-sampling artifacts, maximizes CLIP ceiling
-            # Expected: CLIP median 0.30+, ceiling 0.35+, gaussian counts 200-300k (quality > quantity)
-            # Validator target: 0.80+ scores (vs current 0.67-0.68, network avg 0.887)
+            # PHASE 2.1 OPTIMIZATION (Nov 12, 2025 - Post-Forensic Analysis):
+            # Forensic analysis revealed: Pre-submission rejection (73-76%) was due to THRESHOLDS, not quality
+            # Thresholds now fixed (150K→50K gaussian minimum, 0.15→0.10 CLIP threshold)
+            # Conservative step increase (40/30 → 45/35) to test if higher density helps with new thresholds
+            #
+            # Historical testing context (preserved for reference):
+            # - 40/30: CLIP 0.23-0.28 (baseline)
+            # - 50/40: CLIP degraded 20-25% (artifacts from over-sampling)
+            # - 60/45: Timeouts (over-density)
+            # - 12/12: Catastrophic collapse (CLIP 0.14-0.19)
+            #
+            # TESTING REQUIRED: Monitor CLIP scores and gaussian density with 45/35
+            # SUCCESS CRITERIA: Maintain CLIP >0.22, increase gaussian density 10-20%
+            # ROLLBACK IF: CLIP drops below 0.20 or timeouts increase
             sparse_structure_sampler_params={
-                "steps": 40,  # ROLLBACK: 12/12 caused catastrophic quality collapse (CLIP 0.14-0.19)
+                "steps": 45,  # PHASE 2.1: Conservative increase from 40 (test for better density)
                 "cfg_strength": 9.0,  # Proven optimal for high-quality outputs
             },
             slat_sampler_params={
-                "steps": 30,  # ROLLBACK: Baseline 40/30 produced CLIP 0.23-0.28
+                "steps": 35,  # PHASE 2.1: Conservative increase from 30 (test for better detail)
                 "cfg_strength": 4.0,  # Proven optimal for gaussian quality
             },
         )

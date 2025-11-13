@@ -44,6 +44,10 @@ from models.background_remover import SOTABackgroundRemover
 from models.depth_estimator import DepthEstimator
 from validators.clip_validator import CLIPValidator
 
+# Data logger for comprehensive production tracking
+from data_logger import init_logger, get_logger, log_startup_config
+import traceback
+
 # TRELLIS Native Gaussian Generation - PRODUCTION PIPELINE!
 # 256K gaussians, 5s generation, 16.6 MB files
 from trellis_integration import generate_with_trellis
@@ -389,13 +393,13 @@ else:
         flux_steps = 4  # OPTIMAL for SDXL-Turbo (research: quality degrades at 5-10 steps)
         # SDXL-Turbo is distilled for 1-step inference, works best with 1-4 steps
         # Previous: 6 steps caused over-refinement and quality loss
-        validation_threshold = 0.15  # RESTORED: During successful period (Nov 11 20:xx), 0.15 threshold allowed CLIP 0.176-0.308 → Scores 0.60-0.79
+        validation_threshold = 0.10  # PHASE 1.2: Lowered from 0.15 - more permissive to reduce false-positive rejections
         enable_validation = True  # ENABLED: Phase 1 - filter low-quality outputs before submission
         enable_scale_normalization = False
         enable_prompt_enhancement = True  # ENABLED: Phase 1 - add quality keywords to prompts
         enable_image_enhancement = True   # ENABLED: Phase 6 - improve TRELLIS surface detection for complex subjects
-        min_gaussian_count = 150000  # ENABLED: Phase 2A - filter LOW density models (<150K = 50% acceptance)
-        background_threshold = 0.5  # Standard rembg threshold, preserves more object detail
+        min_gaussian_count = 50000  # PHASE 1.1: Lowered from 150K - let validators judge quality (simple objects naturally produce 60K-120K)
+        background_threshold = 0.4  # PHASE 2.3: Lowered from 0.5 - preserve thin structures (chair legs, handles)
         enable_depth_estimation = True  # ENABLED for Phase 5 testing (depth preprocessing)
     args = Args()
 
@@ -714,6 +718,44 @@ def startup_event():
         logger.warning("\n[4/5] CLIP validation DISABLED (not recommended)")
         app.state.clip_validator = None
 
+    # 5. Initialize Generation Data Logger
+    logger.info("\n[5/5] Initializing Generation Data Logger...")
+    try:
+        data_logger = init_logger(
+            data_dir="/home/kobe/404-gen/v1/3D-gen/data",
+            miner_uid=102,  # Current mainnet UID
+            miner_version="competitive_v1.0_mainnet",
+            network="mainnet",
+            store_images=True,
+            store_ply_files=True,
+            ply_min_score_threshold=0.7,  # Only store high-quality PLYs (≥0.7)
+            store_rejected_sample_rate=0.1,  # 10% of rejected for debugging
+        )
+        app.state.data_logger = data_logger
+        logger.info("✅ Data logger ready")
+        logger.info(f"   Logging to: /home/kobe/404-gen/v1/3D-gen/data/generation_history.jsonl")
+        logger.info(f"   Images: /home/kobe/404-gen/v1/3D-gen/data/images/")
+        logger.info(f"   PLY files (score ≥0.7): /home/kobe/404-gen/v1/3D-gen/data/ply_files/")
+
+        # Log startup configuration
+        startup_config = {
+            "sdxl_turbo_steps": args.flux_steps,
+            "trellis_sparse_steps": 45,  # From serve_trellis.py
+            "trellis_slat_steps": 35,
+            "trellis_sparse_cfg": 9.0,
+            "trellis_slat_cfg": 4.0,
+            "clip_threshold": args.validation_threshold if args.enable_validation else None,
+            "background_threshold": args.background_threshold,
+            "validation_enabled": args.enable_validation,
+            "prompt_enhancement_enabled": args.enable_prompt_enhancement,
+        }
+        log_startup_config(startup_config, "Competitive miner startup")
+
+    except Exception as e:
+        logger.error(f"⚠️ Data logger initialization failed (non-fatal): {e}")
+        logger.error(traceback.format_exc())
+        app.state.data_logger = None
+
     logger.info("\n" + "=" * 60)
     logger.info("🚀 COMPETITIVE MINER READY - SDXL-TURBO + TRELLIS")
     logger.info("=" * 60)
@@ -755,6 +797,37 @@ async def generate(prompt: str = Form()) -> Response:
         logger.info(f"🖼️  Detected IMAGE-TO-3D task (base64 prompt length: {len(prompt)})")
     else:
         logger.info(f"🎯 Detected TEXT-TO-3D task: '{prompt}'")
+
+    # Start data logging
+    log_id = None
+    if hasattr(app.state, 'data_logger') and app.state.data_logger:
+        try:
+            task_type = "IMAGE-TO-3D" if is_base64_image else "TEXT-TO-3D"
+
+            # Get current miner config
+            miner_config = {
+                "sdxl_turbo_steps": args.flux_steps,
+                "trellis_sparse_steps": 45,
+                "trellis_slat_steps": 35,
+                "trellis_sparse_cfg": 9.0,
+                "trellis_slat_cfg": 4.0,
+                "clip_threshold": args.validation_threshold if args.enable_validation else None,
+                "background_threshold": args.background_threshold,
+                "validation_enabled": args.enable_validation,
+            }
+
+            # Start logging (non-blocking)
+            log_id = app.state.data_logger.start_generation(
+                task_type=task_type,
+                prompt=prompt,  # Will be hashed/truncated if base64
+                validator_uid=None,  # Not available at worker level
+                validator_hotkey=None,
+                miner_config=miner_config
+            )
+            logger.debug(f"📊 Started logging generation: {log_id}")
+        except Exception as e:
+            logger.error(f"Data logger error (non-fatal): {e}")
+            log_id = None
 
     # Acquire semaphore to limit concurrent generations (prevents TRELLIS queueing)
     async with app.state.generation_semaphore:
@@ -828,6 +901,10 @@ async def generate(prompt: str = Form()) -> Response:
                     logger.info(f"  ✅ Image-to-3D preprocessing complete ({t3-t1:.2f}s)")
                     logger.info(f"     SDXL-Turbo: skipped (image provided)")
                     logger.info(f"     BiRefNet: {t3-t2:.2f}s (background removed)")
+
+                    # IMAGE-TO-3D doesn't have text prompt enhancement
+                    # Set enhanced_prompt to empty string (TRELLIS can work without text guidance)
+                    enhanced_prompt = ""
 
                 except Exception as e:
                     logger.error(f"  ❌ Failed to decode or process image: {e}", exc_info=True)
@@ -920,7 +997,14 @@ async def generate(prompt: str = Form()) -> Response:
     
                 t2 = time.time()
                 logger.info(f"  ✅ SDXL-Turbo done ({t2-t1:.2f}s)")
-    
+
+                # Log timing
+                if log_id and hasattr(app.state, 'data_logger') and app.state.data_logger:
+                    try:
+                        app.state.data_logger.log_timing(log_id, "sdxl_time", t2-t1)
+                    except Exception as e:
+                        logger.debug(f"Data logger timing error (non-fatal): {e}")
+
                 # DEBUG: Save SD3.5 output for quality inspection
                 debug_timestamp = int(time.time())
                 image.save(f"/tmp/debug_1_sd35_{debug_timestamp}.png")
@@ -943,6 +1027,13 @@ async def generate(prompt: str = Form()) -> Response:
     
                 t3 = time.time()
                 logger.info(f"  ✅ Background removal done ({t3-t2:.2f}s)")
+
+                # Log timing
+                if log_id and hasattr(app.state, 'data_logger') and app.state.data_logger:
+                    try:
+                        app.state.data_logger.log_timing(log_id, "background_removal_time", t3-t2)
+                    except Exception as e:
+                        logger.debug(f"Data logger timing error (non-fatal): {e}")
 
                 # DISABLED: Advanced preprocessing was causing 18% CLIP degradation
                 # Research-backed CLAHE+sharpening is for poor-quality/underwater images
@@ -998,16 +1089,15 @@ async def generate(prompt: str = Form()) -> Response:
                     logger.debug("  Depth estimation SKIPPED (TEXT-TO-3D - depth only applies to IMAGE-TO-3D)")
 
             # Step 3: Native Gaussian generation with TRELLIS (5s, 256K gaussians)
-            # NOTE: Passing validation_prompt (original) to TRELLIS, not enhanced prompt
-            # Research: TRELLIS text conditioning is weak - works best with simple prompts
-            # The image from SDXL already contains all visual info from enhanced prompt
+            # REVERTED: Priority 6 was causing high rejections (37.5% acceptance)
+            # Using enhanced_prompt for better 3D guidance - text conditioning is weak but NOT harmful
             t3_start = time.time()
             try:
                 # Call TRELLIS microservice for direct gaussian splat generation
                 # This includes format conversion: sigmoid [0,1] → logit space [6.0-7.0]
                 ply_bytes, gs_model, timings = await generate_with_trellis(
                     rgba_image=rgba_image,
-                    prompt=validation_prompt,  # Use original simple prompt, not LLM-enhanced
+                    prompt=enhanced_prompt,  # Use enhanced prompt for better 3D guidance
                     trellis_url="http://localhost:10008",
                     enable_scale_normalization=args.enable_scale_normalization,
                     enable_image_enhancement=args.enable_image_enhancement,
@@ -1023,6 +1113,19 @@ async def generate(prompt: str = Form()) -> Response:
                 logger.info(f"     TRELLIS: {timings['trellis']:.2f}s, Model Load: {timings['model_load']:.2f}s")
                 logger.info(f"     Generated {len(ply_bytes)/1024:.1f} KB Gaussian Splat PLY")
                 logger.info(f"     📊 Generation stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB")
+
+                # Log timing and output
+                if log_id and hasattr(app.state, 'data_logger') and app.state.data_logger:
+                    try:
+                        app.state.data_logger.log_timing(log_id, "trellis_time", t4-t3_start)
+                        # Also log output metrics (will be updated with CLIP score later)
+                        app.state.data_logger.log_output(
+                            log_id,
+                            num_gaussians=timings['num_gaussians'],
+                            file_size_mb=timings['file_size_mb'],
+                        )
+                    except Exception as e:
+                        logger.debug(f"Data logger error (non-fatal): {e}")
 
                 # MEASUREMENT: Track prompt-to-density correlation + Tier 1 impact
                 density_tier = "HIGH" if timings['num_gaussians'] >= 400000 else ("MED" if timings['num_gaussians'] >= 150000 else "LOW")
@@ -1115,10 +1218,21 @@ async def generate(prompt: str = Form()) -> Response:
                             for i, view in enumerate(rendered_views):
                                 view.save(f"/tmp/debug_5_render_view{i}_{debug_timestamp}.png")
                             logger.debug(f"  Saved {len(rendered_views)} debug render views")
-    
-                            # Use first view for CLIP validation (or average across all)
-                            validation_image = rendered_views[0]
-                            logger.debug(f"  Using 3D render (view 1/{len(rendered_views)}) for validation")
+
+                            # MULTI-VIEW CLIP: Evaluate all views and use the BEST one
+                            # This prevents using a bad camera angle (e.g., back of object)
+                            app.state.clip_validator.to_gpu()
+                            view_scores = []
+                            for i, view in enumerate(rendered_views):
+                                _, view_score = app.state.clip_validator.validate_image(view, validation_prompt)
+                                view_scores.append(view_score)
+                            app.state.clip_validator.to_cpu()
+
+                            # Use the view with highest CLIP score
+                            best_view_idx = view_scores.index(max(view_scores))
+                            validation_image = rendered_views[best_view_idx]
+                            logger.info(f"  📊 Multi-view CLIP scores: {[f'{s:.3f}' for s in view_scores]}")
+                            logger.info(f"  ✅ Selected view {best_view_idx+1}/{len(rendered_views)} (score={view_scores[best_view_idx]:.3f})")
                         else:
                             # Fallback to 2D image if rendering fails
                             logger.warning("  3D rendering failed, falling back to 2D image")
@@ -1171,7 +1285,21 @@ async def generate(prompt: str = Form()) -> Response:
                 logger.info(f"  ✅ Validation done ({t6-t5:.2f}s)")
                 logger.info(f"  📊 DIAGNOSTIC - 3D Render CLIP score: {score:.3f}")
                 logger.info(f"  📊 DIAGNOSTIC - Quality loss: {((flux_score - score) / flux_score * 100):.1f}%")
-    
+
+                # Log validation timing and CLIP score
+                if log_id and hasattr(app.state, 'data_logger') and app.state.data_logger:
+                    try:
+                        app.state.data_logger.log_timing(log_id, "validation_time", t6-t5)
+                        # Update output with CLIP score
+                        app.state.data_logger.log_output(
+                            log_id,
+                            clip_score=score,
+                            clip_threshold_pass=passes,
+                            validation_pass=passes,
+                        )
+                    except Exception as e:
+                        logger.debug(f"Data logger error (non-fatal): {e}")
+
                 # Clean up
                 del validation_image
                 if 'rendered_views' in locals():
@@ -1188,7 +1316,20 @@ async def generate(prompt: str = Form()) -> Response:
                     f"  ⚠️  VALIDATION FAILED: CLIP={score:.3f} < {args.validation_threshold}"
                 )
                 logger.warning("  Returning empty result to avoid cooldown penalty")
-    
+
+                # Log rejection
+                if log_id and hasattr(app.state, 'data_logger') and app.state.data_logger:
+                    try:
+                        app.state.data_logger.log_submission(
+                            log_id,
+                            submitted=False,
+                            rejection_reason=f"clip_score_too_low_{score:.3f}"
+                        )
+                        app.state.data_logger.log_timing(log_id, "total_time", time.time() - t_start)
+                        app.state.data_logger.finalize_generation(log_id)
+                    except Exception as e:
+                        logger.debug(f"Data logger error (non-fatal): {e}")
+
                 # Return empty PLY instead of bad result
                 empty_buffer = BytesIO()
                 return Response(
@@ -1203,14 +1344,13 @@ async def generate(prompt: str = Form()) -> Response:
             else:
                 logger.info(f"  📊 Final stats: {timings['num_gaussians']:,} gaussians, {timings['file_size_mb']:.1f}MB (CLIP validation disabled)")
     
-            # DIAGNOSTIC: Analyze PLY quality beyond just count
+            # DIAGNOSTIC: Analyze PLY quality beyond just count (optional diagnostics)
             try:
                 from diagnostics.ply_analyzer import analyze_gaussian_quality, diagnose_ply_issues
-                from diagnostics.submission_tracker import get_tracker
-    
+
                 ply_quality = analyze_gaussian_quality(ply_bytes)
                 issues = diagnose_ply_issues(ply_quality)
-    
+
                 if ply_quality:
                     logger.info(f"  🔬 PLY Quality Analysis:")
                     logger.info(f"     Spatial variance: {ply_quality.get('spatial_variance', 0):.4f}")
@@ -1218,31 +1358,44 @@ async def generate(prompt: str = Form()) -> Response:
                     logger.info(f"     Avg opacity: {ply_quality.get('avg_opacity', 0):.3f}")
                     logger.info(f"     Avg scale: {ply_quality.get('avg_scale', 0):.4f}")
                     logger.info(f"     Density variance: {ply_quality.get('density_variance', 0):.2f}")
-    
+
                 if issues:
                     logger.warning(f"  ⚠️  Quality issues detected:")
                     for issue in issues:
                         logger.warning(f"     {issue}")
-    
-                # Log submission for correlation analysis
-                tracker = get_tracker()
-                submission_id = tracker.log_submission(
-                    prompt=prompt,
-                    gaussian_count=timings['num_gaussians'],
-                    file_size_mb=timings['file_size_mb'],
-                    generation_time=t_total if 't_total' in locals() else (time.time() - t_start),
-                    ply_quality_metrics=ply_quality,
-                    clip_score_2d=flux_score if 'flux_score' in locals() else None,
-                    clip_score_3d=score if 'score' in locals() else None,
-                )
-                logger.debug(f"  Logged submission: {submission_id}")
-    
+
+                # OLD TRACKER REMOVED: Now using GenerationDataLogger for comprehensive tracking
+
             except Exception as e:
                 logger.error(f"  Diagnostic analysis failed: {e}")
     
             # Success!
             t_total = time.time() - t_start
-    
+
+            # Log submission and finalize
+            if log_id and hasattr(app.state, 'data_logger') and app.state.data_logger:
+                try:
+                    # Determine submission status
+                    submitted = True
+                    if app.state.clip_validator:
+                        submitted = passes
+
+                    # Log submission
+                    app.state.data_logger.log_submission(
+                        log_id,
+                        submitted=submitted,
+                        rejection_reason=None if submitted else "clip_validation_failed"
+                    )
+
+                    # Log total time
+                    app.state.data_logger.log_timing(log_id, "total_time", t_total)
+
+                    # Finalize generation log (writes to disk)
+                    app.state.data_logger.finalize_generation(log_id)
+                    logger.debug(f"📊 Finalized generation log: {log_id}")
+                except Exception as e:
+                    logger.error(f"Error finalizing log (non-fatal): {e}")
+
             logger.info("=" * 60)
             logger.info(f"✅ GENERATION COMPLETE")
             logger.info(f"   Total time: {t_total:.2f}s")
@@ -1278,13 +1431,32 @@ async def generate(prompt: str = Form()) -> Response:
             )
     
         except Exception as e:
-            import traceback
             logger.error(f"❌ Generation failed: {e}")
             logger.error(f"Traceback:\n{traceback.format_exc()}")
-    
+
+            # Log failure
+            if log_id and hasattr(app.state, 'data_logger') and app.state.data_logger:
+                try:
+                    error_type = type(e).__name__
+                    app.state.data_logger.log_failure(
+                        log_id,
+                        error_type=error_type,
+                        error_message=str(e),
+                        stack_trace=traceback.format_exc()
+                    )
+                    app.state.data_logger.log_submission(
+                        log_id,
+                        submitted=False,
+                        rejection_reason=f"generation_error_{error_type}"
+                    )
+                    app.state.data_logger.log_timing(log_id, "total_time", time.time() - t_start)
+                    app.state.data_logger.finalize_generation(log_id)
+                except Exception as log_err:
+                    logger.error(f"Error logging failure (non-fatal): {log_err}")
+
             # Clean up memory on error
             cleanup_memory()
-    
+
             # Return empty result on error (better than crash)
             empty_buffer = BytesIO()
             return Response(

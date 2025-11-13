@@ -338,58 +338,14 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         logger.info(f"  ✅ TRELLIS generation done ({t3_end-t3_start:.2f}s, service: {result['generation_time']:.2f}s)")
         logger.info(f"     Gaussians: {num_gaussians:,}, File size: {result['file_size_mb']:.1f} MB")
 
-        # QUALITY GATE WITH RETRY: Check if output is too sparse (only if gate is enabled)
+        # PHASE 1.3: DISABLED AGGRESSIVE RETRY - Submit anyway, let validators judge
+        # Research shows: 100K-150K gaussian outputs often score 0.5-0.7 with validators
+        # Over-enhancement (4x sharpness, 2x contrast) creates artifacts that harm 3D reconstruction
         if MIN_GAUSSIANS > 0 and num_gaussians < MIN_GAUSSIANS:
             logger.warning(f"⚠️  SPARSE GENERATION: {num_gaussians:,} < {MIN_GAUSSIANS:,} threshold")
-            logger.warning(f"   Retrying with alternative enhancement (attempt 2/2)...")
-
-            # ATTEMPT 2: Retry with moderate alternative enhancement + different seed
-            try:
-                retry_rgba = apply_retry_enhancement(original_rgba)
-
-                # Convert to RGB
-                if retry_rgba.mode == 'RGBA':
-                    retry_rgb = retry_rgba.convert('RGB')
-                else:
-                    retry_rgb = retry_rgba
-
-                # Retry TRELLIS call
-                retry_result = await _call_trellis_api(retry_rgb, trellis_url, timeout=60.0)
-
-                retry_gaussians = retry_result['num_gaussians']
-                logger.info(f"  🔄 Retry result: {retry_gaussians:,} gaussians (was {num_gaussians:,})")
-
-                # Check if retry improved the result
-                if retry_gaussians >= MIN_GAUSSIANS:
-                    # Retry succeeded! Use the retry result
-                    logger.info(f"  ✅ RETRY SUCCESSFUL: {retry_gaussians:,} >= {MIN_GAUSSIANS:,}")
-                    ply_bytes = base64.b64decode(retry_result["ply_base64"])
-                    result = retry_result  # Use retry result for stats
-                    num_gaussians = retry_gaussians
-                elif retry_gaussians > num_gaussians:
-                    # Retry improved but still not enough - use better result
-                    logger.warning(f"  ⚠️  RETRY IMPROVED but still sparse: {retry_gaussians:,} < {MIN_GAUSSIANS:,}")
-                    logger.warning(f"     Using improved result anyway (+{retry_gaussians - num_gaussians:,} gaussians)")
-                    ply_bytes = base64.b64decode(retry_result["ply_base64"])
-                    result = retry_result
-                    num_gaussians = retry_gaussians
-                else:
-                    # Retry didn't help - reject
-                    logger.error(f"  ❌ RETRY FAILED: {retry_gaussians:,} gaussians (no improvement)")
-                    logger.error(f"     This would receive Score=0.0 from validators - rejecting to avoid penalty")
-                    raise ValueError(f"Insufficient gaussian density after retry: {retry_gaussians:,} gaussians (minimum: {MIN_GAUSSIANS:,})")
-
-            except Exception as retry_error:
-                logger.error(f"  ❌ Retry attempt failed: {retry_error}")
-                logger.error(f"     Original sparse generation: {num_gaussians:,} < {MIN_GAUSSIANS:,}")
-                raise ValueError(f"Insufficient gaussian density: {num_gaussians:,} gaussians (minimum: {MIN_GAUSSIANS:,}, retry failed)")
-
-        # Final quality check (only if gate is enabled)
-        if MIN_GAUSSIANS > 0 and num_gaussians < MIN_GAUSSIANS:
-            logger.error(f"❌ QUALITY GATE FAILED: {num_gaussians:,} < {MIN_GAUSSIANS:,} threshold!")
-            logger.error(f"   This would receive Score=0.0 from validators - rejecting to avoid penalty")
-            logger.error(f"   Prompt: '{prompt[:100]}...'")
-            raise ValueError(f"Insufficient gaussian density: {num_gaussians:,} gaussians (minimum: {MIN_GAUSSIANS:,})")
+            logger.warning(f"   PHASE 1.3: Submitting anyway (validators will judge quality, no retry)")
+            logger.warning(f"   Simple objects naturally produce 60K-120K gaussians - may still score 0.5-0.7")
+            # DO NOT retry - submit as-is to avoid enhancement artifacts
 
     except httpx.TimeoutException:
         logger.error("TRELLIS microservice timeout (60s)")

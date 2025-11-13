@@ -46,7 +46,8 @@ module.exports = {
 
       // Environment
       env: {
-        CUDA_VISIBLE_DEVICES: '0,1'  // Both GPUs visible - SD3.5 on GPU 1 (INT8), TRELLIS on GPU 0
+        CUDA_VISIBLE_DEVICES: '0,1',  // Both GPUs visible - SD3.5 on GPU 1 (INT8), TRELLIS on GPU 0
+        TORCH_CUDA_ARCH_LIST: '8.9'   // FIX: Prevent PyTorch from adding invalid compute_120 arch
       }
     },
     {
