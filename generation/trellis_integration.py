@@ -221,7 +221,7 @@ def normalize_gaussian_scales(gs_model, target_scale_range=(0.01, 0.04)):
     return gs_model
 
 
-async def _call_trellis_api(rgb_image, trellis_url, timeout=60.0):
+async def _call_trellis_api(rgb_image, trellis_url, timeout=60.0, slat_steps=60, attn_steps=50):
     """
     Helper function to call TRELLIS API.
 
@@ -229,6 +229,8 @@ async def _call_trellis_api(rgb_image, trellis_url, timeout=60.0):
         rgb_image: PIL Image (RGB mode)
         trellis_url: TRELLIS microservice URL
         timeout: Request timeout in seconds
+        slat_steps: TRELLIS SLAT sampling steps (default 60, increase to 80-100 for complex prompts)
+        attn_steps: TRELLIS attention sampling steps (default 50, increase to 55-60 for complex prompts)
 
     Returns:
         result dict from TRELLIS API
@@ -253,7 +255,9 @@ async def _call_trellis_api(rgb_image, trellis_url, timeout=60.0):
             json={
                 "image_base64": image_base64,
                 "seed": 42,  # Fixed seed for reproducibility
-                "timeout": 30
+                "timeout": 30,
+                "slat_steps": slat_steps,  # Adaptive sampling (60-100 based on prompt difficulty)
+                "attn_steps": attn_steps   # Adaptive sampling (50-60 based on prompt difficulty)
             }
         )
 
@@ -271,7 +275,7 @@ async def _call_trellis_api(rgb_image, trellis_url, timeout=60.0):
     return result
 
 
-async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhost:10008", enable_scale_normalization=False, enable_image_enhancement=False, min_gaussians=0, depth_map=None):
+async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhost:10008", enable_scale_normalization=False, enable_image_enhancement=False, min_gaussians=0, depth_map=None, slat_steps=60, attn_steps=50):
     """
     Generate 3D Gaussian Splat using TRELLIS microservice.
 
@@ -287,6 +291,8 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         min_gaussians: Minimum gaussian count threshold (0 = disabled, 150000 = strict quality gate)
         depth_map: Optional numpy array (H, W) with depth values [0, 1]
                   If provided, will be used to guide 3D reconstruction
+        slat_steps: TRELLIS SLAT sampling steps (default 60, adaptive 60-100 based on prompt difficulty)
+        attn_steps: TRELLIS attention sampling steps (default 50, adaptive 50-60 based on prompt difficulty)
 
     Returns:
         ply_bytes: Binary PLY data
@@ -326,9 +332,10 @@ async def generate_with_trellis(rgba_image, prompt, trellis_url="http://localhos
         else:
             rgb_image = enhanced_rgba
 
-        # ATTEMPT 1: Call TRELLIS with standard enhancement
+        # ATTEMPT 1: Call TRELLIS with adaptive sampling parameters
         logger.debug(f"  Calling TRELLIS (attempt 1/2) at {trellis_url}/generate...")
-        result = await _call_trellis_api(rgb_image, trellis_url, timeout=60.0)
+        logger.debug(f"  Adaptive sampling: slat_steps={slat_steps}, attn_steps={attn_steps}")
+        result = await _call_trellis_api(rgb_image, trellis_url, timeout=60.0, slat_steps=slat_steps, attn_steps=attn_steps)
 
         # Decode PLY from base64
         ply_bytes = base64.b64decode(result["ply_base64"])

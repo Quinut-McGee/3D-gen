@@ -48,6 +48,8 @@ class GenerateRequest(BaseModel):
     image_base64: str
     seed: int = 42
     timeout: int = 30  # seconds
+    slat_steps: int = 60  # Adaptive SLAT sampling steps (60-100 based on prompt difficulty)
+    attn_steps: int = 50  # Adaptive attention sampling steps (50-60 based on prompt difficulty)
 
 
 class GenerateResponse(BaseModel):
@@ -127,81 +129,31 @@ async def generate_gaussian(request: GenerateRequest) -> GenerateResponse:
         outputs = pipeline.run(
             rgba_image,
             seed=request.seed,
-            # OPTIMIZED PARAMETERS for dense voxel generation + quality
-            # Sparse structure: Detects voxels on object surface
-            # SLAT: Fills voxels with gaussian details
+            # ADAPTIVE SAMPLING PARAMETERS (Nov 13, 2025 - Phase 1 Quick Wins)
+            # Dynamic parameters based on prompt difficulty estimation
+            # - EASY prompts: 50 sparse / 60 slat (baseline)
+            # - MEDIUM prompts: 50 sparse / 70 slat
+            # - HARD prompts: 60 sparse / 100 slat (metallic, decorative, mechanical)
             #
-            # Post-Mortem Optimization (Nov 5, 2025):
-            # Increased sampling steps to improve baseline quality across ALL validators
-            # Trade-off: +3-4s generation time, +50-100K gaussians, +10-15% success rate
-            # CFG kept at proven values (9.0/4.0) - earlier testing showed these work best
+            # Sparse structure: Detects voxels on object surface (attn_steps parameter)
+            # SLAT: Fills voxels with gaussian details (slat_steps parameter)
             #
-            # Phase 7 SPEED OPTIMIZATION (Nov 11, 2025):
-            # REDUCED steps 80→40, 60→30 based on Tier 1 data analysis
-            # Analysis shows: Failures had HIGHER quality than successes (394K vs 384K gaussians)
-            # Validator rejections are RANDOM (same PLY: V49 Score=0.642, V128 Score=0.0)
-            # Strategy: Trade quality for SPEED → more generations = more rewards
-            # Still 2x baseline (20/15), quality remains above minimum thresholds
-            # Expected: -5-6s per generation (~30% faster), gaussian count may drop 10-15% but still >150K
-            #
-            # QUALITY RESTORATION (Nov 11, 2025 - Evening):
-            # REVERTED Phase 7 partially: 40→60, 30→45 steps based on critical failure analysis
-            # Root cause identified: LOW GAUSSIAN COUNT (<400k) = 100% failure rate (3/3 failures)
-            # All failures: 183k, 288k, 370k gaussians → Score=0.0
-            # All successes: 641k-930k gaussians → Score=0.6+
-            # Phase 7 speed optimization dropped gaussian count TOO LOW (280k avg → below 400k threshold)
-            # Strategy: Restore halfway to balance quality + speed
-            # Expected: +40-60% gaussian count (280k→400-450k avg), +2-3s generation time, 85-95% success rate
-            #
-            # CFG FIX (Nov 11, 2025 - 21:50):
-            # Initial deployment used cfg_strength 10.0/4.5 - TOO HIGH, caused CLIP collapse
-            # Evidence: 529k gaussians achieved (steps working!), but CLIP dropped to 0.13-0.19 (75% filtered)
-            # Root cause: High CFG over-constrains generation → dense geometry but poor visual quality
-            # Fix: Restore CFG to original 9.0/4.0 (proven effective), keep increased steps
-            # Expected: Maintain 400k+ gaussians, restore CLIP to 0.22-0.27 range (80%+ pass rate)
-            #
-            # STEPS OPTIMIZATION (Nov 11, 2025 - 21:56):
-            # Steps 60/45 caused TIMEOUT FAILURES: 1.17M gaussians, 25.9s TRELLIS time, 35.9s total (>30s timeout)
-            # Root cause: 60/45 too aggressive for complex prompts (foliage) → 3x over-density → timeout filtered
-            # Evidence: Simple prompts (329k) OK, complex prompts (1,174k) timeout
-            # Fix: Moderate increase 50/40 (Goldilocks zone - not too sparse, not too dense)
-            # Expected: 350-500k gaussians, 6-7s TRELLIS time, <20s total, handles both simple & complex prompts
-            #
-            # ROLLBACK (Nov 11, 2025 - 22:18):
-            # Data analysis showed 50/40 steps DEGRADED CLIP scores by 20-25%:
-            # - Baseline (40/30): CLIP median 0.28, top scores 0.27-0.33
-            # - After 50/40: CLIP median 0.22, top scores 0.22-0.24
-            # This correlated with validator scores 23-24% below average (0.67 vs 0.89 avg)
-            # Root cause: Increased steps introduce cumulative noise/artifacts that CLIP penalizes
-            # Decision: QUALITY > QUANTITY - accept lower gaussian counts for higher CLIP scores
-            # Expected: Restore CLIP to 0.27-0.28 median, validator scores to 0.85+ range
-            #
-            # CFG REDUCTION TEST (Nov 11, 2025 - 22:23):
-            # Testing lower CFG strength to reduce over-constraint and potentially improve quality
-            # Hypothesis: Lower CFG = less rigid guidance = more natural/organic outputs = higher CLIP
-            # Previous: 9.0/4.0 (standard), New: 7.5/3.0 (reduced ~17-25%)
-            # RESULT: Mixed - higher floor (no CLIP <0.20) but lower ceiling (0.294 vs 0.331)
-            #
-            # PHASE 2.1 OPTIMIZATION (Nov 12, 2025 - Post-Forensic Analysis):
-            # Forensic analysis revealed: Pre-submission rejection (73-76%) was due to THRESHOLDS, not quality
-            # Thresholds now fixed (150K→50K gaussian minimum, 0.15→0.10 CLIP threshold)
-            # Conservative step increase (40/30 → 45/35) to test if higher density helps with new thresholds
-            #
-            # Historical testing context (preserved for reference):
+            # Historical context (preserved for reference):
+            # - Previous fixed values: 45/35 (PHASE 2.1)
             # - 40/30: CLIP 0.23-0.28 (baseline)
             # - 50/40: CLIP degraded 20-25% (artifacts from over-sampling)
             # - 60/45: Timeouts (over-density)
-            # - 12/12: Catastrophic collapse (CLIP 0.14-0.19)
             #
-            # TESTING REQUIRED: Monitor CLIP scores and gaussian density with 45/35
-            # SUCCESS CRITERIA: Maintain CLIP >0.22, increase gaussian density 10-20%
-            # ROLLBACK IF: CLIP drops below 0.20 or timeouts increase
+            # Adaptive sampling addresses validator adversarial testing:
+            # - "plate armor with lions mane" (metallic + decorative) now gets 60/100 steps
+            # - Simple objects get baseline 50/60 for efficiency
+            # - Expected: +12-15% success rate on HARD prompts, maintain speed on EASY prompts
             sparse_structure_sampler_params={
-                "steps": 45,  # PHASE 2.1: Conservative increase from 40 (test for better density)
+                "steps": request.attn_steps,  # ADAPTIVE: 50-60 based on prompt difficulty
                 "cfg_strength": 9.0,  # Proven optimal for high-quality outputs
             },
             slat_sampler_params={
-                "steps": 35,  # PHASE 2.1: Conservative increase from 30 (test for better detail)
+                "steps": request.slat_steps,  # ADAPTIVE: 60-100 based on prompt difficulty
                 "cfg_strength": 4.0,  # Proven optimal for gaussian quality
             },
         )
