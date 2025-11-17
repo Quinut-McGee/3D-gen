@@ -48,8 +48,8 @@ class GenerateRequest(BaseModel):
     image_base64: str
     seed: int = 42
     timeout: int = 30  # seconds
-    slat_steps: int = 60  # Adaptive SLAT sampling steps (60-100 based on prompt difficulty)
-    attn_steps: int = 50  # Adaptive attention sampling steps (50-60 based on prompt difficulty)
+    slat_steps: int = 60  # Adaptive SLAT sampling steps (60-120 based on prompt difficulty)
+    attn_steps: int = 50  # Adaptive attention sampling steps (50-70 based on prompt difficulty)
 
 
 class GenerateResponse(BaseModel):

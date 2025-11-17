@@ -204,78 +204,42 @@ def enhance_prompt_with_llm(prompt: str, timeout: float = 2.5) -> dict:
     """
     t_start = time.time()
 
-    # CLIP-optimized system prompt for 3D reconstruction quality
-    system_prompt = """You are a CLIP-optimized prompt expert for SDXL-Turbo → TRELLIS 3D generation.
+    # Research-backed concise system prompt (avoid 77-token truncation)
+    system_prompt = """You are a concise prompt optimizer for SDXL-Turbo image generation.
 
-Your goal: Transform prompts to maximize 3D reconstruction quality and CLIP alignment (target: 0.28-0.35).
+CRITICAL CONSTRAINTS:
+1. **Max Length:** 12-15 words total (CLIP has 77-token limit, longer prompts get truncated)
+2. **Core Keywords Only:** Pick 2-3 most important descriptors
+3. **Simple Language:** Avoid verbose phrases like "award-winning commercial photography"
 
-CRITICAL RULES FOR TRELLIS SUCCESS:
+PROVEN KEYWORDS (Pick 1-2 MAX):
+- Quality: "detailed", "sharp focus", "high quality"
+- Lighting: "studio lighting", "soft lighting"
+- Style: "product photography", "professional photo"
+- Background: "white background", "clean background"
 
-1. Material Specificity (HIGHEST IMPACT for 3D):
-   - BAD: "metal vase"
-   - GOOD: "brushed aluminum vase with matte finish and cylindrical body"
-   - Metals: "polished brass", "brushed steel", "chrome plated", "oxidized copper"
-   - Wood: "lacquered oak with visible grain", "matte walnut", "polished teak"
-   - Ceramics: "glazed porcelain", "matte terracotta", "glossy ceramic"
-   - Glass: "frosted glass", "clear crystal", "translucent acrylic"
-   - Fabric: "woven linen", "smooth leather", "ribbed cotton"
+ADAPTIVE ENHANCEMENT:
+- SHORT (1-5 words): Add 5-7 words max (total: 10-12 words)
+- MEDIUM (6-15 words): Add 3-5 words max (total: 12-15 words)
+- LONG (16+ words): Add NOTHING or replace verbose words with concise equivalents
 
-2. Geometric Description (CRITICAL for 3D reconstruction):
-   - Always include: shape, dimensions, proportions
-   - GOOD: "cylindrical body with narrow neck and flared base"
-   - GOOD: "cubic frame with beveled edges and hollow interior"
-   - Include: "tall", "wide", "compact", "elongated", "spherical", "angular"
+CRITICAL: NEVER mention "flat", "thin", "2D", "paper-like" - these DESTROY CLIP scores
 
-3. Surface Detail (Helps TRELLIS texture mapping):
-   - Include finish: "smooth", "rough", "textured", "polished", "matte"
-   - Include patterns: "ribbed", "grooved", "embossed", "plain" (avoid "engraved")
-
-4. AVOID These TRELLIS Killers (Historical failure analysis):
-   - ❌ "ornate", "decorated", "embellished", "lions mane" (too complex for TRELLIS)
-   - ❌ "reflective", "shiny", "chrome" (unless simple object)
-   - ❌ Multiple objects: "vase and plate" → just "vase"
-   - ❌ Scene context: "on table", "in room" → remove context
-   - ❌ "quilted", "checkered" (failed with 0.066-0.101 CLIP historically)
-
-5. Lighting & Photography (CLIP optimization):
-   - Always add: "professional product photography, studio lighting"
-   - Add: "clean white background, centered composition"
-   - Add: "ultra sharp focus, highly detailed"
-
-DIFFICULTY-AWARE ENHANCEMENT (Based on historical failures):
-
-For SIMPLE prompts (1-5 words):
-- Add ALL enhancement layers (aim for 25-30 words total)
-
-For MEDIUM prompts (6-15 words):
-- Enhance material specificity + geometry (aim for 20-25 words)
-
-For COMPLEX prompts (16+ words):
-- SIMPLIFY first - Remove decorative elements
-- Focus on core object geometry (aim for 15-20 words)
-
-For KNOWN-BAD patterns (plate armor, checkered, quilted):
-- DRASTICALLY SIMPLIFY - Remove all decorative/pattern words
-- Focus on basic shape and material only
-
-EXAMPLES (CLIP 0.28-0.35 Target):
+EXAMPLES (10-15 words max):
 
 Input: "red sports car"
-Output: "sleek red sports car with smooth aerodynamic body, glossy automotive paint finish, professional product photography, studio lighting, clean white background, ultra sharp focus, highly detailed"
+Output: "red sports car, detailed, product photography, studio lighting, white background"
+(11 words)
 
-Input: "wooden chair"
-Output: "wooden dining chair with straight vertical slats, polished oak finish with visible wood grain, simple geometric design, professional furniture photography, studio lighting, clean white background, ultra sharp focus"
-
-Input: "plate armor with lions mane" (KNOWN FAILURE - simplify aggressively)
-Output: "medieval plate armor chest piece with smooth brushed steel finish and simple curved geometry, professional product photography, studio lighting, clean white background, ultra sharp focus"
-
-Input: "checkered carpet" (KNOWN FAILURE - CLIP 0.086-0.101)
-Output: "rectangular woven carpet with simple textile texture and uniform surface, professional product photography, studio lighting, clean white background, ultra sharp focus"
+Input: "wooden chair with carved details"
+Output: "wooden chair with carved details, product photography, clean background"
+(10 words)
 
 Input: "brass candle holder"
-Output: "simple brass candle holder with cylindrical base and smooth polished finish, solid geometric form, professional product photography, studio lighting, clean white background, ultra sharp focus, highly detailed"
+Output: "brass candle holder, polished finish, product photography, studio lighting"
+(10 words)
 
-Transform the prompt below. Return ONLY the enhanced prompt, nothing else."""
+Transform the prompt below. Return ONLY the enhanced prompt (10-15 words max), nothing else."""
 
     try:
         # Call GPT-4o-mini with timeout
@@ -669,11 +633,8 @@ def generate_blip2_caption(image: Image.Image) -> str:
     """
     Generate detailed caption using BLIP-2 for IMAGE-TO-3D text conditioning.
 
-    LAZY LOADING STRATEGY:
-    - Loads BLIP-2 on-demand (only for IMAGE-TO-3D tasks, 19% of workload)
-    - Unloads after caption generation to free GPU 1 for SDXL-Turbo
-    - Prevents OOM on GPU 1 (16GB cannot fit BLIP-2 + SDXL-Turbo simultaneously)
-    - Adds ~7s loading overhead per IMAGE-TO-3D task, but enables 81% TEXT-TO-3D tasks
+    Uses 3D-focused prompts to guide BLIP-2 toward spatial descriptions.
+    BLIP-2 is dependency-compatible with current transformers 4.57.1.
 
     Args:
         image: PIL Image (RGB)
@@ -681,23 +642,12 @@ def generate_blip2_caption(image: Image.Image) -> str:
     Returns:
         Detailed caption describing object's 3D structure
     """
+    if app.state.blip2_model is None:
+        logger.warning("  BLIP-2 not loaded, using generic caption")
+        return "a 3D object"
+
     try:
-        # STEP 1: Lazy load BLIP-2 if not loaded
-        if app.state.blip2_model is None:
-            logger.info("  ⏳ Lazy loading BLIP-2 (first IMAGE-TO-3D task)...")
-            load_start = time.time()
-
-            app.state.blip2_processor = Blip2Processor.from_pretrained(app.state.blip2_model_name)
-            app.state.blip2_model = Blip2ForConditionalGeneration.from_pretrained(
-                app.state.blip2_model_name,
-                device_map={"": "cuda:1"},  # GPU 1 for BLIP-2
-                torch_dtype=torch.float16
-            )
-
-            load_time = time.time() - load_start
-            logger.info(f"  ✅ BLIP-2 loaded in {load_time:.1f}s (6.7B model, FP16, GPU 1)")
-
-        # STEP 2: Generate caption with multiple prompts
+        # Multiple prompts for comprehensive description
         prompts = [
             "Question: What is this object and what does it look like? Answer:",
             "Question: Describe the shape, material, and structure of this object. Answer:",
@@ -726,45 +676,16 @@ def generate_blip2_caption(image: Image.Image) -> str:
             if caption and len(caption) > 5:
                 captions.append(caption)
 
-        # Combine captions
+        # Combine captions for richer description
         if captions:
             combined = ". ".join(captions)
             logger.debug(f"  BLIP-2 caption: {combined}")
-            caption_result = combined
+            return combined
         else:
-            caption_result = "a 3D object"
-
-        # STEP 3: Unload BLIP-2 to free GPU 1 for SDXL-Turbo (TEXT-TO-3D tasks)
-        logger.debug("  🔄 Unloading BLIP-2 to free GPU 1 for SDXL-Turbo...")
-        del app.state.blip2_model
-        del app.state.blip2_processor
-        app.state.blip2_model = None
-        app.state.blip2_processor = None
-
-        # Force GPU memory release
-        gc.collect()
-        torch.cuda.empty_cache()
-        torch.cuda.synchronize()
-        logger.debug("  ✅ BLIP-2 unloaded, GPU 1 freed for TEXT-TO-3D")
-
-        return caption_result
+            return "a 3D object"
 
     except Exception as e:
         logger.error(f"  BLIP-2 caption generation failed: {e}")
-        logger.error(traceback.format_exc())
-
-        # Clean up on error
-        try:
-            if app.state.blip2_model is not None:
-                del app.state.blip2_model
-                del app.state.blip2_processor
-                app.state.blip2_model = None
-                app.state.blip2_processor = None
-                gc.collect()
-                torch.cuda.empty_cache()
-        except:
-            pass
-
         return "a 3D object"
 
 
@@ -930,11 +851,10 @@ def estimate_prompt_difficulty(prompt: str) -> dict:
 
     # HARD category: TRELLIS struggles (historical CLIP < 0.20)
     HARD_KEYWORDS = {
-        'metallic': ['armor', 'plate', 'metal', 'steel', 'chrome', 'silver', 'gold', 'brass', 'copper', 'iron'],
-        'decorative': ['ornate', 'decorated', 'engraved', 'embellished', 'lions', 'mane', 'carved', 'etched', 'detailed'],
-        'mechanical': ['robot', 'hydraulic', 'press', 'machinery', 'gears', 'mechanical', 'engine', 'motor'],
-        'complex_lighting': ['neon', 'glowing', 'luminous', 'reflective', 'shiny', 'glossy'],
-        'problematic_patterns': ['quilted', 'checkered', 'patterned', 'plaid', 'striped']
+        'metallic': ['armor', 'plate', 'metal', 'steel', 'chrome', 'silver', 'gold', 'brass', 'copper'],
+        'decorative': ['ornate', 'decorated', 'engraved', 'embellished', 'lions', 'mane', 'carved', 'etched'],
+        'mechanical': ['robot', 'hydraulic', 'press', 'machinery', 'gears', 'mechanical', 'engine'],
+        'complex_lighting': ['neon', 'glowing', 'luminous', 'reflective', 'shiny', 'glossy']
     }
 
     # MEDIUM category: Some challenge (historical CLIP 0.20-0.25)
@@ -962,8 +882,8 @@ def estimate_prompt_difficulty(prompt: str) -> dict:
         # Very difficult: metallic + decorative (e.g., "plate armor with lions mane")
         return {
             'difficulty': 'HARD',
-            'slat_steps': 120,  # INCREASED from 100 → 120 (+20% more sampling)
-            'attn_steps': 70,   # INCREASED from 60 → 70 (+17% more attention)
+            'slat_steps': 100,  # +67% more sampling
+            'attn_steps': 60,   # +20% more attention
             'reason': f'Complex prompt with {hard_count} hard keywords',
             'expected_clip': 0.19,
             'confidence': 'low'
@@ -972,8 +892,8 @@ def estimate_prompt_difficulty(prompt: str) -> dict:
         # Moderately difficult: single challenge
         return {
             'difficulty': 'MEDIUM-HARD',
-            'slat_steps': 90,   # INCREASED from 80 → 90
-            'attn_steps': 60,   # INCREASED from 55 → 60
+            'slat_steps': 80,
+            'attn_steps': 55,
             'reason': f'Challenging prompt with {hard_count} hard keyword',
             'expected_clip': 0.22,
             'confidence': 'medium'
@@ -1094,20 +1014,37 @@ def startup_event():
         logger.warning("\n[4/5] CLIP validation DISABLED (not recommended)")
         app.state.clip_validator = None
 
-    # 4.5. BLIP-2 for IMAGE-TO-3D text conditioning (LAZY LOADING)
-    # Strategy: GPU 1 conflict between BLIP-2 (6-8GB) + SDXL-Turbo (9-11GB) = 15-19GB > 16GB capacity
-    # Solution: Lazy load BLIP-2 only for IMAGE-TO-3D tasks (19% of workload), unload after use
-    # This keeps GPU 1 free for SDXL-Turbo (TEXT-TO-3D, 81% of workload)
-    logger.info("\n[4.5/5] BLIP-2 lazy loading enabled")
-    logger.info("   Mode: Load on-demand for IMAGE-TO-3D only (19% of tasks)")
-    logger.info("   Rationale: GPU 1 (16GB) cannot fit BLIP-2 + SDXL-Turbo simultaneously")
-    logger.info("   Impact: TEXT-TO-3D (81% of tasks) can use SDXL-Turbo without OOM")
-    logger.info("   BLIP-2 specs: 6.7B model, FP16, ~6-8GB, loads in ~7s")
-
-    # Initialize as None - will be lazy loaded in generate_blip2_caption()
+    # 4.5. Load BLIP-2 for IMAGE-TO-3D text conditioning
+    # TEMPORARILY DISABLED: Model download takes too long during startup (6.7B = ~13GB)
+    # PM2 kills the process before download completes. Will re-enable after manual pre-download.
+    # TODO: Pre-download model, then uncomment this section
+    logger.info("\n[4.5/5] BLIP-2 loading DISABLED (model download too large for startup)")
+    logger.info("   IMAGE-TO-3D will use raw image without text conditioning")
+    logger.info("   Adaptive TRELLIS sampling is ACTIVE and will handle quality improvements")
     app.state.blip2_model = None
     app.state.blip2_processor = None
-    app.state.blip2_model_name = "Salesforce/blip2-opt-6.7b"  # Store model name for lazy loading
+
+    # try:
+    #     # Use BLIP-2 OPT-6.7B for better quality than 2.7B
+    #     # Dependency-compatible with current transformers 4.57.1
+    #     model_name = "Salesforce/blip2-opt-6.7b"
+    #
+    #     app.state.blip2_processor = Blip2Processor.from_pretrained(model_name)
+    #     app.state.blip2_model = Blip2ForConditionalGeneration.from_pretrained(
+    #         model_name,
+    #         device_map="auto",
+    #         torch_dtype=torch.float16
+    #     )
+    #
+    #     logger.info("✅ BLIP-2 ready (6.7B model, FP16)")
+    #     logger.info("   Purpose: Generate detailed captions for IMAGE-TO-3D tasks")
+    #     logger.info("   Expected: +5-7% CLIP improvement over baseline")
+    #     logger.info("   Advantage: Dependency-compatible (no transformers downgrade needed)")
+    # except Exception as e:
+    #     logger.error(f"⚠️ BLIP-2 loading failed: {e}")
+    #     logger.warning("   IMAGE-TO-3D will continue without text conditioning")
+    #     app.state.blip2_model = None
+    #     app.state.blip2_processor = None
 
     # 5. Initialize Generation Data Logger
     logger.info("\n[5/5] Initializing Generation Data Logger...")
